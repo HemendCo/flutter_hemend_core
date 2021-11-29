@@ -62,7 +62,7 @@ class SocketManager {
   }
 
   void _eventReceived(String data, WebSocketChannel sender) {
-    (onReceived ?? (_) {})(data + ' on ${sender.hashCode}');
+    (onReceived ?? (_) {})(data);
     dynamic dataValue = jsonDecode(data);
     String? event = dataValue['event'];
     dynamic value = dataValue['data'];
