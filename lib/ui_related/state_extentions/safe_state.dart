@@ -1,6 +1,6 @@
 library hemend.ui.state_extentions;
 
-import 'package:flutter/widgets.dart';
+import 'package:flutter/material.dart';
 
 abstract class SafeState<T extends StatefulWidget> implements State<T> {
   @override
