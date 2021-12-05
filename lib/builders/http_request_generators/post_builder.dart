@@ -1,31 +1,71 @@
+import 'dart:async';
+
 import 'package:build/build.dart';
 import 'package:dio/dio.dart' as dio;
 import 'package:hemend/annotations/http_request/dio_requests.dart';
 import 'package:source_gen/source_gen.dart';
-
+import 'package:async/async.dart';
 import '../model_visitor.dart';
 
 class PostBuilder extends GeneratorForAnnotation<DioRequest> {
-  // 1
+  @override
+  FutureOr<String> generate(LibraryReader library, BuildStep buildStep) async {
+    final values = <String>{};
+    final library.annotatedWith(typeChecker);
+
+    for (var annotatedElement in library.annotatedWith(typeChecker)) {
+      final generatedValue = generateForAnnotatedElement(
+          annotatedElement.element, annotatedElement.annotation, buildStep);
+      await for (var value in normalizeGeneratorOutput(generatedValue)) {
+        assert(value.length == value.trim().length);
+        values.add(value);
+      }
+    }
+
+    return values.join('\n\n');
+  }
+
   @override
   String generateForAnnotatedElement(
       element, ConstantReader annotation, BuildStep buildStep) {
-    // 2
+    final buffer = StringBuffer();
+    // dio.Dio().post(fullPath,data: );
+
     final visitor = ModelVisitor();
     element.visitChildren(
         visitor); // Visits all the children of element in no particular order.
 
-    // 3
     final className = '${visitor.className}Gen'; // EX: 'ModelGen' for 'Model'.
 
-    // 4
+    buffer.writeln();
+    buildClass(buffer, annotation);
 
-    final buffer = StringBuffer();
-    buffer.writeln('//' +
-        annotation.read('baseUrl').stringValue +
-        annotation.read('apiPath').stringValue);
-    //dio.Dio().get(path)
     return buffer.toString();
+  }
+
+  void buildClass(StringBuffer buffer, ConstantReader annotation) {
+    buildPost(buffer, annotation);
+  }
+
+  void buildPost(StringBuffer buffer, ConstantReader annotation) {
+    final fullPath = annotation.read('baseUrl').stringValue +
+        annotation.read('apiPath').stringValue;
+    String requestType =
+        annotation.read('request').typeValue.toString().replaceAll('*', '');
+    String responseType =
+        annotation.read('response').typeValue.toString().replaceAll('*', '');
+    buffer.writeln('''
+Future<$responseType?> post($requestType body,
+    [Map<String, dynamic> headers = const {}]) async {
+  try {
+    final result = await Dio().post('$fullPath',
+        data: body.toMap(), options: Options(headers: headers));
+    return $responseType.fromMap(result.data);
+  } catch (e) {
+    return null;
+  }
+}
+''');
   }
 
   void generateGettersAndSetters(
@@ -55,3 +95,35 @@ class PostBuilder extends GeneratorForAnnotation<DioRequest> {
     }
   }
 }
+
+/// Converts [Future], [Iterable], and [Stream] implementations
+/// containing [String] to a single [Stream] while ensuring all thrown
+/// exceptions are forwarded through the return value.
+Stream<String> normalizeGeneratorOutput(Object? value) {
+  if (value == null) {
+    return const Stream.empty();
+  } else if (value is Future) {
+    return StreamCompleter.fromFuture(value.then(normalizeGeneratorOutput));
+  } else if (value is String) {
+    value = [value];
+  }
+
+  if (value is Iterable) {
+    value = Stream.fromIterable(value);
+  }
+
+  if (value is Stream) {
+    return value.where((e) => e != null).map((e) {
+      if (e is String) {
+        return e.trim();
+      }
+
+      throw _argError(e as Object);
+    }).where((e) => e.isNotEmpty);
+  }
+  throw _argError(value);
+}
+
+ArgumentError _argError(Object value) => ArgumentError(
+    'Must be a String or be an Iterable/Stream containing String values. '
+    'Found `${Error.safeToString(value)}` (${value.runtimeType}).');
