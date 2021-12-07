@@ -8,24 +8,8 @@ import 'models.dart';
 // Generator: PostBuilder
 // **************************************************************************
 
-Future<SampleResponse?> post(SampleRequest body,
-    [Map<String, dynamic> headers = const {}]) async {
-  try {
-    final result = await Dio().post('http://localhost:8080/test',
-        data: body.toMap(), options: Options(headers: headers));
-    return SampleResponse.fromMap(result.data);
-  } catch (e) {
-    return null;
-  }
-}
+//sample
 
-Future<NullParsableObject?> post(NullParsableObject body,
-    [Map<String, dynamic> headers = const {}]) async {
-  try {
-    final result = await Dio().post('http://localhost:8080',
-        data: body.toMap(), options: Options(headers: headers));
-    return NullParsableObject.fromMap(result.data);
-  } catch (e) {
-    return null;
-  }
-}
+//Test . ((http://localhost:8080), (http://localhost:8080))
+
+//don't create classes without annotation in this file false
