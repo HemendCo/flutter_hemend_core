@@ -11,16 +11,38 @@ class PostBuilder extends GeneratorForAnnotation<DioRequest> {
   @override
   FutureOr<String> generate(LibraryReader library, BuildStep buildStep) async {
     final values = <String>{};
-    final library.annotatedWith(typeChecker);
+    final annotations = library.annotatedWith(typeChecker);
+    final classes = library.classes;
 
-    for (var annotatedElement in library.annotatedWith(typeChecker)) {
-      final generatedValue = generateForAnnotatedElement(
-          annotatedElement.element, annotatedElement.annotation, buildStep);
-      await for (var value in normalizeGeneratorOutput(generatedValue)) {
-        assert(value.length == value.trim().length);
-        values.add(value);
-      }
-    }
+    values.add('//sample');
+
+    /// e.displayName = className
+    /// e.methods = get methods which have annotations as [#metadata]
+    ///   if want to get data of annotation use [@computeConstantValue]
+    ///   then use [@getField] like normal annotation to  get values of annotation
+    ///
+    ///
+    values.addAll(
+      classes.map(
+        (e) {
+          String result =
+              '//don\'t create classes without annotation in this file ${e.metadata.isNotEmpty}';
+          if (e.metadata.isNotEmpty) {
+            result =
+                '//${e.displayName} . ${e.methods.map((e) => e.metadata.map((e) => e.computeConstantValue()?.getField('baseUrl')?.toStringValue()))}';
+          }
+          return result;
+        },
+      ),
+    );
+    // for (var annotatedElement in annotations) {
+    //   final generatedValue = generateForAnnotatedElement(
+    //       annotatedElement.element, annotatedElement.annotation, buildStep);
+    //   await for (var value in normalizeGeneratorOutput(generatedValue)) {
+    //     assert(value.length == value.trim().length);
+    //     values.add(value);
+    //   }
+    // }
 
     return values.join('\n\n');
   }
@@ -37,7 +59,6 @@ class PostBuilder extends GeneratorForAnnotation<DioRequest> {
 
     final className = '${visitor.className}Gen'; // EX: 'ModelGen' for 'Model'.
 
-    buffer.writeln();
     buildClass(buffer, annotation);
 
     return buffer.toString();

@@ -12,6 +12,12 @@ class DioRequest {
     this.request = NullParsableObject,
     this.response = NullParsableObject,
   });
+
+  @override
+  String toString() {
+    // TODO: implement toString
+    return '@DioRequest($name,$baseUrl,$apiPath)';
+  }
 }
 
 enum RequestType { post, get }

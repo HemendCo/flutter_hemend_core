@@ -1,7 +1,6 @@
 library hemend.io.socket;
 
 import 'dart:convert';
-import 'dart:ffi';
 
 import 'package:web_socket_channel/web_socket_channel.dart';
 
