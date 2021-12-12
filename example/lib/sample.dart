@@ -1,7 +1,5 @@
 import 'package:hemend/annotations/http_request/dio_requests.dart';
 
-import 'package:hemend/external_libraries/http_requests/dio.dart';
-
 @DioRequest()
 class Test {
   @DioRequest(
@@ -10,17 +8,13 @@ class Test {
       apiPath: "/test",
       request: SampleRequest,
       response: SampleResponse)
-  void testRequest() {
-    Object d = {'asf': 'asf'};
-  }
+  void testRequest() {}
 
   @DioRequest(
     name: "Test2",
     baseUrl: 'http://localhost:8080',
   )
-  void testRequest2() {
-    Object d = {'asf': 'asf'};
-  }
+  void testRequest2() {}
 }
 
 class SampleResponse extends ParsableObject {
@@ -28,7 +22,6 @@ class SampleResponse extends ParsableObject {
 
   @override
   Map<String, dynamic> toMap() {
-    // TODO: implement toMap
     throw UnimplementedError();
   }
 }
@@ -38,7 +31,6 @@ class SampleRequest extends ParsableObject {
 
   @override
   Map<String, dynamic> toMap() {
-    // TODO: implement toMap
     throw UnimplementedError();
   }
 }

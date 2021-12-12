@@ -20,7 +20,7 @@ class SocketManager {
       Uri.parse(value),
     );
     _socket!.stream.timeout(const Duration(hours: 5));
-    _revokeAllListners();
+    _revokeAllListeners();
     (onConnect ?? () {})();
   }
 
@@ -34,7 +34,7 @@ class SocketManager {
   Future<void> waitForResult(String event, void Function(dynamic) callBack,
       {Future<void> Function()? dummyTask}) async {
     _once.addAll({event: callBack});
-    final task = dummyTask ?? () async {};
+    //final task = dummyTask ?? () async {};
     await Future.doWhile(() async => _once.containsKey(event));
 
     return;
@@ -46,7 +46,7 @@ class SocketManager {
   }
 
   ///After changing address all events on socket will be lost it will revoke all of them
-  void _revokeAllListners() {
+  void _revokeAllListeners() {
     _socket?.stream.listen(
       (value) => _eventReceived(value, _socket!),
       onError: (test) {
@@ -66,63 +66,63 @@ class SocketManager {
     String? event = dataValue['event'];
     dynamic value = dataValue['data'];
     if (event != null) {
-      _callListnersOn(event, value);
+      _callListenersOn(event, value);
     }
   }
 
-  ///Add listner to socket
-  void addListner(
+  ///Add listener to socket
+  void addListener(
       {required String event,
       required String key,
-      required void Function(dynamic) listner}) {
-    ///If event where new it will be added to socket listners
-    if (!_listners.keys.contains(event)) {
-      _listners.addAll({
-        event: {key: listner}
+      required void Function(dynamic) listener}) {
+    ///If event where new it will be added to socket listeners
+    if (!_listeners.keys.contains(event)) {
+      _listeners.addAll({
+        event: {key: listener}
       });
     }
 
-    ///If event was not new and listner key where new it will be added to that events listners
-    else if (!_listners[event]!.keys.contains(key)) {
-      _listners[event]!.addAll({key: listner});
+    ///If event was not new and listener key where new it will be added to that events listeners
+    else if (!_listeners[event]!.keys.contains(key)) {
+      _listeners[event]!.addAll({key: listener});
     }
 
-    ///If event was not new and listner key existed it will update the listner
+    ///If event was not new and listener key existed it will update the listener
     else {
-      _listners[event]![key] = listner;
+      _listeners[event]![key] = listener;
     }
   }
 
-  ///Call listners of an event
-  Future<void> _callListnersOn(String event, dynamic data) async {
-    if (_listners.keys.contains(event)) {
-      for (final listner in (_listners[event] ?? {}).values) {
-        listner(data);
+  ///Call listeners of an event
+  Future<void> _callListenersOn(String event, dynamic data) async {
+    if (_listeners.keys.contains(event)) {
+      for (final listener in (_listeners[event] ?? {}).values) {
+        listener(data);
       }
     }
     if (_once.keys.contains(event)) {
-      final listner = _once[event]!;
+      final listener = _once[event]!;
       _once.remove(event);
-      listner(data);
+      listener(data);
     }
   }
 
-  ///Remove listner with event and listner key
-  bool removeListnerOn(String event, String key) {
+  ///Remove listener with event and listener key
+  bool removeListenerOn(String event, String key) {
     bool result = false;
-    if (!_listners.keys.contains(event)) {
+    if (!_listeners.keys.contains(event)) {
       result = false;
-    } else if (!_listners[event]!.keys.contains(key)) {
+    } else if (!_listeners[event]!.keys.contains(key)) {
       result = false;
     } else {
-      _listners[event]!.remove(key);
+      _listeners[event]!.remove(key);
       result = true;
     }
     return result;
   }
 
   final Map<String, void Function(dynamic)> _once = {};
-  final Map<String, Map<String, void Function(dynamic)>> _listners = {};
+  final Map<String, Map<String, void Function(dynamic)>> _listeners = {};
 
-  Map<String, Map<String, void Function(dynamic)>> get listners => _listners;
+  Map<String, Map<String, void Function(dynamic)>> get listeners => _listeners;
 }

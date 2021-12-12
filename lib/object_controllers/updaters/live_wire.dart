@@ -10,32 +10,32 @@ mixin LiveWire implements _LiveWireBase {
 
   ///Change event name
   set event(String event) {
-    socketClient.removeListnerOn(_event, _listnerKey);
+    socketClient.removeListenerOn(_event, _listenerKey);
     _event = event;
-    socketClient.addListner(
-        event: event, key: _listnerKey, listner: updateFromMap);
+    socketClient.addListener(
+        event: event, key: _listenerKey, listener: updateFromMap);
   }
 
-  ///Listner key in app side (purpose: add more than one listner to an event without resuppling event which cannot be removed)
-  String _listnerKey = '';
+  ///Listener key in app side (purpose: add more than one listener to an event without resupplying event which cannot be removed)
+  String _listenerKey = '';
 
-  ///Change Listner key
-  set listnerKey(String key) {
-    socketClient.removeListnerOn(_event, _listnerKey);
+  ///Change Listener key
+  set listenerKey(String key) {
+    socketClient.removeListenerOn(_event, _listenerKey);
     final randomValue = Random.secure().nextInt(5555555);
-    _listnerKey = "$key$randomValue";
-    socketClient.addListner(
-        event: _event, key: _listnerKey, listner: updateFromMap);
+    _listenerKey = "$key$randomValue";
+    socketClient.addListener(
+        event: _event, key: _listenerKey, listener: updateFromMap);
   }
 
-  ///Connect object to socket with event name and listner key+random value
+  ///Connect object to socket with event name and listener key+random value
   void plugItIn(String event, String? key, {bool invokeAtConnect = true}) {
-    socketClient.removeListnerOn(_event, _listnerKey);
+    socketClient.removeListenerOn(_event, _listenerKey);
     _event = event;
     final randomValue = Random.secure().nextInt(5555555);
-    _listnerKey = "${key ?? '_'}$randomValue";
-    socketClient.addListner(
-        event: event, key: _listnerKey, listner: updateFromMap);
+    _listenerKey = "${key ?? '_'}$randomValue";
+    socketClient.addListener(
+        event: event, key: _listenerKey, listener: updateFromMap);
     if (invokeAtConnect) {
       emit(data: {});
     }
@@ -43,7 +43,7 @@ mixin LiveWire implements _LiveWireBase {
 
   ///Disconnect object from socket
   bool unplug() {
-    return socketClient.removeListnerOn(_event, _listnerKey);
+    return socketClient.removeListenerOn(_event, _listenerKey);
   }
 
   ///Sends data into socket with this event

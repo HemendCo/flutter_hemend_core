@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:build/build.dart';
-import 'package:dio/dio.dart' as dio;
+//import 'package:dio/dio.dart' as dio;
 import 'package:hemend/annotations/http_request/dio_requests.dart';
 import 'package:source_gen/source_gen.dart';
 import 'package:async/async.dart';
@@ -11,7 +11,7 @@ class PostBuilder extends GeneratorForAnnotation<DioRequest> {
   @override
   FutureOr<String> generate(LibraryReader library, BuildStep buildStep) async {
     final values = <String>{};
-    final annotations = library.annotatedWith(typeChecker);
+    //final annotations = library.annotatedWith(typeChecker);
     final classes = library.classes;
 
     values.add('//sample');
@@ -57,7 +57,7 @@ class PostBuilder extends GeneratorForAnnotation<DioRequest> {
     element.visitChildren(
         visitor); // Visits all the children of element in no particular order.
 
-    final className = '${visitor.className}Gen'; // EX: 'ModelGen' for 'Model'.
+    //final className = '${visitor.className}Gen'; // EX: 'ModelGen' for 'Model'.
 
     buildClass(buffer, annotation);
 
