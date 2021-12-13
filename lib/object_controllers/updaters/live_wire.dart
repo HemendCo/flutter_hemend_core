@@ -1,5 +1,3 @@
-library hemend.object_controllers.updaters.live_wire;
-
 import 'dart:math';
 
 import 'package:hemend/io/socket/socket_manager.dart';

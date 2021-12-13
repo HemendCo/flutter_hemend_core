@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:hemend/ui_related/state_extensions/safe_state.dart';
 
-class SingleBindableObject implements BaseBindableObject {
+abstract class SingleBindableObject implements BaseBindableObject {
   BindableState? _bondedState;
   @override
   bool get isBonded => _bondedState != null;
   @override
   void bind(BindableState state) {
+    assert(!isBonded,
+        'Assertion Failed this bindable object is singleBounded and cant have 2 state at same time use MultipleBindableObject instead if needed');
+    if (isBonded) return;
     _bondedState = state;
     onBind();
   }
@@ -29,7 +32,7 @@ class SingleBindableObject implements BaseBindableObject {
   }
 }
 
-class MultipleBindableObject implements BaseBindableObject {
+abstract class MultipleBindableObject implements BaseBindableObject {
   final List<BindableState> _bondedStates = [];
   @override
   bool get isBonded => _bondedStates.isNotEmpty;
@@ -72,16 +75,29 @@ abstract class BaseBindableObject {
 }
 
 abstract class BindableState<T extends StatefulWidget,
-    B extends BaseBindableObject> implements SafeState<T> {
-  B? get _bondedObject;
-  bool get isBonded => _bondedObject != null;
-  void update(B object);
+        B extends BaseBindableObject> extends SafeState<T>
+    implements _ObjectCarrier<B> {
+  bool get isBonded => bondedObject != null;
+  void update(B object) => setState(() {});
+
+  @override
+  void initState() {
+    super.initState();
+    if (isBonded) {
+      bondedObject!.bind(this);
+    }
+  }
+
   @override
   void dispose() {
     if (isBonded) {
-      _bondedObject!.unBind(this);
+      bondedObject!.unBind(this);
     }
 
-    dispose();
+    super.dispose();
   }
+}
+
+abstract class _ObjectCarrier<T> {
+  T? get bondedObject => null;
 }

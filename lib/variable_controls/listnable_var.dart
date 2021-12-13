@@ -1,13 +1,13 @@
 library hemend.variables;
 
-///creates a variable that invokes its listners on change
-class ListnableVar<T> {
-  ///creates a variable that invokes its listners on change
-  ListnableVar(T value) : _value = value;
+///creates a variable that invokes its listeners on change
+class ListenableVar<T> {
+  ///creates a variable that invokes its listeners on change
+  ListenableVar(T value) : _value = value;
 
-  ///closing all listners
+  ///closing all listeners
   void dispose() {
-    _listners.clear();
+    _listeners.clear();
   }
 
   ///Holds value
@@ -19,24 +19,24 @@ class ListnableVar<T> {
   ///Set value of variable
   set value(T value) {
     _value = value;
-    _invokeListners();
+    _invokeListeners();
   }
 
   ///Get value of variable
   T call() => _value;
 
-  ///Invoke All Listners
-  Future<void> _invokeListners() async {
-    for (final listner in _listners) {
-      listner(_value);
+  ///Invoke All Listeners
+  Future<void> _invokeListeners() async {
+    for (final listener in _listeners) {
+      listener(_value);
     }
   }
 
-  ///Listners
-  final List<void Function(T)> _listners = [];
+  ///Listeners
+  final List<void Function(T)> _listeners = [];
 
-  ///Add listner to variable
-  void addListner(void Function(T) p0) {
-    _listners.add(p0);
+  ///Add listener to variable
+  void addListener(void Function(T) p0) {
+    _listeners.add(p0);
   }
 }

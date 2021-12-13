@@ -1,5 +1,3 @@
-library hemend.object_controllers.listenable_object;
-
 mixin ListenableObject {
   final List<void Function()> _oneTimeCall = [];
   final List<void Function()> _listeners = [];
