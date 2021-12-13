@@ -9,6 +9,8 @@ final List<dynamic> _temp = [];
 
 ///use this only for debug purposes and dont use it in release version
 extension Debugger on dynamic {
+  /// **DO NOT USE IN RELEASE MODE**
+  ///
   /// Emit a log event.
   ///
   /// This function was designed to map closely to the logging information
@@ -23,6 +25,7 @@ extension Debugger on dynamic {
   /// - [zone] (optional) the zone where the log was emitted
   /// - [error] (optional) an error object associated with this log event
   /// - [stackTrace] (optional) a stack trace associated with this log event
+  @Deprecated("don't use log in release mode")
   log({
     DateTime? time,
     int? sequenceNumber,
@@ -40,12 +43,16 @@ extension Debugger on dynamic {
         stackTrace: stackTrace);
   }
 
+  /// **DO NOT USE IN RELEASE MODE**
+  ///
   /// Send a reference to [object] to any attached debuggers.
   ///
   /// Debuggers may open an inspector on the object. Returns the argument.
   ///
-  /// Object will be cached you may need to use [resetInspectCache]
-  @Deprecated('dont use inspector in release mode')
+  /// inspected object will be cached so you can see them if object lose all its references garbage collector will remove it and will be lost
+  ///
+  /// you may need to use [resetInspectCache] to clear cached objects
+  @Deprecated("don't use inspector in release mode")
   void inspect() {
     _temp.add(this);
     dev.inspect(_temp.last);
