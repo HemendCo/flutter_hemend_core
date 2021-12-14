@@ -1,12 +1,20 @@
-mixin ListenableObject {
+import 'package:flutter/material.dart';
+
+mixin ListenableObject implements Listenable {
   final List<void Function()> _oneTimeCall = [];
   final List<void Function()> _listeners = [];
   void addOneTimeListener(void Function() listener) {
     _oneTimeCall.add(listener);
   }
 
-  void addListener(void Function() listener) {
+  @override
+  void addListener(VoidCallback listener) {
     _listeners.add(listener);
+  }
+
+  @override
+  void removeListener(VoidCallback listener) {
+    _listeners.remove(listener);
   }
 
   void callThemAll() {
