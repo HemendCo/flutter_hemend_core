@@ -2,11 +2,24 @@ import 'dart:math';
 
 import 'package:hemend/io/socket/socket_manager.dart';
 
+///**links object to socket**
+///
+///set [socketClient] before anything
+///
+///to setup the socket connection you need to use [plugItIn] e.g use it in constructor
+///
+///event name can be changed by setting [event]
+///
+///[listenerKey] is not required its there to set the listener's key for socket manager
+///
+///[emit] can be used to send data to socket with [_event] name
+///
+///finally you may use [unplug] to detach object from socket
 mixin LiveWire implements _LiveWireBase {
   ///Event name on the socket side
   String _event = '';
 
-  ///Change event name
+  ///Changes event's name
   set event(String event) {
     socketClient.removeListenerOn(_event, _listenerKey);
     _event = event;
@@ -27,6 +40,8 @@ mixin LiveWire implements _LiveWireBase {
   }
 
   ///Connect object to socket with event name and listener key+random value
+  ///
+  ///if you set [invokeAtConnect] false you may need to call [emit] manually
   void plugItIn(String event, String? key, {bool invokeAtConnect = true}) {
     socketClient.removeListenerOn(_event, _listenerKey);
     _event = event;
@@ -35,7 +50,7 @@ mixin LiveWire implements _LiveWireBase {
     socketClient.addListener(
         event: event, key: _listenerKey, listener: updateFromMap);
     if (invokeAtConnect) {
-      emit(data: {});
+      emit({});
     }
   }
 
@@ -45,12 +60,13 @@ mixin LiveWire implements _LiveWireBase {
   }
 
   ///Sends data into socket with this event
-  void emit({Map data = const {}}) {
+  void emit([Map data = const {}]) {
     socketClient.emit(_event, data);
   }
 }
 
 abstract class _LiveWireBase {
+  ///the socket client that this object's event should attach to
   final SocketManager socketClient = SocketManager();
 
   ///Update value from map comes from socket
