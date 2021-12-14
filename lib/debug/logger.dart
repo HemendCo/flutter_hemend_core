@@ -5,10 +5,10 @@ String get currentTimeTag =>
     '${DateTime.now().hour}:${DateTime.now().minute}:${DateTime.now().second}';
 
 ///cache objects that are currently sent to debugger
-final List<dynamic> _temp = [];
+final List<Object> _temp = [];
 
 ///use this only for debug purposes and dont use it in release version
-extension Debugger on dynamic {
+extension Debugger on Object {
   /// **DO NOT USE IN RELEASE MODE**
   ///
   /// Emit a log event.
