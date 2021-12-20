@@ -77,3 +77,4 @@ build/
 
 #code generator related files
 *.hemend.dart
+analysis_options.yaml

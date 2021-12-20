@@ -7,7 +7,7 @@ String get currentTimeTag =>
 ///cache objects that are currently sent to debugger
 final List<Object> _temp = [];
 
-///use this only for debug purposes and dont use it in release version
+///use this only for debug purposes and don't use it in release version
 extension Debugger on Object {
   /// **DO NOT USE IN RELEASE MODE**
   ///
@@ -35,12 +35,15 @@ extension Debugger on Object {
     Object? error,
     StackTrace? stackTrace,
   }) {
-    dev.log(toString(),
-        level: level,
-        name: name,
-        zone: zone,
-        error: error,
-        stackTrace: stackTrace);
+    assert(() {
+      dev.log(toString(),
+          level: level,
+          name: name,
+          zone: zone,
+          error: error,
+          stackTrace: stackTrace);
+      return true;
+    }());
   }
 
   /// **DO NOT USE IN RELEASE MODE**
@@ -54,8 +57,11 @@ extension Debugger on Object {
   /// you may need to use [resetInspectCache] to clear cached objects
   @Deprecated("don't use inspector in release mode")
   void inspect() {
-    _temp.add(this);
-    dev.inspect(_temp.last);
+    assert(() {
+      _temp.add(this);
+      dev.inspect(_temp.last);
+      return true;
+    }());
   }
 
   ///Remove cache of inspector objects

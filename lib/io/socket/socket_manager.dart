@@ -29,17 +29,17 @@ class SocketManager {
     address = value;
   }
 
-  Future<void> waitForResult(String event, void Function(dynamic) callBack,
-      {Future<void> Function()? dummyTask}) async {
+  Future<void> waitForResult(String event,
+      {Map<String, dynamic> initialData = const {},
+      required void Function(dynamic) callBack}) async {
     _once.addAll({event: callBack});
-    //final task = dummyTask ?? () async {};
-    await Future.doWhile(() async => _once.containsKey(event));
 
+    await Future.doWhile(() async => _once.containsKey(event));
     return;
   }
 
   ///Sends Data to server through socket connection
-  void emit(String key, Map data) {
+  void emit(String key, [Map data = const {}]) {
     _socket?.sink.add(json.encode({'event': key, 'data': data}));
   }
 

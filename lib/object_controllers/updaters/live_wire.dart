@@ -42,15 +42,16 @@ mixin LiveWire implements _LiveWireBase {
   ///Connect object to socket with event name and listener key+random value
   ///
   ///if you set [invokeAtConnect] false you may need to call [emit] manually
-  void plugItIn(String event, String? key, {bool invokeAtConnect = true}) {
+  void plugItIn(String event, String? key,
+      [Map<String, dynamic>? invokeData = const {}]) {
     socketClient.removeListenerOn(_event, _listenerKey);
     _event = event;
     final randomValue = Random.secure().nextInt(5555555);
     _listenerKey = "${key ?? '_'}$randomValue";
     socketClient.addListener(
         event: event, key: _listenerKey, listener: updateFromMap);
-    if (invokeAtConnect) {
-      emit({});
+    if (invokeData != null) {
+      emit(invokeData);
     }
   }
 
