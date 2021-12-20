@@ -11,6 +11,8 @@ final List<Object> _temp = [];
 extension Debugger on Object {
   /// **DO NOT USE IN RELEASE MODE**
   ///
+  /// **Use in Assertion or DevTools.runInDebugMode**
+  ///
   /// Emit a log event.
   ///
   /// This function was designed to map closely to the logging information
@@ -25,7 +27,6 @@ extension Debugger on Object {
   /// - [zone] (optional) the zone where the log was emitted
   /// - [error] (optional) an error object associated with this log event
   /// - [stackTrace] (optional) a stack trace associated with this log event
-  @Deprecated("don't use log in release mode")
   log({
     DateTime? time,
     int? sequenceNumber,
@@ -35,18 +36,17 @@ extension Debugger on Object {
     Object? error,
     StackTrace? stackTrace,
   }) {
-    assert(() {
-      dev.log(toString(),
-          level: level,
-          name: name,
-          zone: zone,
-          error: error,
-          stackTrace: stackTrace);
-      return true;
-    }());
+    dev.log(toString(),
+        level: level,
+        name: name,
+        zone: zone,
+        error: error,
+        stackTrace: stackTrace);
   }
 
   /// **DO NOT USE IN RELEASE MODE**
+  ///
+  /// **Use in Assertion or DevTools.runInDebugMode**
   ///
   /// Send a reference to [object] to any attached debuggers.
   ///
@@ -55,13 +55,9 @@ extension Debugger on Object {
   /// inspected object will be cached so you can see them if object lose all its references garbage collector will remove it and will be lost
   ///
   /// you may need to use [resetInspectCache] to clear cached objects
-  @Deprecated("don't use inspector in release mode")
   void inspect() {
-    assert(() {
-      _temp.add(this);
-      dev.inspect(_temp.last);
-      return true;
-    }());
+    _temp.add(this);
+    dev.inspect(_temp.last);
   }
 
   ///Remove cache of inspector objects
