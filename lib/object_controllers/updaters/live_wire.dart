@@ -61,7 +61,7 @@ mixin LiveWire implements _LiveWireBase {
   }
 
   ///Sends data into socket with this event
-  void emit([Map data = const {}]) {
+  void emit([Map<String, dynamic> data = const {}]) {
     socketClient.emit(_event, data);
   }
 }
