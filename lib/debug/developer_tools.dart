@@ -15,3 +15,12 @@ abstract class DevTools {
     }());
   }
 }
+
+extension DebugMode on Function {
+  void runInDebugMode() {
+    assert(() {
+      this();
+      return true;
+    }());
+  }
+}
