@@ -5,9 +5,10 @@ import 'package:web_socket_channel/web_socket_channel.dart';
 class SocketManager {
   ///Socket connection
   WebSocketChannel? _socket;
-  void Function()? onConnect;
+  void Function(String)? onConnect;
   void Function()? onDone;
-  void Function()? onError;
+  void Function(dynamic)? onError;
+  void Function(String, Map<String, dynamic>)? onEmit;
   void Function(String)? onReceived;
   String _address = '';
 
@@ -19,7 +20,7 @@ class SocketManager {
     );
     _socket!.stream.timeout(const Duration(hours: 5));
     _revokeAllListeners();
-    (onConnect ?? () {})();
+    (onConnect ?? (_) {})(value);
   }
 
   String get address => _address;
@@ -39,7 +40,8 @@ class SocketManager {
   }
 
   ///Sends Data to server through socket connection
-  void emit(String key, [Map data = const {}]) {
+  void emit(String key, [Map<String, dynamic> data = const {}]) {
+    (onEmit ?? (_, __) {})(key, data);
     _socket?.sink.add(json.encode({'event': key, 'data': data}));
   }
 
@@ -47,8 +49,8 @@ class SocketManager {
   void _revokeAllListeners() {
     _socket?.stream.listen(
       (value) => _eventReceived(value, _socket!),
-      onError: (test) {
-        (onError ?? () {})();
+      onError: (errorMessage) {
+        (onError ?? (_) {})(errorMessage);
         //connect(address);
       },
       onDone: () {
