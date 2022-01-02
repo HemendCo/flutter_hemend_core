@@ -12,7 +12,6 @@ extension PathTools on Path {
   }
 
   void addFromSvgString(String value) {
-    //M 0 0 L 2 0 V 2 H 3 C 3 3 3 4 2 4 S 0.817 3.156 0 3 Q -2 3 -2 1 T -3.99 0.991 A 1 1 0 1 0 -4.419 -0.786 Z
     final data = _parseSvgPathToList(value);
     Offset baseOffset = Offset.zero;
     for (final segment in data) {
@@ -70,11 +69,11 @@ extension PathTools on Path {
           break;
         case 'S':
           //TESTING
-          throw Exception('not implemented yet');
+          throw Exception('S is not implemented yet');
           break;
         case 's':
           //TESTING
-          throw Exception('not implemented yet');
+          throw Exception('s is not implemented yet');
           break;
         case 'Q':
           quadraticBezierTo(
@@ -91,16 +90,16 @@ extension PathTools on Path {
               splitSegment[4].toDouble());
           break;
         case 'T':
-          throw Exception('not implemented yet');
+          throw Exception('T is not implemented yet');
           break;
         case 'A':
-          throw Exception('not implemented yet');
+          throw Exception('Arc is not implemented yet');
           break;
         case 't':
-          throw Exception('not implemented yet');
+          throw Exception('t implemented yet');
           break;
         case 'a':
-          throw Exception('not implemented yet');
+          throw Exception('relative Arc is implemented yet');
           break;
         default:
           close();
