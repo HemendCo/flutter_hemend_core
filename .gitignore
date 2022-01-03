@@ -78,3 +78,4 @@ build/
 #code generator related files
 *.hemend.dart
 analysis_options.yaml
+.vscode/settings.json
