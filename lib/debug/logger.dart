@@ -27,7 +27,7 @@ extension Debugger on Object {
   /// - [zone] (optional) the zone where the log was emitted
   /// - [error] (optional) an error object associated with this log event
   /// - [stackTrace] (optional) a stack trace associated with this log event
-  log({
+  void log({
     DateTime? time,
     int? sequenceNumber,
     int level = 0,
