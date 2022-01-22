@@ -79,3 +79,4 @@ build/
 *.hemend.dart
 analysis_options.yaml
 .vscode/settings.json
+pubspec.lock
