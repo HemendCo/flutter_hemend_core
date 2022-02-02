@@ -39,4 +39,13 @@ class ListenableVar<T> {
   void addListener(void Function(T) p0) {
     _listeners.add(p0);
   }
+
+  ///remove a listener
+  void removeListener(void Function(T) p0) {
+    _listeners.remove(p0);
+  }
+
+  void removeAllListeners() {
+    _listeners.clear();
+  }
 }
