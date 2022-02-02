@@ -3,6 +3,7 @@ enum ErrorType {
   apiFail,
   socketError,
   unknownError,
+  notFound,
   typeError,
   localFileNotFound,
   variableError,
@@ -46,6 +47,9 @@ extension ErrorInfo on ErrorType {
       case ErrorType.notImplementedYet:
         result += 'called method is not implemented yet';
         break;
+      case ErrorType.notFound:
+        result += 'tried to access something that was not found';
+        break;
     }
     return result;
   }
@@ -53,9 +57,9 @@ extension ErrorInfo on ErrorType {
 
 class ErrorHandler implements Exception {
   final String message;
-  final List<ErrorType> errorTypes;
+  final Set<ErrorType> errorTypes;
 
-  ErrorHandler(this.message, [this.errorTypes = const []]);
+  ErrorHandler(this.message, [this.errorTypes = const {}]);
   @override
   String toString() {
     StringBuffer result = StringBuffer();
