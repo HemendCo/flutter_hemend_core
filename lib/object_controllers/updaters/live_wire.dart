@@ -15,7 +15,7 @@ import 'package:hemend/io/socket/socket_manager.dart';
 ///[emit] can be used to send data to socket with [_event] name
 ///
 ///finally you may use [unplug] to detach object from socket
-mixin LiveWire implements _LiveWireBase {
+mixin LiveWire implements ILiveWire {
   ///Event name on the socket side
   String _event = '';
 
@@ -66,9 +66,18 @@ mixin LiveWire implements _LiveWireBase {
   }
 }
 
-abstract class _LiveWireBase {
+abstract class ILiveWire {
   ///the socket client that this object's event should attach to
   final SocketManager socketClient = SocketManager();
+
+  ///emits data into [socketClient] on this [LiveWire]
+  void emit([Map<String, dynamic> data]);
+
+  ///disconnects live wire from [socketClient]
+  bool unplug();
+
+  ///connects live wire to the [socketClient]
+  void plugItIn(String event, String? key, [Map<String, dynamic>? invokeData]);
 
   ///Update value from map comes from socket
   void updateFromMap(dynamic data);
