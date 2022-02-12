@@ -11,7 +11,7 @@ class TapInteractive extends StatefulWidget {
   final Duration onTapDownDuration;
   final Curve curve;
   final Curve reverseCurve;
-  final double minmumScale;
+  final double minimumScale;
   final double maximumScale;
   final void Function()? onTap;
   final void Function()? onTapDown;
@@ -29,7 +29,7 @@ class TapInteractive extends StatefulWidget {
       this.onTapDown,
       this.onTapUp,
       this.builder,
-      this.minmumScale = 0.9,
+      this.minimumScale = 0.9,
       this.maximumScale = 1.0})
       : super(key: key);
 
@@ -51,7 +51,7 @@ class _TapInteractiveState extends State<TapInteractive>
         upperBound: 1.0,
         reverseDuration: widget.onTapDownDuration);
     _animation =
-        Tween<double>(begin: widget.minmumScale, end: widget.maximumScale)
+        Tween<double>(begin: widget.minimumScale, end: widget.maximumScale)
             .animate(CurvedAnimation(
                 parent: _controller,
                 curve: widget.curve,
