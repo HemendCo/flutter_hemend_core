@@ -19,14 +19,14 @@ class ListenableVar<T> {
   ///Set value of variable
   set value(T value) {
     _value = value;
-    _invokeListeners();
+    invokeListeners();
   }
 
   ///Get value of variable
   T call() => _value;
 
   ///Invoke All Listeners
-  Future<void> _invokeListeners() async {
+  Future<void> invokeListeners() async {
     for (final listener in _listeners) {
       listener(_value);
     }
