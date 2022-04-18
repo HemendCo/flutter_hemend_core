@@ -16,9 +16,40 @@ class CrashHandler {
   static int crashCounter = 0;
   final Uri _reportUri;
   final Map<String, String>? _reportHeaders;
-  final void Function(Object, StackTrace) _onCrash;
-  CrashHandler.register(this._reportUri, this._onCrash, this._reportHeaders) {
+  final Map<String, dynamic>? _extraInfo;
+  final void Function(Object, StackTrace)? _onCrash;
+  Map<String, dynamic> _deviceInfo = <String, dynamic>{
+    'error': 'have not been initialized',
+  };
+  Map<String, dynamic> _appInfo = <String, dynamic>{
+    'error': 'have not been initialized',
+  };
+
+  CrashHandler.register(
+    this._reportUri, {
+    void Function(Object, StackTrace)? onCrash,
+    Map<String, String>? reportHeaders,
+    Map<String, dynamic>? extraInfo,
+  })  : _extraInfo = extraInfo,
+        _onCrash = onCrash,
+        _reportHeaders = reportHeaders {
     _instance = this;
+  }
+  Future<void> gatherBasicData() async {
+    final deviceInfo = DeviceInfoPlugin();
+    if (Platform.isAndroid) {
+      _deviceInfo = (await deviceInfo.androidInfo).toMap();
+    } else if (Platform.isIOS) {
+      _deviceInfo = (await deviceInfo.iosInfo).toMap();
+    }
+    final packageInfo = await PackageInfo.fromPlatform();
+    _appInfo = {
+      'appName': packageInfo.appName,
+      'version': packageInfo.version,
+      'buildNumber': packageInfo.buildNumber,
+      'packageName': packageInfo.packageName,
+      'signingKey': packageInfo.buildSignature,
+    };
   }
 
   ///return result of a function in a try-catch block and return the result
@@ -29,23 +60,9 @@ class CrashHandler {
       final result = await function();
       return snap.DataSnapHandler<TResult>.done(data: result);
     } catch (ex, st) {
-      _onCrash(ex, st);
-      final packageInfo = await PackageInfo.fromPlatform();
+      (_onCrash ?? (_, __) {})(ex, st);
+
       final crashTime = DateTime.now().millisecondsSinceEpoch;
-      final appInfo = {
-        'appName': packageInfo.appName,
-        'version': packageInfo.version,
-        'buildNumber': packageInfo.buildNumber,
-        'packageName': packageInfo.packageName,
-        'signingKey': packageInfo.buildSignature,
-      };
-      final deviceInfo = DeviceInfoPlugin();
-      Map<String, dynamic> deviceInfoMap = {'error': 'cannot read info'};
-      if (Platform.isAndroid) {
-        deviceInfoMap = (await deviceInfo.androidInfo).toMap();
-      } else if (Platform.isIOS) {
-        deviceInfoMap = (await deviceInfo.iosInfo).toMap();
-      }
 
       final params = PostRequestParams(
         _reportUri,
@@ -53,12 +70,13 @@ class CrashHandler {
         {
           'data': jsonEncode(
             {
-              'packageInfo': appInfo,
-              'deviceInfo': deviceInfoMap,
+              'packageInfo': _appInfo,
+              'deviceInfo': _deviceInfo,
               'errorTime': crashTime,
               'exception': ex.toString(),
               'stacktrace': st.toString(),
               'crashIndex': (crashCounter++).toString(),
+              'extraInfo': _extraInfo ?? 'none',
             },
           )
         },
