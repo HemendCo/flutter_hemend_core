@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:developer' as dev;
 import 'dart:io';
 
 import 'package:device_info_plus/device_info_plus.dart';
@@ -12,6 +13,7 @@ import '../task_manager/isolate_manager/isolation_core.dart';
 
 class CrashHandler {
   static CrashHandler get instance => _instance;
+  static const _kModuleName = 'Crashlytix';
   static late CrashHandler _instance;
   static int crashCounter = 0;
   final Uri _reportUri;
@@ -34,6 +36,7 @@ class CrashHandler {
         _onCrash = onCrash,
         _reportHeaders = reportHeaders {
     _instance = this;
+    dev.log('$_kModuleName initialized');
   }
   Future<void> gatherBasicData() async {
     final deviceInfo = DeviceInfoPlugin();
@@ -52,6 +55,7 @@ class CrashHandler {
       'signingKey': packageInfo.buildSignature,
     };
     hasBasicData = true;
+    dev.log('Basic Data gathered', name: _kModuleName);
   }
 
   Future<Map<String, dynamic>> crashlyticsLog() async {
@@ -60,7 +64,19 @@ class CrashHandler {
     return result;
   }
 
-  ///return result of a function in a try-catch block and return the result
+  void logCrash(Object? exception, StackTrace stackTrace) {
+    final reportData = {
+      'exception': exception,
+      'stackTrace': stackTrace,
+    };
+    () {
+      reportData.log(
+        time: DateTime.now(),
+        error: _kModuleName,
+      );
+    }.runInDebugMode();
+  }
+
   FutureOr<snap.DataSnapHandler<TResult>> call<TResult>(
     FutureOr<TResult> Function() function,
   ) async {
@@ -69,7 +85,7 @@ class CrashHandler {
       return snap.DataSnapHandler<TResult>.done(data: result);
     } catch (ex, st) {
       (_onCrash ?? (_, __) {})(ex, st);
-
+      logCrash(ex, st);
       final crashTime = DateTime.now().millisecondsSinceEpoch;
 
       final params = PostRequestParams(
@@ -85,7 +101,7 @@ class CrashHandler {
               'stacktrace': st.toString(),
               'crashIndex': (crashCounter++).toString(),
               'extraInfo': _extraInfo ?? 'none',
-              'crashlyticsLog': await crashlyticsLog(),
+              '$_kModuleName Log': await crashlyticsLog(),
             },
           )
         },
@@ -116,7 +132,7 @@ class CrashHandler {
       () {
         result.body.log(
           time: DateTime.now(),
-          name: 'Crashlytics',
+          name: _kModuleName,
         );
       }.runInDebugMode();
     } catch (e, st) {
@@ -128,7 +144,7 @@ class CrashHandler {
         };
         error.log(
           time: DateTime.now(),
-          error: 'Crashlytics Crash',
+          error: '$_kModuleName Crash',
         );
       }.runInDebugMode();
     }
