@@ -24,7 +24,7 @@ class CrashHandler {
   Map<String, dynamic> _appInfo = <String, dynamic>{
     'error': 'have not been initialized',
   };
-
+  bool hasBasicData = false;
   CrashHandler.register(
     this._reportUri, {
     void Function(Object, StackTrace)? onCrash,
@@ -37,6 +37,7 @@ class CrashHandler {
   }
   Future<void> gatherBasicData() async {
     final deviceInfo = DeviceInfoPlugin();
+    _deviceInfo = {'error': 'current platform is not supported'};
     if (Platform.isAndroid) {
       _deviceInfo = (await deviceInfo.androidInfo).toMap();
     } else if (Platform.isIOS) {
@@ -50,6 +51,13 @@ class CrashHandler {
       'packageName': packageInfo.packageName,
       'signingKey': packageInfo.buildSignature,
     };
+    hasBasicData = true;
+  }
+
+  Future<Map<String, dynamic>> crashlyticsLog() async {
+    final result = <String, dynamic>{};
+    result.addAll({'hasBasicData': hasBasicData});
+    return result;
   }
 
   ///return result of a function in a try-catch block and return the result
@@ -77,6 +85,7 @@ class CrashHandler {
               'stacktrace': st.toString(),
               'crashIndex': (crashCounter++).toString(),
               'extraInfo': _extraInfo ?? 'none',
+              'crashlyticsLog': await crashlyticsLog(),
             },
           )
         },
