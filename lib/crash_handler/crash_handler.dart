@@ -107,8 +107,31 @@ class CrashHandler {
   static Future<void> onlineReport(dynamic input) async {
     final params = input as PostRequestParams;
 
-    final result = await http.post(params.uri, body: params.body, headers: params.headers);
-    result.body.printToConsole.runInDebugMode();
+    try {
+      final result = await http.post(
+        params.uri,
+        body: params.body,
+        headers: params.headers,
+      );
+      () {
+        result.body.log(
+          time: DateTime.now(),
+          name: 'Crashlytics',
+        );
+      }.runInDebugMode();
+    } catch (e, st) {
+      () {
+        final error = <String, dynamic>{
+          'error': 'Request failed',
+          'exception': e.toString(),
+          'stacktrace': st.toString(),
+        };
+        error.log(
+          time: DateTime.now(),
+          error: 'Crashlytics Crash',
+        );
+      }.runInDebugMode();
+    }
   }
 }
 
