@@ -1,8 +1,7 @@
 import 'dart:async';
 import 'dart:developer' as dev show log, inspect;
 
-String get currentTimeTag =>
-    '${DateTime.now().hour}:${DateTime.now().minute}:${DateTime.now().second}';
+String get currentTimeTag => '${DateTime.now().hour}:${DateTime.now().minute}:${DateTime.now().second}';
 
 ///cache objects that are currently sent to debugger
 final List<Object> _temp = [];
@@ -36,12 +35,13 @@ extension Debugger on Object {
     Object? error,
     StackTrace? stackTrace,
   }) {
-    dev.log(toString(),
-        level: level,
-        name: name,
-        zone: zone,
-        error: error,
-        stackTrace: stackTrace);
+    _temp.add(this);
+    dev.log(this.toString(), level: level, name: name, zone: zone, error: error, stackTrace: stackTrace);
+  }
+
+  void printToConsole() {
+    print(this);
+    // dev.log(this.toString(), level: level, name: name, zone: zone, error: error, stackTrace: stackTrace);
   }
 
   /// **DO NOT USE IN RELEASE MODE**
@@ -61,7 +61,9 @@ extension Debugger on Object {
   }
 
   ///Remove cache of inspector objects
-  void resetInspectCache() {
-    _temp.clear();
-  }
+
+}
+
+void resetInspectCache() {
+  _temp.clear();
 }

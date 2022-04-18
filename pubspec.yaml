@@ -10,7 +10,9 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-
+  device_info_plus:
+  http:
+  package_info_plus:
   build:
   meta: ^1.7.0
   source_gen:
