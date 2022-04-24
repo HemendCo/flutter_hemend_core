@@ -18,10 +18,10 @@ mixin ListenableObject implements Listenable {
   }
 
   void callThemAll() {
-    for (var listener in _listeners) {
+    for (final listener in _listeners) {
       listener();
     }
-    for (var listener in _oneTimeCall) {
+    for (final listener in _oneTimeCall) {
       listener();
     }
     _oneTimeCall.clear();

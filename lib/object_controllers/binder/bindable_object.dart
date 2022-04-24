@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:hemend/ui_related/state_extensions/safe_state.dart';
+import '../../ui_related/state_extensions/safe_state.dart';
 
 abstract class SingleBindableObject implements BaseBindableObject {
   BindableState? _bondedState;

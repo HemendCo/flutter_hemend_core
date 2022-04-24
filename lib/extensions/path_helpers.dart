@@ -1,12 +1,11 @@
-import 'dart:typed_data';
-
-import 'package:flutter/rendering.dart';
+// ignore_for_file: lines_longer_than_80_chars, constant_identifier_names, comment_references, avoid_equals_and_hash_code_on_mutable_classes
 
 import 'dart:collection';
-
-import 'package:string_scanner/string_scanner.dart';
-
+import 'dart:typed_data';
 import 'dart:ui';
+
+import 'package:flutter/rendering.dart';
+import 'package:string_scanner/string_scanner.dart';
 
 extension PathTools on Path {
   void relativeHorizontalLineTo(double x) {
@@ -17,9 +16,8 @@ extension PathTools on Path {
     relativeLineTo(0, y);
   }
 
-  void addFromSVGString(String value,
-      [Offset offset = Offset.zero, Float64List? matrix4]) {
-    this.addPath(SvgParser(value).parse(), offset, matrix4: matrix4);
+  void addFromSVGString(String value, [Offset offset = Offset.zero, Float64List? matrix4]) {
+    addPath(SvgParser(value).parse(), offset, matrix4: matrix4);
   }
 }
 
@@ -69,18 +67,18 @@ class SvgParser {
   }
 
   /// Parses the stream start token.
-  _parseStreamStart() {
+  void _parseStreamStart() {
     _scanner.scan();
   }
 
   /// Parses the stream end token.
-  _parseStreamEnd() {
+  void _parseStreamEnd() {
     _scanner.scan();
   }
 
   /// Parses a SVG path Command.
-  _parseCommand() {
-    Token token = _scanner.peek()!;
+  void _parseCommand() {
+    var token = _scanner.peek()!;
     // If extra arguments are encountered. Use the last command.
     if (token is! CommandToken) {
       // Subsequent pairs after first Move to are considered as implicit
@@ -134,15 +132,15 @@ class SvgParser {
   ///
   /// move-to-args: x, y            (absolute)
   /// move-to-args: dx, dy          (relative)
-  _parseMoveTo(CommandToken commandToken) {
-    var x = (_scanner.scan()! as ValueToken).value;
-    var y = (_scanner.scan()! as ValueToken).value;
+  void _parseMoveTo(CommandToken commandToken) {
+    final x = ((_scanner.scan()! as ValueToken).value ?? 0.0) as double;
+    final y = ((_scanner.scan()! as ValueToken).value ?? 0.0) as double;
 
     if (commandToken.coordinateType == CoordinateType.absolute) {
-      path.moveTo(x as double, y as double);
+      path.moveTo(x, y);
       _currentPoint = Offset(x, y);
     } else {
-      path.relativeMoveTo(x as double, y as double);
+      path.relativeMoveTo(x, y);
       _currentPoint = _currentPoint.translate(x, y);
     }
     // moveTo command reset the initial and current point
@@ -153,7 +151,7 @@ class SvgParser {
   }
 
   /// Parses a [CommandToken] of type [TokenType.closePath].
-  _parseClosePath(CommandToken commandToken) {
+  void _parseClosePath(CommandToken commandToken) {
     path.close();
     // closePath resets the current point to initial point.
     _currentPoint = _initialPoint;
@@ -166,15 +164,15 @@ class SvgParser {
   ///
   /// line-to-args: x, y            (absolute)
   /// line-to-args: dx, dy          (relative)
-  _parseLineTo(CommandToken commandToken) {
-    var x = (_scanner.scan()! as ValueToken).value;
-    var y = (_scanner.scan()! as ValueToken).value;
+  void _parseLineTo(CommandToken commandToken) {
+    final x = ((_scanner.scan()! as ValueToken).value ?? 0.0) as double;
+    final y = ((_scanner.scan()! as ValueToken).value ?? 0.0) as double;
 
     if (commandToken.coordinateType == CoordinateType.absolute) {
-      path.lineTo(x as double, y as double);
+      path.lineTo(x, y);
       _currentPoint = Offset(x, y);
     } else {
-      path.relativeLineTo(x as double, y as double);
+      path.relativeLineTo(x, y);
       _currentPoint = _currentPoint.translate(x, y);
     }
 
@@ -186,15 +184,16 @@ class SvgParser {
   ///
   /// horizontal-line-to-args: x     (absolute)
   /// horizontal-line-to-args: dx    (relative)
-  _parseHorizontalLineTo(CommandToken commandToken) {
-    var h = (_scanner.scan()! as ValueToken).value;
-    var y = _currentPoint.dy;
+  void _parseHorizontalLineTo(CommandToken commandToken) {
+    final h = ((_scanner.scan()! as ValueToken).value ?? 0.0) as double;
+
+    final y = _currentPoint.dy;
 
     if (commandToken.coordinateType == CoordinateType.absolute) {
-      path.lineTo(h as double, y);
+      path.lineTo(h, y);
       _currentPoint = Offset(h, y);
     } else {
-      path.relativeLineTo(h as double, 0);
+      path.relativeLineTo(h, 0);
       _currentPoint = _currentPoint.translate(h, 0);
     }
 
@@ -206,15 +205,16 @@ class SvgParser {
   ///
   /// vertical-line-to-args: y        (absolute)
   /// vertical-line-to-args: dy       (relative)
-  _parseVerticalLineTo(CommandToken commandToken) {
-    var v = (_scanner.scan()! as ValueToken).value;
-    var x = _currentPoint.dx;
+  void _parseVerticalLineTo(CommandToken commandToken) {
+    // final v = (_scanner.scan()! as ValueToken).value;
+    final v = ((_scanner.scan()! as ValueToken).value ?? 0.0) as double;
+    final x = _currentPoint.dx;
 
     if (commandToken.coordinateType == CoordinateType.absolute) {
-      path.lineTo(x, v as double);
+      path.lineTo(x, v);
       _currentPoint = Offset(x, v);
     } else {
-      path.relativeLineTo(0, v as double);
+      path.relativeLineTo(0, v);
       _currentPoint = _currentPoint.translate(0, v);
     }
 
@@ -226,21 +226,26 @@ class SvgParser {
   ///
   /// curve-to-args: x1,y1 x2,y2 x,y        (absolute)
   /// curve-to-args: dx1,dy1 dx2,dy2 dx,dy  (relative)
-  _parseCurveTo(CommandToken commandToken) {
-    var x1 = (_scanner.scan()! as ValueToken).value;
-    var y1 = (_scanner.scan()! as ValueToken).value;
-    var x2 = (_scanner.scan()! as ValueToken).value;
-    var y2 = (_scanner.scan()! as ValueToken).value;
-    var x = (_scanner.scan()! as ValueToken).value;
-    var y = (_scanner.scan()! as ValueToken).value;
+  void _parseCurveTo(CommandToken commandToken) {
+    final x1 = ((_scanner.scan()! as ValueToken).value ?? 0.0) as double;
+    final y1 = ((_scanner.scan()! as ValueToken).value ?? 0.0) as double;
+    final x2 = ((_scanner.scan()! as ValueToken).value ?? 0.0) as double;
+    final y2 = ((_scanner.scan()! as ValueToken).value ?? 0.0) as double;
+    final x = ((_scanner.scan()! as ValueToken).value ?? 0.0) as double;
+    final y = ((_scanner.scan()! as ValueToken).value ?? 0.0) as double;
+
+    // final x1 = (_scanner.scan()! as ValueToken).value;
+    // final y1 = (_scanner.scan()! as ValueToken).value;
+    // final x2 = (_scanner.scan()! as ValueToken).value;
+    // final y2 = (_scanner.scan()! as ValueToken).value;
+    // final x = (_scanner.scan()! as ValueToken).value;
+    // final y = (_scanner.scan()! as ValueToken).value;
 
     if (commandToken.coordinateType == CoordinateType.absolute) {
-      path.cubicTo(x1 as double, y1 as double, x2 as double, y2 as double,
-          x as double, y as double);
+      path.cubicTo(x1, y1, x2, y2, x, y);
       _currentPoint = Offset(x, y);
     } else {
-      path.relativeCubicTo(x1 as double, y1 as double, x2 as double,
-          y2 as double, x as double, y as double);
+      path.relativeCubicTo(x1, y1, x2, y2, x, y);
       _currentPoint = _currentPoint.translate(x, y);
     }
 
@@ -252,21 +257,23 @@ class SvgParser {
   ///
   /// smooth-curve-to-args: x1,y1 x,y        (absolute)
   /// smooth-curve-to-args: dx1,dy1 dx,dy    (relative)
-  _parseSmoothCurveTo(CommandToken commandToken) {
-    var x2 = (_scanner.scan()! as ValueToken).value;
-    var y2 = (_scanner.scan()! as ValueToken).value;
-    var x = (_scanner.scan()! as ValueToken).value;
-    var y = (_scanner.scan()! as ValueToken).value;
+  void _parseSmoothCurveTo(CommandToken commandToken) {
+    final x2 = ((_scanner.scan()! as ValueToken).value ?? 0.0) as double;
+    final y2 = ((_scanner.scan()! as ValueToken).value ?? 0.0) as double;
+    final x = ((_scanner.scan()! as ValueToken).value ?? 0.0) as double;
+    final y = ((_scanner.scan()! as ValueToken).value ?? 0.0) as double;
+    // final x2 = (_scanner.scan()! as ValueToken).value;
+    // final y2 = (_scanner.scan()! as ValueToken).value;
+    // final x = (_scanner.scan()! as ValueToken).value;
+    // final y = (_scanner.scan()! as ValueToken).value;
     // Calculate the first control point
-    var cp = _calculateCubicControlPoint();
+    final cp = _calculateCubicControlPoint();
 
     if (commandToken.coordinateType == CoordinateType.absolute) {
-      path.cubicTo(
-          cp.dx, cp.dy, x2 as double, y2 as double, x as double, y as double);
+      path.cubicTo(cp.dx, cp.dy, x2, y2, x, y);
       _currentPoint = Offset(x, y);
     } else {
-      path.cubicTo(cp.dx - _currentPoint.dx, cp.dy - _currentPoint.dy,
-          x2 as double, y2 as double, x as double, y as double);
+      path.cubicTo(cp.dx - _currentPoint.dx, cp.dy - _currentPoint.dy, x2, y2, x, y);
       _currentPoint = _currentPoint.translate(x, y);
     }
 
@@ -279,19 +286,17 @@ class SvgParser {
   ///
   /// quadratic-curve-to-args: x1,y1 x,y        (absolute)
   /// quadratic-curve-to-args: dx1,dy1 dx,dy    (relative)
-  _parseQuadraticBezierCurveTo(CommandToken commandToken) {
-    var x1 = (_scanner.scan()! as ValueToken).value;
-    var y1 = (_scanner.scan()! as ValueToken).value;
-    var x = (_scanner.scan()! as ValueToken).value;
-    var y = (_scanner.scan()! as ValueToken).value;
+  void _parseQuadraticBezierCurveTo(CommandToken commandToken) {
+    final x1 = ((_scanner.scan()! as ValueToken).value ?? 0.0) as double;
+    final y1 = ((_scanner.scan()! as ValueToken).value ?? 0.0) as double;
+    final x = ((_scanner.scan()! as ValueToken).value ?? 0.0) as double;
+    final y = ((_scanner.scan()! as ValueToken).value ?? 0.0) as double;
 
     if (commandToken.coordinateType == CoordinateType.absolute) {
-      path.quadraticBezierTo(
-          x1 as double, y1 as double, x as double, y as double);
+      path.quadraticBezierTo(x1, y1, x, y);
       _currentPoint = Offset(x, y);
     } else {
-      path.relativeQuadraticBezierTo(
-          x1 as double, y1 as double, x as double, y as double);
+      path.relativeQuadraticBezierTo(x1, y1, x, y);
       _currentPoint = _currentPoint.translate(x, y);
     }
 
@@ -303,18 +308,17 @@ class SvgParser {
   ///
   /// smooth-quadratic-curve-to-args: x,y         (absolute)
   /// smooth-quadratic-curve-to-args: dx,dy       (relative)
-  _parseSmoothQuadraticBezierCurveTo(CommandToken commandToken) {
-    var x = (_scanner.scan()! as ValueToken).value;
-    var y = (_scanner.scan()! as ValueToken).value;
+  void _parseSmoothQuadraticBezierCurveTo(CommandToken commandToken) {
+    final x = ((_scanner.scan()! as ValueToken).value ?? 0.0) as double;
+    final y = ((_scanner.scan()! as ValueToken).value ?? 0.0) as double;
     // Calculate the control point
-    var cp = _calculateQuadraticControlPoint();
+    final cp = _calculateQuadraticControlPoint();
 
     if (commandToken.coordinateType == CoordinateType.absolute) {
-      path.quadraticBezierTo(cp.dx, cp.dy, x as double, y as double);
+      path.quadraticBezierTo(cp.dx, cp.dy, x, y);
       _currentPoint = Offset(x, y);
     } else {
-      path.relativeQuadraticBezierTo(cp.dx - _currentPoint.dx,
-          cp.dy - _currentPoint.dy, x as double, y as double);
+      path.relativeQuadraticBezierTo(cp.dx - _currentPoint.dx, cp.dy - _currentPoint.dy, x, y);
       _currentPoint = _currentPoint.translate(x, y);
     }
 
@@ -326,28 +330,26 @@ class SvgParser {
   ///
   /// smooth-curve-to-args: rx ry x-axis-rotation large-arc-flag sweep-flag x y     (absolute)
   /// smooth-curve-to-args: rx ry x-axis-rotation large-arc-flag sweep-flag dx dy   (relative)
-  _parseEllipticalArcTo(CommandToken commandToken) {
-    var rx = (_scanner.scan()! as ValueToken).value;
-    var ry = (_scanner.scan()! as ValueToken).value;
-    var theta = (_scanner.scan()! as ValueToken).value;
-    var fa = (_scanner.scan()! as ValueToken).value == 1;
-    var fb = (_scanner.scan()! as ValueToken).value == 1;
-    var x = (_scanner.scan()! as ValueToken).value;
-    var y = (_scanner.scan()! as ValueToken).value;
+  void _parseEllipticalArcTo(CommandToken commandToken) {
+    final rx = ((_scanner.scan()! as ValueToken).value ?? 0.0) as double;
+    final ry = ((_scanner.scan()! as ValueToken).value ?? 0.0) as double;
+    final theta = ((_scanner.scan()! as ValueToken).value ?? 0.0) as double;
+    final fa = (_scanner.scan()! as ValueToken).value == 1;
+    final fb = (_scanner.scan()! as ValueToken).value == 1;
+    final x = ((_scanner.scan()! as ValueToken).value ?? 0.0) as double;
+    final y = ((_scanner.scan()! as ValueToken).value ?? 0.0) as double;
 
     if (commandToken.coordinateType == CoordinateType.absolute) {
-      path.arcToPoint(Offset(x as double, y as double),
-          radius: Radius.elliptical(rx as double, ry as double),
-          rotation: theta as double,
-          largeArc: fa,
-          clockwise: fb);
+      path.arcToPoint(Offset(x, y), radius: Radius.elliptical(rx, ry), rotation: theta, largeArc: fa, clockwise: fb);
       _currentPoint = Offset(x, y);
     } else {
-      path.relativeArcToPoint(Offset(x as double, y as double),
-          radius: Radius.elliptical(rx as double, ry as double),
-          rotation: theta as double,
-          largeArc: fa,
-          clockwise: fb);
+      path.relativeArcToPoint(
+        Offset(x, y),
+        radius: Radius.elliptical(rx, ry),
+        rotation: theta,
+        largeArc: fa,
+        clockwise: fb,
+      );
       _currentPoint = _currentPoint.translate(x, y);
     }
 
@@ -359,15 +361,13 @@ class SvgParser {
   Offset _calculateCubicControlPoint() {
     if (_lastCommand.type == TokenType.curveTo) {
       if (_lastCommand.coordinateType == CoordinateType.absolute) {
-        return _currentPoint +
-            (_currentPoint - Offset(_lastCommandArgs[2], _lastCommandArgs[3]));
+        return _currentPoint + (_currentPoint - Offset(_lastCommandArgs[2], _lastCommandArgs[3]));
       } else {
         return _currentPoint - Offset(_lastCommandArgs[2], _lastCommandArgs[3]);
       }
     } else if (_lastCommand.type == TokenType.smoothCurveTo) {
       if (_lastCommand.coordinateType == CoordinateType.absolute) {
-        return _currentPoint +
-            (_currentPoint - Offset(_lastCommandArgs[0], _lastCommandArgs[1]));
+        return _currentPoint + (_currentPoint - Offset(_lastCommandArgs[0], _lastCommandArgs[1]));
       } else {
         return _currentPoint - Offset(_lastCommandArgs[0], _lastCommandArgs[1]);
       }
@@ -380,15 +380,13 @@ class SvgParser {
   Offset _calculateQuadraticControlPoint() {
     if (_lastCommand.type == TokenType.quadraticBezierCurveTo) {
       if (_lastCommand.coordinateType == CoordinateType.absolute) {
-        return _currentPoint +
-            (_currentPoint - Offset(_lastCommandArgs[0], _lastCommandArgs[1]));
+        return _currentPoint + (_currentPoint - Offset(_lastCommandArgs[0], _lastCommandArgs[1]));
       } else {
         return _currentPoint - Offset(_lastCommandArgs[1], _lastCommandArgs[0]);
       }
     } else if (_lastCommand.type == TokenType.smoothQuadraticBezierCurveTo) {
       if (_lastCommand.coordinateType == CoordinateType.absolute) {
-        return _currentPoint +
-            (_currentPoint - Offset(_lastCommandArgs[0], _lastCommandArgs[1]));
+        return _currentPoint + (_currentPoint - Offset(_lastCommandArgs[0], _lastCommandArgs[1]));
       } else {
         return _currentPoint - Offset(_lastCommandArgs[0], _lastCommandArgs[1]);
       }
@@ -441,11 +439,10 @@ class Scanner {
 
   /// The [RegExp] pattern to match a valid non-negative float value. Allowed float
   /// values include starting with decimal (.3) and exponent notation (1.3e+4).
-  static final nonNegativeFloatPattern =
-      RegExp(r'[+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?');
+  static final nonNegativeFloatPattern = RegExp(r'[+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?');
 
   /// The [RegExp] pattern to match a boolean flag (`1` or `0`).
-  static final flagPattern = RegExp(r'(0|1)');
+  static final flagPattern = RegExp('(0|1)');
 
   /// Queue of tokens generated to be returned.
   final _tokens = Queue<Token>();
@@ -473,18 +470,16 @@ class Scanner {
 
   /// returns the [CoordinateType] based on the case of a character
   CoordinateType _coordinateType(char) {
-    return _isLowerChar(char)
-        ? CoordinateType.relative
-        : CoordinateType.absolute;
+    return _isLowerChar(char) ? CoordinateType.relative : CoordinateType.absolute;
   }
 
   bool _isWhitespaceAt(int offset) {
-    var char = _scanner.peekChar(offset);
+    final char = _scanner.peekChar(offset);
     return char == 0x20 || char == 0x9 || char == 0xd || char == 0xa;
   }
 
   bool _isCommandAt(int offset) {
-    var char = _scanner.peekChar();
+    final char = _scanner.peekChar();
     return [
       LETTER_A,
       LETTER_a,
@@ -509,8 +504,8 @@ class Scanner {
     ].contains(char);
   }
 
-  bool _isLowerChar(char) {
-    return (LETTER_a <= char && char <= LETTER_z);
+  bool _isLowerChar(int char) {
+    return LETTER_a <= char && char <= LETTER_z;
   }
 
   /// Creates a [Scanner] that scans [source].
@@ -533,7 +528,7 @@ class Scanner {
   }
 
   /// Populates [_tokens] by fetching more tokens.
-  _fetchNextToken() {
+  void _fetchNextToken() {
     if (!_streamStartProduced) {
       _fetchStreamStart();
       return;
@@ -555,9 +550,9 @@ class Scanner {
   }
 
   /// Fetches a [CommandToken] and the required arguments' [ValueToken]s.
-  _fetchCommand() {
-    var coordinateType = _coordinateType(_scanner.peekChar());
-    var tokenType = _scanCommand();
+  void _fetchCommand() {
+    final coordinateType = _coordinateType(_scanner.peekChar());
+    final tokenType = _scanCommand();
 
     _tokens.add(CommandToken(tokenType, coordinateType));
 
@@ -583,12 +578,20 @@ class Scanner {
         return;
       case TokenType.closePath:
         return;
+      case TokenType.value:
+        break;
+      case TokenType.flag:
+        break;
+      case TokenType.streamStart:
+        break;
+      case TokenType.streamEnd:
+        break;
     }
   }
 
   /// Consumes whitespaces and commas until the next token or
   /// the end of source is reached.
-  _scanToNextToken() {
+  void _scanToNextToken() {
     while (!isDone && (_isWhitespace || _isSeparator)) {
       _scanner.readChar();
     }
@@ -596,26 +599,26 @@ class Scanner {
 
   /// Consumes all the whitespace till a non-whitespace character occurs
   /// or till the end of the source.
-  _skipWhitespace() {
+  void _skipWhitespace() {
     while (!isDone && _isWhitespace) {
       _scanner.readChar();
     }
   }
 
   /// Fetches a stream start token.
-  _fetchStreamStart() {
-    _tokens.add(Token(TokenType.streamStart));
+  void _fetchStreamStart() {
+    _tokens.add(const Token(TokenType.streamStart));
     _streamStartProduced = true;
   }
 
   /// Fetches a stream end token.
-  _fetchStreamEnd() {
-    _tokens.add(Token(TokenType.streamEnd));
+  void _fetchStreamEnd() {
+    _tokens.add(const Token(TokenType.streamEnd));
     _streamEndProduced = true;
   }
 
   /// Fetches a comma but raises an error when a second comma is found.
-  _fetchSeparator() {
+  void _fetchSeparator() {
     _skipWhitespace();
     if (_scanner.scanChar(COMMA)) {
       _skipWhitespace();
@@ -628,22 +631,21 @@ class Scanner {
   }
 
   /// Fetch the next comma.
-  _fetchSingleSeparator() {
+  void _fetchSingleSeparator() {
     _skipWhitespace();
     _scanner.scanChar(COMMA);
   }
 
   /// Fetch a float value.
-  _fetchFloatValue() =>
-      _tokens.add(ValueToken(TokenType.value, _scanFloatValue()));
+  void _fetchFloatValue() => _tokens.add(ValueToken(TokenType.value, _scanFloatValue()));
 
   /// Fetch a non-negative float value.
-  _fetchNonNegativeFloatValue() {
+  void _fetchNonNegativeFloatValue() {
     _tokens.add(ValueToken(TokenType.value, _scanNonNegativeFloatValue()));
   }
 
   /// Fetch a boolean (1 | 0) flag.
-  _fetchFlag() => _tokens.add(ValueToken(TokenType.flag, _scanFlag()));
+  void _fetchFlag() => _tokens.add(ValueToken(TokenType.flag, _scanFlag()));
 
   /// Fetch Parameters for ellipticalArcTo command.
   ///
@@ -652,7 +654,7 @@ class Scanner {
   ///   elliptical-arc-argument:
   ///     nonnegative-number comma-wsp? nonnegative-number comma-wsp?
   ///       number comma-wsp flag comma-wsp? flag comma-wsp? coordinate-pair
-  _fetchArcCommandParams() {
+  void _fetchArcCommandParams() {
     do {
       _skipWhitespace();
       _fetchNonNegativeFloatValue();
@@ -672,10 +674,10 @@ class Scanner {
   /// Fetch coordinate Pairs for moveTo, LineTo, smoothQuadraticBezierCurveTo commands.
   ///
   /// Production for ellipticalArcTo Arguments:
-  ///   lineto-argument-sequence:
+  ///   lineno-argument-sequence:
   ///    coordinate-pair
-  ///    | coordinate-pair comma-wsp? lineto-argument-sequence
-  _fetchCoordinatePair() {
+  ///    | coordinate-pair comma-wsp? lineno-argument-sequence
+  void _fetchCoordinatePair() {
     do {
       _skipWhitespace();
       _fetchSingleCoordinate();
@@ -688,10 +690,10 @@ class Scanner {
   /// Fetch Single coordinates for horizontalMoveTo, verticalMoveTo commands.
   ///
   /// Production for ellipticalArcTo Arguments:
-  ///   horizontal-lineto-argument-sequence:
+  ///   horizontal-lineno-argument-sequence:
   ///    coordinate
-  ///    | coordinate comma-wsp? horizontal-lineto-argument-sequence
-  _fetchCoordinate() {
+  ///    | coordinate comma-wsp? horizontal-lineno-argument-sequence
+  void _fetchCoordinate() {
     do {
       _fetchSingleCoordinate();
       _fetchSingleSeparator();
@@ -699,14 +701,14 @@ class Scanner {
   }
 
   /// Fetch a single float value
-  _fetchSingleCoordinate() {
+  void _fetchSingleCoordinate() {
     _skipWhitespace();
     _fetchFloatValue();
     _skipWhitespace();
   }
 
   /// Fetch a single coordinate pair
-  _fetchSingleCoordinatePair() {
+  void _fetchSingleCoordinatePair() {
     _skipWhitespace();
     _fetchSingleCoordinate();
     _fetchSeparator();
@@ -716,7 +718,7 @@ class Scanner {
   /// fetches Multiple coordinate Pairs.
   ///
   /// Used to fetch Arguments for curveTo, smoothCurveTo, quadraticBezierCurveTo commands.
-  _fetchMultipleCoordinatePair(int count) {
+  void _fetchMultipleCoordinatePair(int count) {
     do {
       for (var i = 1; i <= count; i++) {
         _skipWhitespace();
@@ -729,8 +731,8 @@ class Scanner {
   }
 
   /// scans the source and generates a [CommandToken].
-  _scanCommand() {
-    var char = _scanner.readChar();
+  TokenType _scanCommand() {
+    final char = _scanner.readChar();
     if (char == LETTER_A || char == LETTER_a) return TokenType.ellipticalArcTo;
     if (char == LETTER_C || char == LETTER_c) return TokenType.curveTo;
     if (char == LETTER_H || char == LETTER_h) return TokenType.horizontalLineTo;
@@ -745,6 +747,7 @@ class Scanner {
     }
     if (char == LETTER_V || char == LETTER_v) return TokenType.verticalLineTo;
     if (char == LETTER_Z || char == LETTER_z) return TokenType.closePath;
+    return TokenType.closePath;
   }
 
   /// scans the source and generates a [ValueToken].
@@ -770,32 +773,33 @@ class Scanner {
   }
 
   /// scans the source and generates a [ValueToken] having [TokenType.flag].
-  _scanFlag() {
+  int? _scanFlag() {
     if (_scanner.scan(flagPattern)) {
       return int.parse(_scanner.lastMatch!.group(0)!);
     } else {
       _expectedZeroOneValue();
     }
+    return null;
   }
 
   /// Raise an error for a unexpected character.
-  _invalidCharacter([int length = 0]) {
+  void _invalidCharacter([int length = 0]) {
     _scanner.error('Unexpected character.', length: length);
   }
 
   /// Raise an error when a float value is not found
-  _expectedFloatValue() {
-    _scanner.error("Expected a float Value.");
+  void _expectedFloatValue() {
+    _scanner.error('Expected a float Value.');
   }
 
   /// Raise an error when a non-negative float value is not found
-  _expectedNonNegativeFloatValue() {
-    _scanner.error("Expected a non-negative float Value.");
+  void _expectedNonNegativeFloatValue() {
+    _scanner.error('Expected a non-negative float Value.');
   }
 
   /// Raise an error when a boolean(1 | 0) is not found.
-  _expectedZeroOneValue() {
-    _scanner.error("Expected a 0 or 1.");
+  void _expectedZeroOneValue() {
+    _scanner.error('Expected a 0 or 1.');
   }
 }
 
@@ -803,7 +807,7 @@ class Scanner {
 class Token {
   final TokenType type;
 
-  Token(this.type);
+  const Token(this.type);
 
   @override
   String toString() {
@@ -811,7 +815,7 @@ class Token {
   }
 
   @override
-  bool operator ==(other) {
+  bool operator ==(Object other) {
     return (other is Token) && type == other.type;
   }
 
@@ -825,9 +829,9 @@ class CommandToken implements Token {
   final TokenType type;
 
   /// Type of coordinates to use for the command.
-  CoordinateType coordinateType;
+  final CoordinateType coordinateType;
 
-  CommandToken(this.type, [this.coordinateType = CoordinateType.absolute]);
+  const CommandToken(this.type, [this.coordinateType = CoordinateType.absolute]);
 
   @override
   String toString() {
@@ -835,7 +839,7 @@ class CommandToken implements Token {
   }
 
   @override
-  bool operator ==(other) {
+  bool operator ==(Object other) {
     if (other is CommandToken) {
       return type == other.type && coordinateType == other.coordinateType;
     }
@@ -862,7 +866,7 @@ class ValueToken implements Token {
   }
 
   @override
-  bool operator ==(other) {
+  bool operator ==(Object other) {
     if (other is ValueToken) {
       return type == other.type && value == other.value;
     }

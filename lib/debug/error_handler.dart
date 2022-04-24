@@ -14,7 +14,7 @@ enum ErrorType {
 
 extension ErrorInfo on ErrorType {
   String get info {
-    String result = '$name : ';
+    var result = '$name : ';
     switch (this) {
       case ErrorType.retryCountReached:
         result += 'function failed after some retry';
@@ -38,8 +38,8 @@ extension ErrorInfo on ErrorType {
         result += 'variable error (type or nullCheck failed)';
         break;
       case ErrorType.algorithmFail:
-        result +=
-            'thrown from algorithm validator possibly one or more validation failed';
+        // ignore: lines_longer_than_80_chars
+        result += 'thrown from algorithm validator possibly one or more validation failed';
         break;
       case ErrorType.strategyFail:
         result += 'strategy failed possibly a rare issue accrued';
@@ -62,10 +62,11 @@ class ErrorHandler implements Exception {
   ErrorHandler(this.message, [this.errorTypes = const {}]);
   @override
   String toString() {
-    StringBuffer result = StringBuffer();
-    result.writeln('');
+    final result = StringBuffer();
+    result.writeln();
     result.writeln(
-        '================================================================');
+      '================================================================',
+    );
     result.writeln('message : $message');
     if (errorTypes.isNotEmpty) {
       result.writeln('<=-Tags-=> ');
@@ -74,7 +75,8 @@ class ErrorHandler implements Exception {
       }
     }
     result.writeln(
-        '================================================================');
+      '================================================================',
+    );
     return result.toString();
   }
 }

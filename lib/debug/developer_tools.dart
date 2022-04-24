@@ -9,18 +9,22 @@ abstract class DevTools {
   ///
   ///Runs given function only in debug mode
   static void runInDebugMode(void Function() task) {
-    assert(() {
-      task();
-      return true;
-    }());
+    assert(
+      () {
+        task();
+        return true;
+      }(),
+    );
   }
 }
 
-extension DebugMode on Function {
+extension DebugMode on void Function() {
   void runInDebugMode() {
-    assert(() {
-      this();
-      return true;
-    }());
+    assert(
+      () {
+        this();
+        return true;
+      }(),
+    );
   }
 }

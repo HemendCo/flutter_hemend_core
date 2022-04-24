@@ -22,8 +22,10 @@ class DebugViewBuilder extends StatefulWidget {
   final Color segmentListColor;
   final Color eachSegmentColor;
   final List<DebugSegments> segments;
-  final Widget Function(BuildContext context, List<dynamic> segmentsResults)
-      builder;
+  final Widget Function(
+    BuildContext context,
+    List<dynamic> segmentsResults,
+  ) builder;
   @override
   _DebugViewBuilderState createState() => _DebugViewBuilderState();
 }
@@ -58,29 +60,34 @@ class _DebugViewBuilderState extends State<DebugViewBuilder> {
             color: widget.segmentListColor,
             height: widget.segmentsListHeight,
             child: ListView.separated(
-              separatorBuilder: (context, index) =>
-                  Container(height: 5, color: Colors.black45),
+              separatorBuilder: (context, index) => Container(
+                height: 5,
+                color: Colors.black45,
+              ),
               itemBuilder: (_, index) {
                 switch (widget.segments[index]) {
                   case DebugSegments.slider:
                     return DecoratedBox(
                       decoration: BoxDecoration(color: widget.eachSegmentColor),
                       child: Slider(
-                          value: segmentValues[index],
-                          onChanged: (value) => setState(() {
-                                segmentValues[index] = value;
-                              })),
+                        value: segmentValues[index],
+                        onChanged: (value) => setState(() {
+                          segmentValues[index] = value;
+                        }),
+                      ),
                     );
                   case DebugSegments.textInput:
                     return SizedBox(
                       width: widget.width,
                       child: DecoratedBox(
-                        decoration:
-                            BoxDecoration(color: widget.eachSegmentColor),
+                        decoration: BoxDecoration(
+                          color: widget.eachSegmentColor,
+                        ),
                         child: TextField(
-                            onChanged: (value) => setState(() {
-                                  segmentValues[index] = value;
-                                })),
+                          onChanged: (value) => setState(() {
+                            segmentValues[index] = value;
+                          }),
+                        ),
                       ),
                     );
                 }

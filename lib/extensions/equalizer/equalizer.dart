@@ -1,4 +1,5 @@
-/// a mixin that will override the == operator and hashCode to make it easier to handle
+/// a mixin that will override the == operator and hashCode to
+/// make it easier to handle
 mixin EqualizerMixin implements _BaseEqualizer {
   @override
   bool operator ==(Object other) {
@@ -8,11 +9,13 @@ mixin EqualizerMixin implements _BaseEqualizer {
     ///checking if both are the same type
     if (runtimeType != other.runtimeType) return false;
 
-    ///checking if both have same length of check items (actually it cannot be false cause each type may have same type but if used generative list it can handle that)
+    ///checking if both have same length of check items
+    ///(actually it cannot be false cause each type may have same type
+    ///but if used generative list it can handle that)
     if (equalCheckItems.length != other.equalCheckItems.length) return false;
 
     ///checking if both equalCheckItems have identical items
-    for (int index = 0; index < equalCheckItems.length; index++) {
+    for (var index = 0; index < equalCheckItems.length; index++) {
       if (equalCheckItems[index] != other.equalCheckItems[index]) return false;
     }
 
@@ -20,10 +23,11 @@ mixin EqualizerMixin implements _BaseEqualizer {
   }
 
   @override
-  int get hashCode => equalCheckItems.join('').hashCode;
+  int get hashCode => equalCheckItems.join().hashCode;
 
   @override
   String toString() {
+    // ignore: lines_longer_than_80_chars
     return '\n=================================\n$runtimeType:\n--------------------------\n${equalCheckItems.join('\n--------------------------\n')}\n=================================';
   }
 }

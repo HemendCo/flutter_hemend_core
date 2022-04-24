@@ -6,8 +6,10 @@ abstract class LocalStorageManager {
   //disable ability to create instances of Manager
   LocalStorageManager._();
 
-  static Future<File> write(
-      {required String fileName, List<int> data = const []}) async {
+  static Future<File> write({
+    required String fileName,
+    List<int> data = const [],
+  }) async {
     final fileInstance = await read(fileName);
     final finalFile = await fileInstance.writeAsBytes(data);
     return finalFile;

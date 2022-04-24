@@ -30,9 +30,11 @@ class SocketManager {
     address = value;
   }
 
-  Future<void> waitForResult(String event,
-      {Map<String, dynamic> initialData = const {},
-      required void Function(dynamic) callBack}) async {
+  Future<void> waitForResult(
+    String event, {
+    Map<String, dynamic> initialData = const {},
+    required void Function(dynamic) callBack,
+  }) async {
     _once.addAll({event: callBack});
 
     await Future.doWhile(() async => _once.containsKey(event));
@@ -45,7 +47,8 @@ class SocketManager {
     _socket?.sink.add(json.encode({'event': key, 'data': data}));
   }
 
-  ///After changing address all events on socket will be lost it will revoke all of them
+  ///After changing address all events on socket will be lost
+  ///it will revoke all of them
   void _revokeAllListeners() {
     _socket?.stream.listen(
       (value) => _eventReceived(value, _socket!),
@@ -62,19 +65,20 @@ class SocketManager {
 
   void _eventReceived(String data, WebSocketChannel sender) {
     (onReceived ?? (_) {})(data);
-    dynamic dataValue = jsonDecode(data);
-    String? event = dataValue['event'];
-    dynamic value = dataValue['data'];
+    final Map<String, dynamic> dataValue = jsonDecode(data);
+    final String? event = dataValue['event'];
+    final dynamic value = dataValue['data'];
     if (event != null) {
       _callListenersOn(event, value);
     }
   }
 
   ///Add listener to socket
-  void addListener(
-      {required String event,
-      required String key,
-      required void Function(dynamic) listener}) {
+  void addListener({
+    required String event,
+    required String key,
+    required void Function(dynamic) listener,
+  }) {
     ///If event where new it will be added to socket listeners
     if (!_listeners.keys.contains(event)) {
       _listeners.addAll({
@@ -82,7 +86,8 @@ class SocketManager {
       });
     }
 
-    ///If event was not new and listener key where new it will be added to that events listeners
+    ///If event was not new and listener key where new
+    ///it will be added to that events listeners
     else if (!_listeners[event]!.keys.contains(key)) {
       _listeners[event]!.addAll({key: listener});
     }
@@ -109,7 +114,7 @@ class SocketManager {
 
   ///Remove listener with event and listener key
   bool removeListenerOn(String event, String key) {
-    bool result = false;
+    var result = false;
     if (!_listeners.keys.contains(event)) {
       result = false;
     } else if (!_listeners[event]!.keys.contains(key)) {

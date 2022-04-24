@@ -1,3 +1,5 @@
+// ignore_for_file: comment_references, lines_longer_than_80_chars
+
 import 'dart:async';
 import 'dart:developer' as dev show log, inspect;
 
@@ -36,7 +38,14 @@ extension Debugger on Object {
     StackTrace? stackTrace,
   }) {
     _temp.add(this);
-    dev.log(this.toString(), level: level, name: name, zone: zone, error: error, stackTrace: stackTrace);
+    dev.log(
+      toString(),
+      level: level,
+      name: name,
+      zone: zone,
+      error: error,
+      stackTrace: stackTrace,
+    );
   }
 
   void printToConsole() {
