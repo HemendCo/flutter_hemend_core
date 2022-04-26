@@ -16,7 +16,7 @@ class CrashHandler {
   static const _kModuleName = 'Crashlytix';
   static late CrashHandler _instance;
   static int crashCounter = 0;
-  final Uri _reportUri;
+  final Uri? reportUri;
   final Map<String, String>? _reportHeaders;
   final Map<String, dynamic>? _extraInfo;
   final void Function(Object, StackTrace)? _onCrash;
@@ -27,8 +27,8 @@ class CrashHandler {
     'error': 'have not been initialized',
   };
   bool hasBasicData = false;
-  CrashHandler.register(
-    this._reportUri, {
+  CrashHandler.register({
+    this.reportUri,
     void Function(Object, StackTrace)? onCrash,
     Map<String, String>? reportHeaders,
     Map<String, dynamic>? extraInfo,
@@ -87,31 +87,76 @@ class CrashHandler {
       (_onCrash ?? (_, __) {})(ex, st);
       logCrash(ex, st);
       final crashTime = DateTime.now().millisecondsSinceEpoch;
+      if (reportUri != null) {
+        final params = PostRequestParams(
+          reportUri!,
+          _reportHeaders,
+          {
+            'data': jsonEncode(
+              {
+                'packageInfo': _appInfo,
+                'deviceInfo': _deviceInfo,
+                'errorTime': crashTime,
+                'exception': ex.toString(),
+                'stacktrace': st.toString(),
+                'crashIndex': (crashCounter++).toString(),
+                'extraInfo': _extraInfo ?? 'none',
+                '$_kModuleName Log': await crashlyticsLog(),
+              },
+            )
+          },
+          null,
+        );
+        IsolationCore.createIsolateForSingleTask<void>(
+          task: onlineReport,
+          taskParams: params,
+          debugName: 'crash_report_$crashCounter',
+        );
+      }
 
-      final params = PostRequestParams(
-        _reportUri,
-        _reportHeaders,
-        {
-          'data': jsonEncode(
-            {
-              'packageInfo': _appInfo,
-              'deviceInfo': _deviceInfo,
-              'errorTime': crashTime,
-              'exception': ex.toString(),
-              'stacktrace': st.toString(),
-              'crashIndex': (crashCounter++).toString(),
-              'extraInfo': _extraInfo ?? 'none',
-              '$_kModuleName Log': await crashlyticsLog(),
-            },
-          )
-        },
-        null,
+      return snap.DataSnapHandler<TResult>.error(
+        exception: ex,
+        sender: st,
       );
-      IsolationCore.createIsolateForSingleTask<void>(
-        task: onlineReport,
-        taskParams: params,
-        debugName: 'crash_report_$crashCounter',
-      );
+    }
+  }
+
+  FutureOr<snap.DataSnapHandler<TResult>> tryThis<TResult>(
+    FutureOr<TResult> Function() function,
+  ) async {
+    try {
+      final result = await function();
+      return snap.DataSnapHandler<TResult>.done(data: result);
+    } catch (ex, st) {
+      (_onCrash ?? (_, __) {})(ex, st);
+      logCrash(ex, st);
+      final crashTime = DateTime.now().millisecondsSinceEpoch;
+      if (reportUri != null) {
+        final params = PostRequestParams(
+          reportUri!,
+          _reportHeaders,
+          {
+            'data': jsonEncode(
+              {
+                'packageInfo': _appInfo,
+                'deviceInfo': _deviceInfo,
+                'errorTime': crashTime,
+                'exception': ex.toString(),
+                'stacktrace': st.toString(),
+                'crashIndex': (crashCounter++).toString(),
+                'extraInfo': _extraInfo ?? 'none',
+                '$_kModuleName Log': await crashlyticsLog(),
+              },
+            )
+          },
+          null,
+        );
+        IsolationCore.createIsolateForSingleTask<void>(
+          task: onlineReport,
+          taskParams: params,
+          debugName: 'crash_report_$crashCounter',
+        );
+      }
 
       return snap.DataSnapHandler<TResult>.error(
         exception: ex,

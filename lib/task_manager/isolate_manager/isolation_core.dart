@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:isolate';
 
 import '../../object_controllers/data_snap_handler/data_snap_handler.dart';
@@ -5,7 +6,7 @@ import '../../object_controllers/data_snap_handler/data_snap_handler.dart';
 ///parameters for single task isolate spawn
 class SingleTaskIsolateParams<T> {
   final SendPort sendPort;
-  final Future<T> Function(dynamic) task;
+  final FutureOr<T> Function(dynamic) task;
   final dynamic taskParams;
   SingleTaskIsolateParams({
     required this.sendPort,
@@ -19,8 +20,11 @@ class StreamTaskIsolateParams<T> {
   final SendPort sendPort;
   final Stream<DataSnapHandler<T>> Function(dynamic) task;
   final dynamic taskParams;
-  StreamTaskIsolateParams(
-      {required this.sendPort, required this.task, required this.taskParams});
+  StreamTaskIsolateParams({
+    required this.sendPort,
+    required this.task,
+    required this.taskParams,
+  });
 }
 
 ///isolation core which can spawn single task and stream task
@@ -35,7 +39,7 @@ abstract class IsolationCore {
   ///
   ///return type is a [DataSnapHandler] with only Done or Error states
   static Future<DataSnapHandler<T>> createIsolateForSingleTask<T>({
-    required Future<T> Function(dynamic) task,
+    required FutureOr<T> Function(dynamic) task,
     required dynamic taskParams,
     String debugName = '',
   }) async {
@@ -43,8 +47,8 @@ abstract class IsolationCore {
     final receivePort = ReceivePort('$debugName-Port');
 
     ///mapping information to pass with spawn
-    final isolateParams = SingleTaskIsolateParams<T>(
-        sendPort: receivePort.sendPort, task: task, taskParams: taskParams);
+    final isolateParams =
+        SingleTaskIsolateParams<T>(sendPort: receivePort.sendPort, task: task, taskParams: taskParams);
 
     ///spawning the isolate
     Isolate.spawn<SingleTaskIsolateParams<T>>(_taskRunner, isolateParams,
@@ -54,9 +58,7 @@ abstract class IsolationCore {
       ///awaiting for first result that has ended (Done or Error)
       ///
       ///then because the port will receive dynamic version of result it will cast it back to [DataSnapHandler]
-      return (await receivePort.firstWhere(
-                  (element) => (element as DataSnapHandler).hasEnded)
-              as DataSnapHandler)
+      return (await receivePort.firstWhere((element) => (element as DataSnapHandler).hasEnded) as DataSnapHandler)
           .castTo<T>();
     } catch (exception) {
       ///if there is an exception in the isolate or in casting part this will throw it
@@ -64,8 +66,7 @@ abstract class IsolationCore {
         exception: exception,
         sender: {
           'name': 'Isolate Manager->createIsolateForSingleTask',
-          'possible reasons':
-              'error in Receiving/Casting the DataSnapHandler from isolate',
+          'possible reasons': 'error in Receiving/Casting the DataSnapHandler from isolate',
           'exception': exception,
           'task': task,
           'taskParams': taskParams,
@@ -101,8 +102,7 @@ abstract class IsolationCore {
         snap = message.castTo<T>();
       } else {
         snap = DataSnapHandler<T>.error(
-          exception:
-              Exception('Unexpected message type: ${message.runtimeType}'),
+          exception: Exception('Unexpected message type: ${message.runtimeType}'),
           sender: {
             'name': 'Isolate Manager->createIsolateForStream',
             'reason': 'task should yield only [DataSnapHandler]',
@@ -115,12 +115,11 @@ abstract class IsolationCore {
     });
 
     ///mapping information to pass with spawn
-    final isolateParams = StreamTaskIsolateParams<T>(
-        sendPort: receivePort.sendPort, task: task, taskParams: taskParams);
+    final isolateParams =
+        StreamTaskIsolateParams<T>(sendPort: receivePort.sendPort, task: task, taskParams: taskParams);
 
     ///spawn the isolate main loop
-    Isolate.spawn(_streamTaskRunner, isolateParams,
-        errorsAreFatal: false, debugName: '$debugName-Spawn');
+    Isolate.spawn(_streamTaskRunner, isolateParams, errorsAreFatal: false, debugName: '$debugName-Spawn');
   }
 
   ///main loop of the isolate for single tasks
@@ -129,8 +128,7 @@ abstract class IsolationCore {
     try {
       result = DataSnapHandler.done(data: await params.task(params.taskParams));
     } catch (exception) {
-      result = DataSnapHandler.error(
-          exception: exception, sender: 'Main Loop Of Single Shot Isolate');
+      result = DataSnapHandler.error(exception: exception, sender: 'Main Loop Of Single Shot Isolate');
     } finally {
       ///exiting the isolate after done a single shot
       Isolate.exit(params.sendPort, result);
@@ -138,8 +136,7 @@ abstract class IsolationCore {
   }
 
   ///main loop of the isolate for stream tasks
-  static Future<void> _streamTaskRunner<T>(
-      StreamTaskIsolateParams<T> params) async {
+  static Future<void> _streamTaskRunner<T>(StreamTaskIsolateParams<T> params) async {
     try {
       ///awaiting for each result from the task loop and will exit the isolate on Done or Error
       await for (final response in params.task(params.taskParams)) {
@@ -158,9 +155,7 @@ abstract class IsolationCore {
       }
     } catch (exception) {
       Isolate.exit(
-          params.sendPort,
-          DataSnapHandler<T>.error(
-              exception: exception, sender: 'Main Loop Of Stream Isolate'));
+          params.sendPort, DataSnapHandler<T>.error(exception: exception, sender: 'Main Loop Of Stream Isolate'));
     }
   }
 }

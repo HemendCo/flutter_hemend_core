@@ -7,8 +7,10 @@ abstract class SingleBindableObject implements BaseBindableObject {
   bool get isBonded => _bondedState != null;
   @override
   void bind(BindableState state) {
-    assert(!isBonded,
-        'Assertion Failed this bindable object is singleBounded and cant have 2 state at same time use MultipleBindableObject instead if needed');
+    assert(
+      !isBonded,
+      'Assertion Failed this bindable object is singleBounded and cant have 2 state at same time use MultipleBindableObject instead if needed',
+    );
     if (isBonded) return;
     _bondedState = state;
     onBind();
@@ -74,8 +76,7 @@ abstract class BaseBindableObject {
   void update();
 }
 
-abstract class BindableState<T extends StatefulWidget,
-        B extends BaseBindableObject> extends SafeState<T>
+abstract class BindableState<T extends StatefulWidget, B extends BaseBindableObject> extends SafeState<T>
     implements _ObjectCarrier<B> {
   bool get isBonded => bondedObject != null;
   void update(B object) => setState(() {});
