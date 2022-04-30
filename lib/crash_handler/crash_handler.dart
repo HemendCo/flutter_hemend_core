@@ -13,23 +13,25 @@ import '../object_controllers/data_snap_handler/data_snap_handler.dart' as snap;
 import '../task_manager/isolate_manager/isolation_core.dart';
 
 class CrashHandler {
-  static CrashHandler get instance => _instance;
-  late SharedPreferences? _bucket;
   static const _kModuleName = 'Crashlytix';
-  static const _bucketPrefix = '$_kModuleName-bucket';
+
+  ///uses singleton pattern first u need to initialize it with registerer
+  ///then you can use report methods
+  ///
+  ///there are 2 way to use crash reporter
+  ///it can handle try catch by itself (it has a [call] method can be used like
+  ///Crashlytics.instance(() => someMethod()))
+  ///
+  ///or you can use [tryThis] like
+  ///Crashlytics.instance.tryThis(() => someMethod()))
+  ///
+  ///alternatively you can pass exception and stackTrace to [recordError] method
+  ///or pass a map to [recordRawMap] to record it
+  ///
+  ///although you can pass [Map<String,dynamic>] with extraInfo parameter to
+  ///[call] [tryThis] or [recordError] methods and attach extra info to report
+  static CrashHandler get instance => _instance;
   static late CrashHandler _instance;
-  static int crashCounter = 0;
-  final Uri? reportUri;
-  final Map<String, String>? _reportHeaders;
-  final Map<String, dynamic>? _extraInfo;
-  final void Function(Object, StackTrace)? _onCrash;
-  Map<String, dynamic> _deviceInfo = <String, dynamic>{
-    'error': 'have not been initialized',
-  };
-  Map<String, dynamic> _appInfo = <String, dynamic>{
-    'error': 'have not been initialized',
-  };
-  bool hasBasicData = false;
   CrashHandler.register({
     this.reportUri,
     void Function(Object, StackTrace)? onCrash,
@@ -44,11 +46,69 @@ class CrashHandler {
       name: _kModuleName,
     );
   }
+
+  ///local bucket information
+  ///will save data with a prefix to avoid collision
+  ///
+  ///if you don't call [activateLocalStorage] it will be disabled by default
+  static const _kBucketPrefix = '$_kModuleName-bucket';
+  SharedPreferences? _bucket;
   Future<void> activateLocalStorage() async {
     _bucket = await SharedPreferences.getInstance();
     _reportBucket();
   }
 
+  Future<void> _reportBucket() async {
+    dev.log(
+      'starting to upload logged data',
+      name: _kModuleName,
+    );
+    final items = _bucket?.getKeys().where(
+          (element) => element.startsWith(_kBucketPrefix),
+        );
+
+    dev.log(
+      'found ${items?.length} items to upload',
+      name: _kModuleName,
+    );
+    if ((items?.isNotEmpty ?? false) == true) {
+      for (final item in items!) {
+        final data = jsonDecode(_bucket?.getString(item) ?? '{}');
+        await recordRawMap(data).then(
+          (value) async =>
+              (await _bucket?.remove(
+                item,
+              )) ??
+              false,
+        );
+      }
+    }
+    dev.log(
+      'done uploading logged data',
+      name: _kModuleName,
+    );
+  }
+
+  bool get hasBucket => _bucket != null;
+
+  ///index of crash in a runtime
+  static int crashCounter = 0;
+
+  ///where to send crash report
+  final Uri? reportUri;
+
+  ///headers of crash report eg. token, ...
+  final Map<String, String>? _reportHeaders;
+
+  ///extra info to attach to every report
+  final Map<String, dynamic>? _extraInfo;
+
+  ///callback to call when crash happens to handle internally
+  final void Function(Object, StackTrace)? _onCrash;
+
+  ///[_deviceInfo] and [_appInfo] grabbed with [gatherBasicData]
+  ///
+  ///if you don't call [gatherBasicData] it will pass an error message
   Future<void> gatherBasicData() async {
     final deviceInfo = DeviceInfoPlugin();
     _deviceInfo = {'error': 'current platform is not supported'};
@@ -65,21 +125,27 @@ class CrashHandler {
       'packageName': packageInfo.packageName,
       'signingKey': packageInfo.buildSignature,
     };
-    hasBasicData = true;
+    _hasBasicData = true;
     dev.log('Basic Data gathered', name: _kModuleName);
   }
 
-  Future<Map<String, dynamic>> crashlyticsLog() async {
-    final result = <String, dynamic>{};
-    result.addAll({'hasBasicData': hasBasicData});
-    return result;
-  }
+  bool _hasBasicData = false;
+  bool get hasBasicData => _hasBasicData;
+  Map<String, dynamic> _deviceInfo = <String, dynamic>{
+    'error': 'have not been initialized',
+  };
+  Map<String, dynamic> _appInfo = <String, dynamic>{
+    'error': 'have not been initialized',
+  };
 
+  ///crashlytix settings map
+  Map<String, dynamic> get crashlytixLog => {
+        'hasBasicData': hasBasicData,
+        'hasABucket': hasBucket,
+      };
+
+  ///report log to console in debug mode
   void logCrash(Object? exception, StackTrace stackTrace) {
-    // final reportData = {
-    //   'exception': exception,
-    //   'stackTrace': stackTrace,
-    // };
     () {
       dev.log(
         'found a crash',
@@ -93,6 +159,12 @@ class CrashHandler {
   }
 
   FutureOr<snap.DataSnapHandler<TResult>> call<TResult>(
+    FutureOr<TResult> Function() function, {
+    Map<String, dynamic> extraInfo = const {},
+  }) =>
+      tryThis(function, extraInfo: extraInfo);
+
+  FutureOr<snap.DataSnapHandler<TResult>> tryThis<TResult>(
     FutureOr<TResult> Function() function, {
     Map<String, dynamic> extraInfo = const {},
   }) async {
@@ -123,7 +195,7 @@ class CrashHandler {
               ...data,
               'crashIndex': (crashCounter++).toString(),
               'extraInfo': _extraInfo ?? 'none',
-              '$_kModuleName Log': await crashlyticsLog(),
+              '$_kModuleName Log': crashlytixLog,
             },
           )
         },
@@ -148,7 +220,7 @@ class CrashHandler {
                   name: _kModuleName,
                 );
                 _bucket?.setString(
-                  '$_bucketPrefix-${logData.hashCode}',
+                  '$_kBucketPrefix-${logData.hashCode}',
                   logData,
                 );
               }
@@ -176,53 +248,7 @@ class CrashHandler {
     });
   }
 
-  Future<void> _reportBucket() async {
-    dev.log(
-      'starting to upload logged data',
-      name: _kModuleName,
-    );
-    final items = _bucket?.getKeys().where(
-          (element) => element.startsWith(_bucketPrefix),
-        );
-
-    dev.log(
-      'found ${items?.length} items to upload',
-      name: _kModuleName,
-    );
-    if ((items?.isNotEmpty ?? false) == true) {
-      for (final item in items!) {
-        final data = jsonDecode(_bucket?.getString(item) ?? '{}');
-        await recordRawMap(data).then(
-          (value) async =>
-              (await _bucket?.remove(
-                item,
-              )) ??
-              false,
-        );
-      }
-    }
-    dev.log(
-      'done uploading logged data',
-      name: _kModuleName,
-    );
-  }
-
-  FutureOr<snap.DataSnapHandler<TResult>> tryThis<TResult>(
-    FutureOr<TResult> Function() function, {
-    Map<String, dynamic> extraInfo = const {},
-  }) async {
-    try {
-      final result = await function();
-      return snap.DataSnapHandler<TResult>.done(data: result);
-    } catch (ex, st) {
-      recordError(ex, st, extraInfo);
-      return snap.DataSnapHandler<TResult>.error(
-        exception: ex,
-        sender: st,
-      );
-    }
-  }
-
+  ///report error to server
   static Future<bool> onlineReport(dynamic input) async {
     final params = input as PostRequestParams;
 
