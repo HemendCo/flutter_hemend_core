@@ -13,7 +13,8 @@ dependencies:
   device_info_plus: ^3.2.3
   package_info_plus: ^1.4.2
   http:
-
+  shared_preferences: ^2.0.13
+  # logging:
   build:
   meta: ^1.7.0
   source_gen:

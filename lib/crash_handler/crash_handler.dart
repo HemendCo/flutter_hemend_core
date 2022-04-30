@@ -2,10 +2,11 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:developer' as dev;
 import 'dart:io';
-
+// import 'package:logging/logging.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:http/http.dart' as http;
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../debug/developer_tools.dart';
 import '../object_controllers/data_snap_handler/data_snap_handler.dart' as snap;
@@ -13,7 +14,9 @@ import '../task_manager/isolate_manager/isolation_core.dart';
 
 class CrashHandler {
   static CrashHandler get instance => _instance;
+  late SharedPreferences? _bucket;
   static const _kModuleName = 'Crashlytix';
+  static const _bucketPrefix = '$_kModuleName-bucket';
   static late CrashHandler _instance;
   static int crashCounter = 0;
   final Uri? reportUri;
@@ -36,8 +39,16 @@ class CrashHandler {
         _onCrash = onCrash,
         _reportHeaders = reportHeaders {
     _instance = this;
-    dev.log('$_kModuleName initialized');
+    dev.log(
+      '$_kModuleName initialized',
+      name: _kModuleName,
+    );
   }
+  Future<void> activateLocalStorage() async {
+    _bucket = await SharedPreferences.getInstance();
+    _reportBucket();
+  }
+
   Future<void> gatherBasicData() async {
     final deviceInfo = DeviceInfoPlugin();
     _deviceInfo = {'error': 'current platform is not supported'};
@@ -65,99 +76,146 @@ class CrashHandler {
   }
 
   void logCrash(Object? exception, StackTrace stackTrace) {
-    final reportData = {
-      'exception': exception,
-      'stackTrace': stackTrace,
-    };
+    // final reportData = {
+    //   'exception': exception,
+    //   'stackTrace': stackTrace,
+    // };
     () {
-      reportData.log(
+      dev.log(
+        'found a crash',
         time: DateTime.now(),
-        error: _kModuleName,
+        level: 1200,
+        stackTrace: stackTrace,
+        error: exception,
+        name: _kModuleName,
       );
     }.runInDebugMode();
   }
 
   FutureOr<snap.DataSnapHandler<TResult>> call<TResult>(
-    FutureOr<TResult> Function() function,
-  ) async {
+    FutureOr<TResult> Function() function, {
+    Map<String, dynamic> extraInfo = const {},
+  }) async {
     try {
       final result = await function();
       return snap.DataSnapHandler<TResult>.done(data: result);
     } catch (ex, st) {
-      (_onCrash ?? (_, __) {})(ex, st);
-      logCrash(ex, st);
-      final crashTime = DateTime.now().millisecondsSinceEpoch;
-      if (reportUri != null) {
-        final params = PostRequestParams(
-          reportUri!,
-          _reportHeaders,
-          {
-            'data': jsonEncode(
-              {
-                'packageInfo': _appInfo,
-                'deviceInfo': _deviceInfo,
-                'errorTime': crashTime,
-                'exception': ex.toString(),
-                'stacktrace': st.toString(),
-                'crashIndex': (crashCounter++).toString(),
-                'extraInfo': _extraInfo ?? 'none',
-                '$_kModuleName Log': await crashlyticsLog(),
-              },
-            )
-          },
-          null,
-        );
-        IsolationCore.createIsolateForSingleTask<void>(
-          task: onlineReport,
-          taskParams: params,
-          debugName: 'crash_report_$crashCounter',
-        );
-      }
-
+      recordError(ex, st, extraInfo);
       return snap.DataSnapHandler<TResult>.error(
         exception: ex,
         sender: st,
       );
     }
+  }
+
+  Future<void> recordRawMap(Map<String, dynamic> data) async {
+    final crashTime = DateTime.now().millisecondsSinceEpoch;
+    if (reportUri != null) {
+      final params = PostRequestParams(
+        reportUri!,
+        _reportHeaders,
+        {
+          'data': jsonEncode(
+            {
+              'packageInfo': _appInfo,
+              'deviceInfo': _deviceInfo,
+              'errorTime': crashTime,
+              ...data,
+              'crashIndex': (crashCounter++).toString(),
+              'extraInfo': _extraInfo ?? 'none',
+              '$_kModuleName Log': await crashlyticsLog(),
+            },
+          )
+        },
+        null,
+      );
+      await IsolationCore.createIsolateForSingleTask<bool>(
+        task: onlineReport,
+        taskParams: params,
+        debugName: 'crash_report_$crashCounter',
+      ).then(
+        (value) {
+          print(value.status);
+
+          value.singleActOnFinished(
+            onDone: (result) {
+              if (result ?? false == true) {
+                _reportBucket();
+              } else {
+                final logData = jsonEncode(data);
+                dev.log(
+                  'cannot upload log data for now it will be placed in ${logData.hashCode}',
+                  name: _kModuleName,
+                );
+                _bucket?.setString(
+                  '$_bucketPrefix-${logData.hashCode}',
+                  logData,
+                );
+              }
+            },
+            onError: (_) {},
+          );
+        },
+      );
+    }
+  }
+
+  ///[Object] ex is the exception
+  ///[StackTrace] st is the stack trace
+  Future<void> recordError(
+    Object ex,
+    StackTrace st, [
+    Map<String, dynamic> extraInfo = const {},
+  ]) async {
+    (_onCrash ?? (_, __) {})(ex, st);
+    logCrash(ex, st);
+    await recordRawMap({
+      'exception': ex.toString(),
+      'stacktrace': st.toString(),
+      'carryInfo': extraInfo,
+    });
+  }
+
+  Future<void> _reportBucket() async {
+    dev.log(
+      'starting to upload logged data',
+      name: _kModuleName,
+    );
+    final items = _bucket?.getKeys().where(
+          (element) => element.startsWith(_bucketPrefix),
+        );
+
+    dev.log(
+      'found ${items?.length} items to upload',
+      name: _kModuleName,
+    );
+    if ((items?.isNotEmpty ?? false) == true) {
+      for (final item in items!) {
+        final data = jsonDecode(_bucket?.getString(item) ?? '{}');
+        await recordRawMap(data).then(
+          (value) async =>
+              (await _bucket?.remove(
+                item,
+              )) ??
+              false,
+        );
+      }
+    }
+    dev.log(
+      'done uploading logged data',
+      name: _kModuleName,
+    );
   }
 
   FutureOr<snap.DataSnapHandler<TResult>> tryThis<TResult>(
-    FutureOr<TResult> Function() function,
-  ) async {
+    FutureOr<TResult> Function() function, {
+    Map<String, dynamic> extraInfo = const {},
+  }) async {
     try {
       final result = await function();
       return snap.DataSnapHandler<TResult>.done(data: result);
     } catch (ex, st) {
-      (_onCrash ?? (_, __) {})(ex, st);
-      logCrash(ex, st);
-      final crashTime = DateTime.now().millisecondsSinceEpoch;
-      if (reportUri != null) {
-        final params = PostRequestParams(
-          reportUri!,
-          _reportHeaders,
-          {
-            'data': jsonEncode(
-              {
-                'packageInfo': _appInfo,
-                'deviceInfo': _deviceInfo,
-                'errorTime': crashTime,
-                'exception': ex.toString(),
-                'stacktrace': st.toString(),
-                'crashIndex': (crashCounter++).toString(),
-                'extraInfo': _extraInfo ?? 'none',
-                '$_kModuleName Log': await crashlyticsLog(),
-              },
-            )
-          },
-          null,
-        );
-        IsolationCore.createIsolateForSingleTask<void>(
-          task: onlineReport,
-          taskParams: params,
-          debugName: 'crash_report_$crashCounter',
-        );
-      }
-
+      recordError(ex, st, extraInfo);
       return snap.DataSnapHandler<TResult>.error(
         exception: ex,
         sender: st,
@@ -165,7 +223,7 @@ class CrashHandler {
     }
   }
 
-  static Future<void> onlineReport(dynamic input) async {
+  static Future<bool> onlineReport(dynamic input) async {
     final params = input as PostRequestParams;
 
     try {
@@ -180,6 +238,7 @@ class CrashHandler {
           name: _kModuleName,
         );
       }.runInDebugMode();
+      return true;
     } catch (e, st) {
       () {
         final error = <String, dynamic>{
@@ -192,6 +251,7 @@ class CrashHandler {
           error: '$_kModuleName Crash',
         );
       }.runInDebugMode();
+      return false;
     }
   }
 }
