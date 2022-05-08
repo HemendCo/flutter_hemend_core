@@ -19,15 +19,11 @@ class CountDownTimer {
     }
   }
 
-  CountDownTimer(Duration duration,
-      {this.onTick, this.ssz = true, this.timerCondition})
-      : _duration = duration;
+  CountDownTimer(Duration duration, {this.onTick, this.ssz = true, this.timerCondition}) : _duration = duration;
 
   String alterIntToStr(int v, bool ssz) {
-    assert(() {
-      return v < 100;
-    }());
-    String result = v.toString();
+    assert(v < 100);
+    var result = v.toString();
     if (v < 10) {
       result = '0$result';
     }
@@ -39,7 +35,7 @@ class CountDownTimer {
 
   @override
   String toString() {
-    String result = '';
+    var result = '';
     if (hours.isNotEmpty) {
       result += '$hours:';
     }
@@ -55,11 +51,7 @@ class CountDownTimer {
 
 class TimerViewMaster extends StatefulWidget {
   TimerViewMaster(
-      {Key? key,
-      DateTime? finalDate,
-      Duration? duration,
-      this.showZeroValues = true,
-      required this.builder})
+      {Key? key, DateTime? finalDate, Duration? duration, this.showZeroValues = true, required this.builder})
       : super(key: key) {
     final fromDate = finalDate != null;
     final fromDuration = duration != null;
@@ -81,11 +73,10 @@ class TimerViewMaster extends StatefulWidget {
 }
 
 class _TimerState extends SafeState<TimerViewMaster> {
-  late final time =
-      CountDownTimer((widget.endTime).difference(DateTime.now()), onTick: () {
+  late final time = CountDownTimer((widget.endTime).difference(DateTime.now()), onTick: () {
     setState(() {});
   })
-        ..startTimer();
+    ..startTimer();
 
   @override
   Widget build(BuildContext context) {

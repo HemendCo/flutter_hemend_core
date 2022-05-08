@@ -1,5 +1,7 @@
 library hemend;
 
+import 'package:flutter/foundation.dart';
+
 export 'package:hemend/debug/logger.dart';
 
 abstract class DevTools {
@@ -9,22 +11,16 @@ abstract class DevTools {
   ///
   ///Runs given function only in debug mode
   static void runInDebugMode(void Function() task) {
-    assert(
-      () {
-        task();
-        return true;
-      }(),
-    );
+    if (kDebugMode) {
+      task();
+    }
   }
 }
 
 extension DebugMode on void Function() {
   void runInDebugMode() {
-    assert(
-      () {
-        this();
-        return true;
-      }(),
-    );
+    if (kDebugMode) {
+      this();
+    }
   }
 }
