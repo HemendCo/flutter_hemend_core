@@ -1,3 +1,5 @@
+// ignore_for_file: lines_longer_than_80_chars
+
 import '../../extensions/equalizer/equalizer.dart';
 
 enum SnapStatus {
@@ -34,7 +36,8 @@ class DataSnapHandler<T> with EqualizerMixin {
         castErrorHandler(data);
       } else {
         throw Exception(
-            "data type is not $C cannot cast ${data.runtimeType} to it");
+          'data type is not $C cannot cast ${data.runtimeType} to it',
+        );
       }
     }
     switch (status) {
@@ -125,8 +128,7 @@ class DataSnapHandler<T> with EqualizerMixin {
   bool get hasEnded => !isLoading;
 
   ///call the parameter with all information [data] [exception] [progress]
-  R runForAll<R>(R Function(T?, Object?, double) worker) =>
-      worker(data, exception, progress);
+  R runForAll<R>(R Function(T?, Object?, double) worker) => worker(data, exception, progress);
 
   ///this method will force you to handle all types of responses
   R call<R>({
@@ -136,10 +138,11 @@ class DataSnapHandler<T> with EqualizerMixin {
     required R Function(T?, double) onDataSnapshot,
   }) =>
       singleAct(
-          onDone: onDone,
-          onError: onError,
-          onProgress: onProgress,
-          onDataSnapshot: onDataSnapshot);
+        onDone: onDone,
+        onError: onError,
+        onProgress: onProgress,
+        onDataSnapshot: onDataSnapshot,
+      );
 
   ///this method will force you to handle all types of responses
   R singleAct<R>({
@@ -150,15 +153,15 @@ class DataSnapHandler<T> with EqualizerMixin {
   }) {
     switch (status) {
       case SnapStatus.done:
-        return onDone(data!);
+        return onDone(data);
       case SnapStatus.error:
-        return onError(exception!);
+        return onError(exception);
       case SnapStatus.progress:
         return onProgress(progress);
       case SnapStatus.progressWithData:
-        return onDataSnapshot(data!, progress);
+        return onDataSnapshot(data, progress);
       case SnapStatus.singleSnap:
-        return onDataSnapshot(data!, progress);
+        return onDataSnapshot(data, progress);
     }
   }
 
@@ -179,6 +182,5 @@ class DataSnapHandler<T> with EqualizerMixin {
   // }
 
   @override
-  List<dynamic> get equalCheckItems =>
-      [data.toString(), exception, sender, progress, status.name];
+  List<dynamic> get equalCheckItems => [data.toString(), exception, sender, progress, status.name];
 }
