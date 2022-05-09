@@ -1,6 +1,8 @@
+// ignore_for_file: lines_longer_than_80_chars, prefer_single_quotes
+
 import 'dart:math';
 
-import 'package:hemend/io/socket/socket_manager.dart';
+import '../../io/socket/socket_manager.dart';
 
 ///**links object to socket**
 ///
@@ -23,8 +25,7 @@ mixin LiveWire implements ILiveWire {
   set event(String event) {
     socketClient.removeListenerOn(_event, _listenerKey);
     _event = event;
-    socketClient.addListener(
-        event: event, key: _listenerKey, listener: updateFromMap);
+    socketClient.addListener(event: event, key: _listenerKey, listener: updateFromMap);
   }
 
   ///Listener key in app side (purpose: add more than one listener to an event without resupplying event which cannot be removed)
@@ -35,32 +36,32 @@ mixin LiveWire implements ILiveWire {
     socketClient.removeListenerOn(_event, _listenerKey);
     final randomValue = Random.secure().nextInt(5555555);
     _listenerKey = "$key$randomValue";
-    socketClient.addListener(
-        event: _event, key: _listenerKey, listener: updateFromMap);
+    socketClient.addListener(event: _event, key: _listenerKey, listener: updateFromMap);
   }
 
   ///Connect object to socket with event name and listener key+random value
   ///
-  ///if you set [invokeAtConnect] false you may need to call [emit] manually
-  void plugItIn(String event, String? key,
-      [Map<String, dynamic>? invokeData = const {}]) {
+  ///if you don't pass [invokeData] you may need to call register [emit] manually
+  @override
+  void plugItIn(String event, String? key, [Map<String, dynamic>? invokeData = const {}]) {
     socketClient.removeListenerOn(_event, _listenerKey);
     _event = event;
     final randomValue = Random.secure().nextInt(5555555);
     _listenerKey = "${key ?? '_'}$randomValue";
-    socketClient.addListener(
-        event: event, key: _listenerKey, listener: updateFromMap);
+    socketClient.addListener(event: event, key: _listenerKey, listener: updateFromMap);
     if (invokeData != null) {
       emit(invokeData);
     }
   }
 
   ///Disconnect object from socket
+  @override
   bool unplug() {
     return socketClient.removeListenerOn(_event, _listenerKey);
   }
 
   ///Sends data into socket with this event
+  @override
   void emit([Map<String, dynamic> data = const {}]) {
     socketClient.emit(_event, data);
   }

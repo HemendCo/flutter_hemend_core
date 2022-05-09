@@ -19,17 +19,17 @@ class BuildWithAnimationOf<T, C> extends AnimatedWidget {
   ///
   /// * [T] value of animation
   ///
-  /// * [Widget] child given in parametrs to avoid performance issue
+  /// * [Widget] child given in parameters to avoid performance issue
   final Widget Function(BuildContext, T, C?) builder;
 
   ///Alternative of animation builder
-  const BuildWithAnimationOf(
-      {Key? key,
-      required this.animation,
-      required this.builder,
-      C? data,
-      this.child})
-      : data = data ?? child,
+  const BuildWithAnimationOf({
+    Key? key,
+    required this.animation,
+    required this.builder,
+    C? data,
+    this.child,
+  })  : data = data ?? child,
         super(key: key, listenable: animation);
 
   @override

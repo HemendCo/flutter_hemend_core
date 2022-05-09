@@ -1,3 +1,5 @@
+// ignore_for_file: lines_longer_than_80_chars
+
 import 'dart:async';
 import 'dart:isolate';
 
@@ -47,19 +49,28 @@ abstract class IsolationCore {
     final receivePort = ReceivePort('$debugName-Port');
 
     ///mapping information to pass with spawn
-    final isolateParams =
-        SingleTaskIsolateParams<T>(sendPort: receivePort.sendPort, task: task, taskParams: taskParams);
+    final isolateParams = SingleTaskIsolateParams<T>(
+      sendPort: receivePort.sendPort,
+      task: task,
+      taskParams: taskParams,
+    );
 
     ///spawning the isolate
-    Isolate.spawn<SingleTaskIsolateParams<T>>(_taskRunner, isolateParams,
-        errorsAreFatal: false, debugName: '$debugName-Spawn');
+    Isolate.spawn<SingleTaskIsolateParams<T>>(
+      _taskRunner,
+      isolateParams,
+      errorsAreFatal: false,
+      debugName: '$debugName-Spawn',
+    );
 
     try {
       ///awaiting for first result that has ended (Done or Error)
       ///
       ///then because the port will receive dynamic version of result it will cast it back to [DataSnapHandler]
-      return (await receivePort.firstWhere((element) => (element as DataSnapHandler).hasEnded) as DataSnapHandler)
-          .castTo<T>();
+      final finishedTasks = await receivePort.firstWhere(
+        (element) => (element as DataSnapHandler).hasEnded,
+      ) as DataSnapHandler;
+      return finishedTasks.castTo<T>();
     } catch (exception) {
       ///if there is an exception in the isolate or in casting part this will throw it
       return DataSnapHandler<T>.error(
@@ -102,7 +113,9 @@ abstract class IsolationCore {
         snap = message.castTo<T>();
       } else {
         snap = DataSnapHandler<T>.error(
-          exception: Exception('Unexpected message type: ${message.runtimeType}'),
+          exception: Exception(
+            'Unexpected message type: ${message.runtimeType}',
+          ),
           sender: {
             'name': 'Isolate Manager->createIsolateForStream',
             'reason': 'task should yield only [DataSnapHandler]',
@@ -115,11 +128,19 @@ abstract class IsolationCore {
     });
 
     ///mapping information to pass with spawn
-    final isolateParams =
-        StreamTaskIsolateParams<T>(sendPort: receivePort.sendPort, task: task, taskParams: taskParams);
+    final isolateParams = StreamTaskIsolateParams<T>(
+      sendPort: receivePort.sendPort,
+      task: task,
+      taskParams: taskParams,
+    );
 
     ///spawn the isolate main loop
-    Isolate.spawn(_streamTaskRunner, isolateParams, errorsAreFatal: false, debugName: '$debugName-Spawn');
+    Isolate.spawn(
+      _streamTaskRunner,
+      isolateParams,
+      errorsAreFatal: false,
+      debugName: '$debugName-Spawn',
+    );
   }
 
   ///main loop of the isolate for single tasks
@@ -128,7 +149,10 @@ abstract class IsolationCore {
     try {
       result = DataSnapHandler.done(data: await params.task(params.taskParams));
     } catch (exception) {
-      result = DataSnapHandler.error(exception: exception, sender: 'Main Loop Of Single Shot Isolate');
+      result = DataSnapHandler.error(
+        exception: exception,
+        sender: 'Main Loop Of Single Shot Isolate',
+      );
     } finally {
       ///exiting the isolate after done a single shot
       Isolate.exit(params.sendPort, result);
@@ -136,7 +160,9 @@ abstract class IsolationCore {
   }
 
   ///main loop of the isolate for stream tasks
-  static Future<void> _streamTaskRunner<T>(StreamTaskIsolateParams<T> params) async {
+  static Future<void> _streamTaskRunner<T>(
+    StreamTaskIsolateParams<T> params,
+  ) async {
     try {
       ///awaiting for each result from the task loop and will exit the isolate on Done or Error
       await for (final response in params.task(params.taskParams)) {
@@ -155,7 +181,12 @@ abstract class IsolationCore {
       }
     } catch (exception) {
       Isolate.exit(
-          params.sendPort, DataSnapHandler<T>.error(exception: exception, sender: 'Main Loop Of Stream Isolate'));
+        params.sendPort,
+        DataSnapHandler<T>.error(
+          exception: exception,
+          sender: 'Main Loop Of Stream Isolate',
+        ),
+      );
     }
   }
 }

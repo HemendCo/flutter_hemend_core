@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:hemend/ui_related/state_extensions/safe_state.dart';
+import '../state_extensions/safe_state.dart';
 
 class CountDownTimer {
   String get hours => alterIntToStr(_duration.inHours % 24, ssz);
   String get minutes => alterIntToStr(_duration.inMinutes % 60, ssz);
   String get seconds => alterIntToStr(_duration.inSeconds % 60, true);
-  bool get isNegetive => _duration.isNegative;
+  bool get isNegative => _duration.isNegative;
   final bool ssz;
   Duration _duration;
   final bool Function(Duration)? timerCondition;
@@ -13,13 +13,18 @@ class CountDownTimer {
   final void Function()? onTick;
   Future<void> startTimer() async {
     while (!_duration.isNegative) {
-      _duration = Duration(seconds: (_duration.inSeconds - 1));
+      _duration = Duration(seconds: _duration.inSeconds - 1);
       (onTick ?? () {})();
       await Future.delayed(const Duration(seconds: 1));
     }
   }
 
-  CountDownTimer(Duration duration, {this.onTick, this.ssz = true, this.timerCondition}) : _duration = duration;
+  CountDownTimer(
+    Duration duration, {
+    this.onTick,
+    this.ssz = true,
+    this.timerCondition,
+  }) : _duration = duration;
 
   String alterIntToStr(int v, bool ssz) {
     assert(v < 100);
@@ -45,20 +50,26 @@ class CountDownTimer {
 
     result += seconds;
 
-    return (isNegetive ? '-' : '') + result;
+    return (isNegative ? '-' : '') + result;
   }
 }
 
 class TimerViewMaster extends StatefulWidget {
-  TimerViewMaster(
-      {Key? key, DateTime? finalDate, Duration? duration, this.showZeroValues = true, required this.builder})
-      : super(key: key) {
+  TimerViewMaster({
+    Key? key,
+    DateTime? finalDate,
+    Duration? duration,
+    this.showZeroValues = true,
+    required this.builder,
+  }) : super(key: key) {
     final fromDate = finalDate != null;
     final fromDuration = duration != null;
 
-    assert(() {
-      return fromDate != fromDuration;
-    }());
+    assert(
+      () {
+        return fromDate != fromDuration;
+      }(),
+    );
     if (fromDate) {
       endTime = finalDate;
     } else {
@@ -73,10 +84,12 @@ class TimerViewMaster extends StatefulWidget {
 }
 
 class _TimerState extends SafeState<TimerViewMaster> {
-  late final time = CountDownTimer((widget.endTime).difference(DateTime.now()), onTick: () {
-    setState(() {});
-  })
-    ..startTimer();
+  late final time = CountDownTimer(
+    (widget.endTime).difference(DateTime.now()),
+    onTick: () {
+      setState(() {});
+    },
+  )..startTimer();
 
   @override
   Widget build(BuildContext context) {
