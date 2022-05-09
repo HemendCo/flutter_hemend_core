@@ -1,3 +1,5 @@
+import 'dart:async' show FutureOr;
+
 import '../../debug/error_handler.dart';
 import 'command_query_params.dart';
 
@@ -5,8 +7,17 @@ class CommandModel {
   final String command;
   final List<String> forcedParams;
   final List<String> optionalParams;
-  final String? Function(Parameters, Map<String, dynamic> results)? optionalAssertion;
-  final dynamic Function(Parameters, Map<String, dynamic> results) commandRunner;
+
+  final String? Function(
+    Parameters,
+    Map<String, dynamic> results,
+  )? optionalAssertion;
+
+  final FutureOr<dynamic> Function(
+    Parameters,
+    Map<String, dynamic> results,
+  ) commandRunner;
+
   const CommandModel({
     required this.command,
     required this.forcedParams,
@@ -15,19 +26,26 @@ class CommandModel {
     this.optionalAssertion,
   });
 
-  T call<T>(Parameters params, Map<String, dynamic> results) {
-    final optionalAssertResult = (optionalAssertion ?? (_, __) => null)(params, results);
+  FutureOr<T> call<T>(Parameters params, Map<String, dynamic> results) async {
+    final optionalAssertResult = (optionalAssertion ?? (_, __) => null)(
+      params,
+      results,
+    );
     final paramsChk = extraAssertion(params);
     if (optionalAssertResult != null || paramsChk != null) {
-      throw ErrorHandler(
-          'Assertion failed\nCommand: $command\nParams: $params\nLog: \n$paramsChk$optionalAssertResult', {
+      throw ErrorHandler('''Assertion failed
+          Command: $command
+          Params: $params
+          Log: 
+          $paramsChk$optionalAssertResult
+          ''', {
         ErrorType.variableError,
       });
     }
-    return commandRunner(params, results);
+    return await commandRunner(params, results);
   }
 
-  T run<T>(Parameters params, Map<String, dynamic> results) {
+  FutureOr<T> run<T>(Parameters params, Map<String, dynamic> results) {
     return this(params, results);
   }
 
@@ -41,12 +59,14 @@ class CommandModel {
     if (missingForcedParams) {
       result.writeln('Missing forced params');
     }
-    final extraParams = sentParams.any((element) => !allParams.contains(element));
+    final extraParams = sentParams.any(
+      (element) => !allParams.contains(element),
+    );
     if (extraParams) {
       result.writeln('Extra params found');
     }
     if (result.isNotEmpty) {
-      return result.toString() + '\n';
+      return '$result\n';
     }
     return null;
   }

@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 typedef Parameters = Map<String, ParamsModel>;
 
 class ParamsModel {
@@ -19,5 +21,25 @@ class ParamsModel {
     return ParamsModel(name: key, value: value);
   }
   @override
-  String toString() => " $name = $value ";
+  String toString() => ' $name = $value ';
+
+  Map<String, dynamic> toMap() {
+    return {
+      'name': name,
+      'value': value,
+    };
+  }
+
+  factory ParamsModel.fromMap(Map<String, dynamic> map) {
+    return ParamsModel(
+      name: map['name'] ?? '',
+      value: map['value'] ?? '',
+    );
+  }
+
+  String toJson() => json.encode(toMap());
+
+  factory ParamsModel.fromJson(String source) => ParamsModel.fromMap(
+        json.decode(source),
+      );
 }
