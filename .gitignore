@@ -79,3 +79,4 @@ build/
 *.hemend.dart
 .vscode/settings.json
 pubspec.lock
+example/pubspec.lock
