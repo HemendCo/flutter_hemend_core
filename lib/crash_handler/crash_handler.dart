@@ -101,7 +101,11 @@ class CrashHandler {
   final Map<String, String>? _reportHeaders;
 
   ///extra info to attach to every report
-  final Map<String, dynamic>? _extraInfo;
+  Map<String, dynamic>? _extraInfo;
+  void addExtraInfo(Map<String, dynamic> info) {
+    _extraInfo ??= {};
+    _extraInfo!.addAll(info);
+  }
 
   ///callback to call when crash happens to handle internally
   final void Function(Object, StackTrace)? _onCrash;
