@@ -186,25 +186,27 @@ class CrashHandler {
     }
   }
 
-  Future<void> recordRawMap(Map<String, dynamic> data) async {
+  Future<void> recordRawMap(Map<String, dynamic> data, {bool attachInfo = true}) async {
     final crashTime = DateTime.now().millisecondsSinceEpoch;
     if (reportUri != null) {
       final params = PostRequestParams(
         reportUri!,
         _reportHeaders,
-        {
-          'data': jsonEncode(
-            {
-              'packageInfo': _appInfo,
-              'deviceInfo': _deviceInfo,
-              'errorTime': crashTime,
-              ...data,
-              'crashIndex': (crashCounter++).toString(),
-              'extraInfo': _extraInfo ?? 'none',
-              '$_kModuleName Log': crashlytixLog,
-            },
-          )
-        },
+        attachInfo
+            ? {
+                'data': jsonEncode(
+                  {
+                    'packageInfo': _appInfo,
+                    'deviceInfo': _deviceInfo,
+                    'errorTime': crashTime,
+                    ...data,
+                    'crashIndex': (crashCounter++).toString(),
+                    'extraInfo': _extraInfo ?? 'none',
+                    '$_kModuleName Log': crashlytixLog,
+                  },
+                )
+              }
+            : data,
         null,
       );
       await IsolationCore.createIsolateForSingleTask<bool>(
@@ -213,14 +215,12 @@ class CrashHandler {
         debugName: 'crash_report_$crashCounter',
       ).then(
         (value) {
-          print(value.status);
-
           value.singleActOnFinished(
             onDone: (result) {
               if (result ?? false == true) {
                 _reportBucket();
               } else {
-                final logData = jsonEncode(data);
+                final logData = jsonEncode(params);
                 dev.log(
                   'cannot upload log data for now it will be placed in ${logData.hashCode}',
                   name: _kModuleName,
