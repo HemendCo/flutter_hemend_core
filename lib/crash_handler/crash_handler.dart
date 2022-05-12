@@ -123,7 +123,7 @@ class CrashHandler {
     } else if (Platform.isIOS) {
       _deviceInfo = (await deviceInfo.iosInfo).toMap();
     }
-    _deviceInfo=_deviceInfo.remove('systemFeatures')
+   _deviceInfo.remove('systemFeatures')
     final packageInfo = await PackageInfo.fromPlatform();
     _appInfo = {
       'appName': packageInfo.appName,
