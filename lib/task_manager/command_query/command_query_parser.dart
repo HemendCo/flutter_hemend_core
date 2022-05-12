@@ -14,7 +14,6 @@ class CommandQueryParser {
     final results = <String, dynamic>{};
     final microQueries = query.split(';');
     for (final mq in microQueries) {
-      // TODO(FMotalleb): replace with new parser;
       var commandName = mq.split(' ')[0];
       var resultTag = commandName;
       if (commandName.isNotEmpty) {
