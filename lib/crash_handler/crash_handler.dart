@@ -6,6 +6,8 @@ import 'dart:developer' as dev;
 import 'dart:io';
 // import 'package:logging/logging.dart';
 import 'package:device_info_plus/device_info_plus.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -39,10 +41,30 @@ class CrashHandler {
     void Function(Object, StackTrace)? onCrash,
     Map<String, String>? reportHeaders,
     Map<String, dynamic>? extraInfo,
+    Widget Function(FlutterErrorDetails)? errorWidget,
   })  : _extraInfo = extraInfo,
         _onCrash = onCrash,
         _reportHeaders = reportHeaders {
     _instance = this;
+
+    ErrorWidget.builder = (FlutterErrorDetails details) {
+      CrashHandler.instance
+          .recordError(details.exception, details.stack ?? StackTrace.empty, {'fullErrorLog': details.toString()});
+
+      return (errorWidget ??
+          (_) => Material(
+                child: Container(
+                  color: Colors.red,
+                  child: const Center(
+                    child: Text(
+                      'مشکلی در نمایش این صفحه رخ داده است. لطفا این مشکل را با تیم فنی به اشتراک بگذارید.',
+                      style: TextStyle(color: Colors.white),
+                    ),
+                  ),
+                ),
+              ))(details);
+    };
+
     dev.log(
       '$_kModuleName initialized',
       name: _kModuleName,
