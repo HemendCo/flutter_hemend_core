@@ -1,58 +1,20 @@
 enum ErrorType {
-  retryCountReached,
-  apiFail,
-  socketError,
-  unknownError,
-  notFound,
-  typeError,
-  localFileNotFound,
-  variableError,
-  algorithmFail,
-  strategyFail,
-  notImplementedYet,
-}
+  retryCountReached('function failed after some retry'),
+  apiFail('api failed (response or code)'),
+  socketError('socket failed (response or after retry)'),
+  unknownError('Wtf just happened?'),
+  notFound('tried to access something that was not found'),
+  typeError('one or more type was incorrect'),
+  localFileNotFound('local file is missing or cannot be reached'),
+  variableError('variable error (type or nullCheck failed)'),
+  algorithmFail(
+    'thrown from algorithm validator possibly one or more validation failed',
+  ),
+  strategyFail('strategy failed possibly a rare issue accrued'),
+  notImplementedYet('called method is not implemented yet');
 
-extension ErrorInfo on ErrorType {
-  String get info {
-    var result = '$name : ';
-    switch (this) {
-      case ErrorType.retryCountReached:
-        result += 'function failed after some retry';
-        break;
-      case ErrorType.apiFail:
-        result += 'api failed (response or code)';
-        break;
-      case ErrorType.socketError:
-        result += 'socket failed (response or after retry)';
-        break;
-      case ErrorType.unknownError:
-        result += 'Wtf just happened?';
-        break;
-      case ErrorType.typeError:
-        result += 'one or more type was incorrect';
-        break;
-      case ErrorType.localFileNotFound:
-        result += 'local file is missing or cannot be reached';
-        break;
-      case ErrorType.variableError:
-        result += 'variable error (type or nullCheck failed)';
-        break;
-      case ErrorType.algorithmFail:
-        // ignore: lines_longer_than_80_chars
-        result += 'thrown from algorithm validator possibly one or more validation failed';
-        break;
-      case ErrorType.strategyFail:
-        result += 'strategy failed possibly a rare issue accrued';
-        break;
-      case ErrorType.notImplementedYet:
-        result += 'called method is not implemented yet';
-        break;
-      case ErrorType.notFound:
-        result += 'tried to access something that was not found';
-        break;
-    }
-    return result;
-  }
+  const ErrorType(this.info);
+  final String info;
 }
 
 class ErrorHandler implements Exception {
