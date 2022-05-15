@@ -107,17 +107,14 @@ class CrashHandler {
   }
 
   Future<void> _reportBucket() async {
-    internalLog(
-      'starting to upload logged data',
-    );
     final items = _bucket?.getKeys().where(
           (element) => element.startsWith(_kBucketPrefix),
         );
 
-    internalLog(
-      'found ${items?.length} items to upload',
-    );
     if ((items?.isNotEmpty ?? false) == true) {
+      internalLog(
+        'starting to upload locally recorded data\nfound ${items?.length} items to upload',
+      );
       for (final item in items!) {
         final data = jsonDecode(_bucket?.getString(item) ?? '{}');
         await recordRawMap(data).then(
@@ -128,10 +125,10 @@ class CrashHandler {
               false,
         );
       }
+      internalLog(
+        'done uploading logged data',
+      );
     }
-    internalLog(
-      'done uploading logged data',
-    );
   }
 
   void internalLog(
