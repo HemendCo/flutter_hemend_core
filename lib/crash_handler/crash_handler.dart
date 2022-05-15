@@ -70,6 +70,24 @@ class CrashHandler {
       name: _kModuleName,
     );
   }
+  R? runZoned<R>(
+    R Function() body, {
+    Map<Object?, Object?>? zoneValues,
+    ZoneSpecification? zoneSpecification,
+  }) {
+    return runZonedGuarded(
+      body,
+      recordError,
+      zoneValues: zoneValues,
+      zoneSpecification: zoneSpecification,
+    );
+  }
+
+  Future<void> runTasks(List<FutureOr<void> Function()> tasks) async {
+    for (final task in tasks) {
+      await tryThis(task);
+    }
+  }
 
   ///local bucket information
   ///will save data with a prefix to avoid collision
