@@ -1,20 +1,18 @@
 // ignore_for_file: lines_longer_than_80_chars
 
-import 'dart:async';
-import 'dart:convert';
+import 'dart:async' show Future, FutureOr, Zone, ZoneSpecification, runZonedGuarded;
+import 'dart:convert' as converter show jsonDecode, jsonEncode;
 import 'dart:developer' as dev;
-import 'dart:io';
-// import 'package:logging/logging.dart';
-import 'package:device_info_plus/device_info_plus.dart';
-import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
+import 'dart:io' show Platform;
+import 'package:device_info_plus/device_info_plus.dart' as device_info show DeviceInfoPlugin;
+import 'package:flutter/material.dart' as ui_part;
 import 'package:http/http.dart' as http;
-import 'package:package_info_plus/package_info_plus.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:package_info_plus/package_info_plus.dart' as package_info show PackageInfo;
+import 'package:shared_preferences/shared_preferences.dart' as storage show SharedPreferences;
 
 import '../debug/developer_tools.dart';
 import '../object_controllers/data_snap_handler/data_snap_handler.dart' as snap;
-import '../task_manager/isolate_manager/isolation_core.dart';
+import '../task_manager/isolate_manager/isolation_core.dart' as treads show IsolationCore;
 
 class CrashHandler {
   static const _kModuleName = 'Crashlytix';
@@ -43,30 +41,30 @@ class CrashHandler {
     Map<String, dynamic>? extraInfo,
 
     ///it is a placeholder for crashed widgets
-    Widget Function(FlutterErrorDetails)? errorWidget,
+    ui_part.Widget Function(ui_part.FlutterErrorDetails)? errorWidget,
   })  : _extraInfo = extraInfo,
         _onCrash = onCrash,
         _reportHeaders = reportHeaders {
     _instance = this;
 
     ///will replace (red in debug mode / grey in release mode) default error widget and will catch its error and report it
-    ErrorWidget.builder = (FlutterErrorDetails details) {
+    ui_part.ErrorWidget.builder = (ui_part.FlutterErrorDetails details) {
       recordError(details.exception, details.stack ?? StackTrace.empty, {'fullErrorLog': details.toString()});
       return (errorWidget ??
-          (_) => Material(
-                child: Container(
-                  color: Colors.red,
-                  child: const Center(
-                    child: Text(
+          (_) => ui_part.Material(
+                child: ui_part.Container(
+                  color: ui_part.Colors.red,
+                  child: const ui_part.Center(
+                    child: ui_part.Text(
                       'found a bug inside this view.',
-                      style: TextStyle(color: Colors.white),
+                      style: ui_part.TextStyle(color: ui_part.Colors.white),
                     ),
                   ),
                 ),
               ))(details);
     };
 
-    internalLog(
+    _internalLog(
       '$_kModuleName initialized',
     );
   }
@@ -100,9 +98,9 @@ class CrashHandler {
   ///
   ///if you don't call [activateLocalStorage] it will be disabled by default
   static const _kBucketPrefix = '$_kModuleName-bucket';
-  SharedPreferences? _bucket;
+  storage.SharedPreferences? _bucket;
   Future<void> activateLocalStorage() async {
-    _bucket = await SharedPreferences.getInstance();
+    _bucket = await storage.SharedPreferences.getInstance();
     _reportBucket();
   }
 
@@ -112,11 +110,11 @@ class CrashHandler {
         );
 
     if ((items?.isNotEmpty ?? false) == true) {
-      internalLog(
+      _internalLog(
         'starting to upload locally recorded data\nfound ${items?.length} items to upload',
       );
       for (final item in items!) {
-        final data = jsonDecode(_bucket?.getString(item) ?? '{}');
+        final data = converter.jsonDecode(_bucket?.getString(item) ?? '{}');
         await recordRawMap(data).then(
           (value) async =>
               (await _bucket?.remove(
@@ -125,13 +123,14 @@ class CrashHandler {
               false,
         );
       }
-      internalLog(
+      _internalLog(
         'done uploading logged data',
       );
     }
   }
 
-  void internalLog(
+  ///log message to console
+  void _internalLog(
     String message, {
     DateTime? time,
     int? sequenceNumber,
@@ -139,7 +138,8 @@ class CrashHandler {
     Zone? zone,
     Object? error,
     StackTrace? stackTrace,
-  }) =>
+  }) {
+    () {
       dev.log(
         message,
         name: _kModuleName,
@@ -150,6 +150,12 @@ class CrashHandler {
         time: time,
         zone: zone,
       );
+    }.runInDebugMode();
+  }
+
+  ///check whether app is connected to a local storage or not
+  ///
+  ///if you don't call [activateLocalStorage] it will be disabled by default
   bool get hasBucket => _bucket != null;
 
   ///index of crash in a runtime
@@ -175,7 +181,7 @@ class CrashHandler {
   ///
   ///if you don't call [gatherBasicData] it will pass an error message
   Future<void> gatherBasicData() async {
-    final deviceInfo = DeviceInfoPlugin();
+    final deviceInfo = device_info.DeviceInfoPlugin();
     _deviceInfo = {'error': 'current platform is not supported'};
     if (Platform.isAndroid) {
       _deviceInfo = (await deviceInfo.androidInfo).toMap();
@@ -183,7 +189,7 @@ class CrashHandler {
       _deviceInfo = (await deviceInfo.iosInfo).toMap();
     }
     _deviceInfo.remove('systemFeatures');
-    final packageInfo = await PackageInfo.fromPlatform();
+    final packageInfo = await package_info.PackageInfo.fromPlatform();
     _appInfo = {
       'appName': packageInfo.appName,
       'version': packageInfo.version,
@@ -192,16 +198,23 @@ class CrashHandler {
       'signingKey': packageInfo.buildSignature,
     };
     _hasBasicData = true;
-    internalLog(
+    _internalLog(
       'Basic Data gathered',
     );
   }
 
+  ///check module has device and app info
   bool _hasBasicData = false;
+
+  ///check module has device and app info
   bool get hasBasicData => _hasBasicData;
+
+  ///device info gathered with [gatherBasicData]
   Map<String, dynamic> _deviceInfo = <String, dynamic>{
     'error': 'have not been initialized',
   };
+
+  ///app info gathered with [gatherBasicData]
   Map<String, dynamic> _appInfo = <String, dynamic>{
     'error': 'have not been initialized',
   };
@@ -214,23 +227,27 @@ class CrashHandler {
 
   ///report log to console in debug mode
   void logCrash(Object? exception, StackTrace stackTrace) {
-    () {
-      internalLog(
-        'found a crash',
-        time: DateTime.now(),
-        level: 1200,
-        stackTrace: stackTrace,
-        error: exception,
-      );
-    }.runInDebugMode();
+    _internalLog(
+      'found a crash',
+      time: DateTime.now(),
+      level: 1200,
+      stackTrace: stackTrace,
+      error: exception,
+    );
   }
 
+  ///will pass its params to [tryThis]
   FutureOr<snap.DataSnapHandler<TResult>> call<TResult>(
     FutureOr<TResult> Function() function, {
     Map<String, dynamic> extraInfo = const {},
   }) =>
       tryThis(function, extraInfo: extraInfo);
 
+  ///will run the given function in try catch clause
+  ///
+  ///if faces error it will call [recordError]
+  ///
+  ///return type is a future of [snap.DataSnapHandler] so you can handle result with it
   FutureOr<snap.DataSnapHandler<TResult>> tryThis<TResult>(
     FutureOr<TResult> Function() function, {
     Map<String, dynamic> extraInfo = const {},
@@ -247,6 +264,14 @@ class CrashHandler {
     }
   }
 
+  ///recording raw map data as json
+  ///
+  ///if failed to send and [hasBucket] is true it will save it locally
+  ///and try to send it later
+  ///
+  ///by later i mean when calling [_reportBucket]
+  ///that is when app is connected to a local storage via [activateLocalStorage]
+  ///or it sent a report successfully
   Future<void> recordRawMap(Map<String, dynamic> data, {bool attachInfo = true}) async {
     final crashTime = DateTime.now().millisecondsSinceEpoch;
     if (reportUri != null) {
@@ -255,7 +280,7 @@ class CrashHandler {
         _reportHeaders,
         attachInfo
             ? {
-                'data': jsonEncode(
+                'data': converter.jsonEncode(
                   {
                     'packageInfo': _appInfo,
                     'deviceInfo': _deviceInfo,
@@ -270,7 +295,7 @@ class CrashHandler {
             : data,
         null,
       );
-      await IsolationCore.createIsolateForSingleTask<bool>(
+      await treads.IsolationCore.createIsolateForSingleTask<bool>(
         task: onlineReport,
         taskParams: params,
         debugName: 'crash_report_$crashCounter',
@@ -281,8 +306,8 @@ class CrashHandler {
               if (result ?? false == true) {
                 _reportBucket();
               } else {
-                final logData = jsonEncode(params);
-                internalLog(
+                final logData = converter.jsonEncode(params);
+                _internalLog(
                   'cannot upload log data for now it will be placed in ${logData.hashCode}',
                 );
                 _bucket?.setString(
@@ -291,7 +316,16 @@ class CrashHandler {
                 );
               }
             },
-            onError: (_) {},
+            onError: (_) {
+              final logData = converter.jsonEncode(params);
+              _internalLog(
+                'cannot upload log data for now it will be placed in ${logData.hashCode}',
+              );
+              _bucket?.setString(
+                '$_kBucketPrefix-${logData.hashCode}',
+                logData,
+              );
+            },
           );
         },
       );
@@ -300,6 +334,8 @@ class CrashHandler {
 
   ///[Object] ex is the exception
   ///[StackTrace] st is the stack trace
+  ///[Map<String, dynamic>] extraInfo is the extra info to attach to the report
+  ///will log crash with [recordRawMap]
   Future<void> recordError(
     Object ex,
     StackTrace st, [
@@ -317,33 +353,21 @@ class CrashHandler {
   ///report error to server
   static Future<bool> onlineReport(dynamic input) async {
     final params = input as PostRequestParams;
-
     try {
       await http.post(
         params.uri,
         body: params.body,
         headers: params.headers,
       );
-      // () {
-      //   result.body.log(
-      //     time: DateTime.now(),
-      //     name: _kModuleName,
-      //   );
-      // }.runInDebugMode();
       return true;
     } catch (e, st) {
-      () {
-        final error = <String, dynamic>{
-          'error': 'Request failed',
-          'exception': e.toString(),
-          'stacktrace': st.toString(),
-        };
-        error.log(
-          time: DateTime.now(),
-          error: '$_kModuleName Crash',
-        );
-      }.runInDebugMode();
-      return false;
+      CrashHandler.instance._internalLog(
+        'Request failed',
+        time: DateTime.now(),
+        error: e,
+        stackTrace: st,
+      );
+      rethrow;
     }
   }
 }
