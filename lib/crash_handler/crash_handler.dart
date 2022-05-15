@@ -41,23 +41,24 @@ class CrashHandler {
     void Function(Object, StackTrace)? onCrash,
     Map<String, String>? reportHeaders,
     Map<String, dynamic>? extraInfo,
+
+    ///it is a placeholder for crashed widgets
     Widget Function(FlutterErrorDetails)? errorWidget,
   })  : _extraInfo = extraInfo,
         _onCrash = onCrash,
         _reportHeaders = reportHeaders {
     _instance = this;
 
+    ///will replace (red in debug mode / grey in release mode) default error widget and will catch its error and report it
     ErrorWidget.builder = (FlutterErrorDetails details) {
-      CrashHandler.instance
-          .recordError(details.exception, details.stack ?? StackTrace.empty, {'fullErrorLog': details.toString()});
-
+      recordError(details.exception, details.stack ?? StackTrace.empty, {'fullErrorLog': details.toString()});
       return (errorWidget ??
           (_) => Material(
                 child: Container(
                   color: Colors.red,
                   child: const Center(
                     child: Text(
-                      'مشکلی در نمایش این صفحه رخ داده است. لطفا این مشکل را با تیم فنی به اشتراک بگذارید.',
+                      'found a bug inside this view.',
                       style: TextStyle(color: Colors.white),
                     ),
                   ),
@@ -65,9 +66,8 @@ class CrashHandler {
               ))(details);
     };
 
-    dev.log(
+    internalLog(
       '$_kModuleName initialized',
-      name: _kModuleName,
     );
   }
   R? runZoned<R>(
@@ -83,10 +83,16 @@ class CrashHandler {
     );
   }
 
-  Future<void> runTasks(List<FutureOr<void> Function()> tasks) async {
+  Future<List<bool>> runTasks(List<FutureOr<void> Function()> tasks) async {
+    final results = <bool>[];
     for (final task in tasks) {
-      await tryThis(task);
+      final taskResult = await tryThis(task);
+      taskResult.singleActOnFinished(
+        onDone: (p0) => results.add(true),
+        onError: (p0) => results.add(false),
+      );
     }
+    return results;
   }
 
   ///local bucket information
@@ -101,17 +107,15 @@ class CrashHandler {
   }
 
   Future<void> _reportBucket() async {
-    dev.log(
+    internalLog(
       'starting to upload logged data',
-      name: _kModuleName,
     );
     final items = _bucket?.getKeys().where(
           (element) => element.startsWith(_kBucketPrefix),
         );
 
-    dev.log(
+    internalLog(
       'found ${items?.length} items to upload',
-      name: _kModuleName,
     );
     if ((items?.isNotEmpty ?? false) == true) {
       for (final item in items!) {
@@ -125,12 +129,30 @@ class CrashHandler {
         );
       }
     }
-    dev.log(
+    internalLog(
       'done uploading logged data',
-      name: _kModuleName,
     );
   }
 
+  void internalLog(
+    String message, {
+    DateTime? time,
+    int? sequenceNumber,
+    int level = 0,
+    Zone? zone,
+    Object? error,
+    StackTrace? stackTrace,
+  }) =>
+      dev.log(
+        message,
+        name: _kModuleName,
+        error: error,
+        level: level,
+        sequenceNumber: sequenceNumber,
+        stackTrace: stackTrace,
+        time: time,
+        zone: zone,
+      );
   bool get hasBucket => _bucket != null;
 
   ///index of crash in a runtime
@@ -173,7 +195,9 @@ class CrashHandler {
       'signingKey': packageInfo.buildSignature,
     };
     _hasBasicData = true;
-    dev.log('Basic Data gathered', name: _kModuleName);
+    internalLog(
+      'Basic Data gathered',
+    );
   }
 
   bool _hasBasicData = false;
@@ -194,13 +218,12 @@ class CrashHandler {
   ///report log to console in debug mode
   void logCrash(Object? exception, StackTrace stackTrace) {
     () {
-      dev.log(
+      internalLog(
         'found a crash',
         time: DateTime.now(),
         level: 1200,
         stackTrace: stackTrace,
         error: exception,
-        name: _kModuleName,
       );
     }.runInDebugMode();
   }
@@ -262,9 +285,8 @@ class CrashHandler {
                 _reportBucket();
               } else {
                 final logData = jsonEncode(params);
-                dev.log(
+                internalLog(
                   'cannot upload log data for now it will be placed in ${logData.hashCode}',
-                  name: _kModuleName,
                 );
                 _bucket?.setString(
                   '$_kBucketPrefix-${logData.hashCode}',
@@ -300,17 +322,17 @@ class CrashHandler {
     final params = input as PostRequestParams;
 
     try {
-      final result = await http.post(
+      await http.post(
         params.uri,
         body: params.body,
         headers: params.headers,
       );
-      () {
-        result.body.log(
-          time: DateTime.now(),
-          name: _kModuleName,
-        );
-      }.runInDebugMode();
+      // () {
+      //   result.body.log(
+      //     time: DateTime.now(),
+      //     name: _kModuleName,
+      //   );
+      // }.runInDebugMode();
       return true;
     } catch (e, st) {
       () {
