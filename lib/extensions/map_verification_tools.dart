@@ -23,12 +23,12 @@ extension MapVerifier<TK, TV> on Map<TK, TV> {
     return null;
   }
 
-  void killOnMissingKey(List<TK> possibleOptions) {
+  void breakOnMissingKey(List<TK> possibleOptions) {
     final missingItem = getMissingKey(possibleOptions);
     if (missingItem != null) {
       throw ErrorHandler('''
 
-Cannot find a required entry in map: $map
+Cannot find a required entry in map: $this
 Missing key: $missingItem''', {
         ErrorType.variableError,
         ErrorType.notFound,
@@ -36,7 +36,7 @@ Missing key: $missingItem''', {
     }
   }
 
-  void killOnLengthMissMatch(List<int> possibleOptions) {
+  void breakOnLengthMissMatch(List<int> possibleOptions) {
     final lengthCheck = verifyLength(possibleOptions);
     if (!lengthCheck) {
       throw ErrorHandler(
