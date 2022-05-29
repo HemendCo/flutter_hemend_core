@@ -36,13 +36,24 @@ class CommandModel {
       throw ErrorHandler('''Assertion failed
           Command: $command
           Params: $params
-          Log: 
-          $paramsChk$optionalAssertResult
+          Log:
+          $paramsChk
+          $optionalAssertResult
           ''', {
         ErrorType.variableError,
       });
     }
-    return await commandRunner(params, results);
+    final reflectedParams = Map.fromEntries(
+      params.entries.map((e) {
+        final value = e.value;
+        if (value.isFromResults) {
+          return results[value.value];
+        }
+        return MapEntry(e.key, value);
+      }),
+    );
+
+    return await commandRunner(reflectedParams, results);
   }
 
   FutureOr<T> run<T>(Parameters params, Map<String, dynamic> results) {
