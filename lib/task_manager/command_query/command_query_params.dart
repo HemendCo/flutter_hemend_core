@@ -1,8 +1,10 @@
 import 'dart:convert';
 
+import '../../debug/error_handler.dart';
 import '../../extensions/map_verification_tools.dart';
 
 typedef Parameters = Map<String, ParamsModel>;
+typedef ValueParser<T> = T Function(String);
 
 class ParamsModel {
   final String name;
@@ -13,14 +15,60 @@ class ParamsModel {
     required this.value,
     required this.isFromResults,
   });
-  factory ParamsModel.fromString(String element, Map<String, dynamic> results) {
+  T extractValue<T>({
+    required Map<Type, ValueParser> mappers,
+    required Map<String, dynamic> results,
+  }) {
+    if (isFromResults) {
+      return extractFromResultsTable<T>(results);
+    } else {
+      return extractValueUsingTypeMappers<T>(mappers);
+    }
+  }
+
+  T extractValueUsingTypeMappers<T>(Map<Type, ValueParser> mappers) {
+    mappers.breakOnMissingKey([T]);
+    return mappers[T]!.call(value);
+  }
+
+  T extractFromResultsTable<T>(Map<String, dynamic> results) {
+    final referencedObject = results[value];
+    if (referencedObject == null) {
+      throw ErrorHandler(
+        '''
+
+cannot find referenced object on result table for $value
+result table items: ${results.keys}''',
+        <ErrorType>{
+          ErrorType.variableError,
+          ErrorType.notFound,
+        },
+      );
+    }
+    if (referencedObject is! T) {
+      throw ErrorHandler(
+        '''
+
+found result for $value but it is not of type $T
+found type is ${referencedObject.runtimeType}
+result table items: ${results.keys}''',
+        <ErrorType>{
+          ErrorType.variableError,
+          ErrorType.notFound,
+        },
+      );
+    }
+    return referencedObject;
+  }
+
+  factory ParamsModel.fromString(String element) {
     final split = element.split('=');
     final key = split[0];
     var value = split[1];
     final readFromResults = value.startsWith('|') && value.endsWith('|');
     if (readFromResults) {
       value = value.substring(1, value.length - 1);
-      value = results[value].toString();
+      // value = results[value].toString();
     }
 
     return ParamsModel(
@@ -51,8 +99,8 @@ class ParamsModel {
     Map<String, dynamic> map,
   ) {
     map
-      ..killOnMissingKey(['name', 'value'])
-      ..killOnLengthMissMatch([2, 3]);
+      ..breakOnMissingKey(['name', 'value'])
+      ..breakOnLengthMissMatch([2, 3]);
     // if (!map.verifyLength([2, 3]) ||
     //     !map.containsKey(
     //       'name',

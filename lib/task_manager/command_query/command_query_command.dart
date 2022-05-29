@@ -43,17 +43,15 @@ class CommandModel {
         ErrorType.variableError,
       });
     }
-    final reflectedParams = Map<String, ParamsModel>.fromEntries(
-      params.entries.map((e) {
-        final value = e.value;
-        if (value.isFromResults) {
-          return results[value.value];
-        }
-        return MapEntry(e.key, value);
-      }),
-    );
+    // final reflectedParams = Map<String, ParamsModel>.fromEntries(
+    //   params.entries.map((e) {
+    //     final value = e.value;
 
-    return await commandRunner(reflectedParams, results);
+    //     return MapEntry(e.key, value);
+    //   }),
+    // );
+
+    return await commandRunner(params, results);
   }
 
   FutureOr<T> run<T>(Parameters params, Map<String, dynamic> results) {

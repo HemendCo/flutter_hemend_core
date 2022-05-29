@@ -54,7 +54,7 @@ class CommandQueryParser {
           final paramsStrings = mq.split(' ').sublist(1);
           final params = <String, ParamsModel>{};
           for (final ps in paramsStrings) {
-            final param = ParamsModel.fromString(ps, _results);
+            final param = ParamsModel.fromString(ps);
             params.addAll({param.name: param});
           }
           final result = await relatedCommand.run(params, _results);
@@ -141,7 +141,7 @@ class CommandQueryModel {
   }
 
   factory CommandQueryModel.fromMap(Map<String, dynamic> map) {
-    map.killOnMissingKey(['command', 'params']);
+    map.breakOnMissingKey(['command', 'params']);
 
     return CommandQueryModel(
       command: map['command'],
