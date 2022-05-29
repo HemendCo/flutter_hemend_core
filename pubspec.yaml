@@ -4,7 +4,7 @@ version: 0.0.1
 homepage: https://hemend.com/
 
 environment:
-  sdk: ">=2.17.0 <3.0.0"
+  sdk: ">=2.17.1 <3.0.0"
   flutter: ">=3.0.0"
 
 dependencies:
@@ -14,10 +14,6 @@ dependencies:
   package_info_plus: ^1.4.2
   http:
   shared_preferences: ^2.0.13
-  # logging:
-  build:
-  meta: ^1.7.0
-  source_gen:
 
   dio: ^4.0.1
   web_socket_channel: ^2.1.0
