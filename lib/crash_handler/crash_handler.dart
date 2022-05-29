@@ -39,11 +39,15 @@ class CrashHandler {
     void Function(Object, StackTrace)? onCrash,
     Map<String, String>? reportHeaders,
     Map<String, dynamic>? extraInfo,
+    List<String> cleanFromDeviceInfo = const [
+      'systemFeatures',
+    ],
 
     ///it is a placeholder for crashed widgets
     ui_part.Widget Function(ui_part.FlutterErrorDetails)? errorWidget,
   })  : _extraInfo = extraInfo,
         _onCrash = onCrash,
+        _cleanFromDeviceInfo = cleanFromDeviceInfo,
         _reportHeaders = reportHeaders {
     _instance = this;
 
@@ -188,7 +192,8 @@ class CrashHandler {
     } else if (Platform.isIOS) {
       _deviceInfo = (await deviceInfo.iosInfo).toMap();
     }
-    _deviceInfo.remove('systemFeatures');
+    _cleanFromDeviceInfo.forEach(_deviceInfo.remove);
+
     final packageInfo = await package_info.PackageInfo.fromPlatform();
     _appInfo = {
       'appName': packageInfo.appName,
@@ -208,6 +213,7 @@ class CrashHandler {
 
   ///check module has device and app info
   bool get hasBasicData => _hasBasicData;
+  List<String> _cleanFromDeviceInfo;
 
   ///device info gathered with [gatherBasicData]
   Map<String, dynamic> _deviceInfo = <String, dynamic>{
