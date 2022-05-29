@@ -1,6 +1,5 @@
 import 'dart:convert';
 
-import '../../debug/error_handler.dart';
 import '../../extensions/map_verification_tools.dart';
 
 typedef Parameters = Map<String, ParamsModel>;
