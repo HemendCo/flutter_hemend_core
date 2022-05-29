@@ -22,10 +22,18 @@ class ParamsModel {
       value = value.substring(1, value.length - 1);
       value = results[value].toString();
     }
+
     return ParamsModel(
       name: key,
       value: value,
-      isFromResults: readFromResults,
+
+      ///the reason is that the value is from results
+      ///but we set value from results here
+      ///and this flag will active command runners value parser to replace
+      ///results[value] with the real value
+      ///like what we did here so it will be false but in [fromMap()]
+      ///we don't have access to results and command runner will do the job
+      isFromResults: false,
     );
   }
   @override
@@ -35,6 +43,7 @@ class ParamsModel {
     return {
       'name': name,
       'value': value,
+      'isFromResults': isFromResults,
     };
   }
 
@@ -58,12 +67,10 @@ class ParamsModel {
         },
       );
     }
-    final usingResults = map['isFromResults'] ?? false;
-
     return ParamsModel(
       name: map['name'],
       value: map['value'],
-      isFromResults: usingResults,
+      isFromResults: map['isFromResults'] ?? false,
     );
   }
 
