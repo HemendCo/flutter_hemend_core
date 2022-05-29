@@ -43,7 +43,7 @@ class CommandModel {
         ErrorType.variableError,
       });
     }
-    final reflectedParams = Map.fromEntries(
+    final reflectedParams = Map<String, ParamsModel>.fromEntries(
       params.entries.map((e) {
         final value = e.value;
         if (value.isFromResults) {

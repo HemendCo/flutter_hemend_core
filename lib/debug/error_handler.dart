@@ -24,12 +24,12 @@ class ErrorHandler implements Exception {
   ErrorHandler(this.message, [this.errorTypes = const {}]);
   @override
   String toString() {
-    final result = StringBuffer();
-    result.writeln();
-    result.writeln(
-      '================================================================',
-    );
-    result.writeln('message : $message');
+    final result = StringBuffer()
+      ..writeln()
+      ..writeln(
+        '================================================================',
+      )
+      ..writeln('message : $message');
     if (errorTypes.isNotEmpty) {
       result.writeln('<=-Tags-=> ');
       for (final error in errorTypes) {

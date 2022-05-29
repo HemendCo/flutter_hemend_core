@@ -104,28 +104,27 @@ abstract class IsolationCore {
     String debugName = '',
   }) async {
     ///Main port for exchanging data with isolate
-    final receivePort = ReceivePort('$debugName-Port');
-
-    ///signing listener to port and casting data to [DataSnapHandler]
-    receivePort.listen((message) {
-      late final DataSnapHandler<T> snap;
-      if (message is DataSnapHandler) {
-        snap = message.castTo<T>();
-      } else {
-        snap = DataSnapHandler<T>.error(
-          exception: Exception(
-            'Unexpected message type: ${message.runtimeType}',
-          ),
-          sender: {
-            'name': 'Isolate Manager->createIsolateForStream',
-            'reason': 'task should yield only [DataSnapHandler]',
-            'task': task,
-            'taskParams': taskParams,
-          },
-        );
-      }
-      listener(snap);
-    });
+    ///and register listener to port and casting data to [DataSnapHandler]
+    final receivePort = ReceivePort('$debugName-Port')
+      ..listen((message) {
+        late final DataSnapHandler<T> snap;
+        if (message is DataSnapHandler) {
+          snap = message.castTo<T>();
+        } else {
+          snap = DataSnapHandler<T>.error(
+            exception: Exception(
+              'Unexpected message type: ${message.runtimeType}',
+            ),
+            sender: {
+              'name': 'Isolate Manager->createIsolateForStream',
+              'reason': 'task should yield only [DataSnapHandler]',
+              'task': task,
+              'taskParams': taskParams,
+            },
+          );
+        }
+        listener(snap);
+      });
 
     ///mapping information to pass with spawn
     final isolateParams = StreamTaskIsolateParams<T>(

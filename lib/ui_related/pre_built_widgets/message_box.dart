@@ -23,9 +23,10 @@ class MessageBoxSegment extends CustomPainter {
     if (painter != null) {
       canvasPainter = painter!;
     } else {
-      canvasPainter.color = const Color(0xff447a9c);
-      canvasPainter.maskFilter = const MaskFilter.blur(BlurStyle.normal, 1);
-      canvasPainter.style = PaintingStyle.stroke;
+      canvasPainter
+        ..color = const Color(0xff447a9c)
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 1)
+        ..style = PaintingStyle.stroke;
     }
     final path = MessageBoxSegment.messageBox(
       size.width,
@@ -77,12 +78,13 @@ class MessageBoxSegment extends CustomPainter {
     if (sharpPointPath != null) {
       sharpPoint = sharpPointPath;
     } else {
-      sharpPoint.moveTo(0, 0);
-      sharpPoint.lineTo(7, 2);
-      sharpPoint.lineTo(7, 7);
-      sharpPoint.lineTo(2, 7);
-      sharpPoint.lineTo(0, 0);
-      sharpPoint.close();
+      sharpPoint
+        ..moveTo(0, 0)
+        ..lineTo(7, 2)
+        ..lineTo(7, 7)
+        ..lineTo(2, 7)
+        ..lineTo(0, 0)
+        ..close();
       sharpPoint = sharpPoint.shift(const Offset(-2, -2));
     }
 
