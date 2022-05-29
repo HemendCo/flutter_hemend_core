@@ -1,4 +1,8 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:hemend/extensions/list_verification_tools.dart';
+import 'package:hemend/task_manager/command_query/command_query.dart';
+import 'package:hemend/ui_related/pre_built_widgets/future_builder.dart';
 
 void main() {
   runApp(const MyApp());
@@ -51,14 +55,162 @@ class _MyHomePageState extends State<MyHomePage> {
   int _counter = 0;
 
   void _incrementCounter() {
-    setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
-    });
+    print(mamad);
+  }
+
+  Future<List<Widget>> viewCommandParser(dynamic mamad) async {
+    // testChecker();
+    final start = DateTime.now();
+
+    final query = [
+      {
+        'command': 'ContainerGenerator',
+        'resultTag': 't0',
+        'params': [
+          {
+            'name': 'width',
+            'value': '150',
+          },
+          {
+            'name': 'height',
+            'value': '50',
+          },
+          {
+            'name': 'decoration',
+            'value': 'basic',
+            'isFromResults': true,
+          },
+          {
+            'name': 'alignment',
+            'value': '0,0',
+          }
+        ]
+      },
+      {
+        'command': 'ContainerGenerator',
+        'resultTag': 't1',
+        'params': [
+          {
+            'name': 'width',
+            'value': '150',
+          },
+          {
+            'name': 'height',
+            'value': '50',
+          },
+          {
+            'name': 'decoration',
+            'value': 'master',
+            'isFromResults': true,
+          },
+          {
+            'name': 'alignment',
+            'value': '0,0',
+          }
+        ]
+      },
+      {
+        'command': 'ContainerGenerator',
+        'resultTag': 't2',
+        'params': [
+          {
+            'name': 'width',
+            'value': '150',
+          },
+          {
+            'name': 'height',
+            'value': '50',
+          },
+          {
+            'name': 'decoration',
+            'value': 'master',
+            'isFromResults': true,
+          },
+          {
+            'name': 'alignment',
+            'value': '0,0',
+          }
+        ]
+      },
+      ...List.generate(
+        9500,
+        (index) => {
+          'command': 'TextView',
+          'resultTag': 'TextViewTest$index#Widget',
+          'params': [
+            {
+              'name': 'text',
+              'value': 'test text $index',
+            },
+            {
+              'name': 'builder',
+              'value': 't${(index % 2).toInt()}',
+              'isFromResults': true,
+            }
+          ]
+        },
+      )
+    ];
+    final result = <Widget>[];
+    final parser = CommandQueryParser(commands: commandMap);
+    await parser.parsAndRunFromJson([
+      {
+        'command': 'DecorationGenerator',
+        'resultTag': 'basic',
+        'params': [
+          {
+            'name': 'color',
+            'value': '0xFFA03F3F',
+          },
+          {
+            'name': 'borderRadius',
+            'value': '15',
+          },
+          {
+            'name': 'border',
+            'value': '0xFF34C517,2',
+          },
+        ],
+      },
+      {
+        'command': 'DecorationGenerator',
+        'resultTag': 'master',
+        'params': [
+          {
+            'name': 'color',
+            'value': '0xFF34C517',
+          },
+          {
+            'name': 'borderRadius',
+            'value': '15',
+          },
+          {
+            'name': 'border',
+            'value': '0xFFA03F3F,2',
+          },
+        ],
+      },
+    ]);
+    final parsResult = await parser.parsAndRunFromJson(
+      query,
+    );
+
+    for (final item in parsResult.entries
+        .where(
+          (element) => element.key.endsWith(
+            '#Widget',
+          ),
+        )
+        .map(
+          (e) => e.value,
+        )) {
+      if (item is Widget) {
+        result.add(item);
+      }
+    }
+    final end = DateTime.now();
+    print(end.difference(start).inMilliseconds);
+    return result;
   }
 
   @override
@@ -78,31 +230,12 @@ class _MyHomePageState extends State<MyHomePage> {
       body: Center(
         // Center is a layout widget. It takes a single child and positions it
         // in the middle of the parent.
-        child: Column(
-          // Column is also a layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Invoke "debug painting" (press "p" in the console, choose the
-          // "Toggle Debug Paint" action from the Flutter Inspector in Android
-          // Studio, or the "Toggle Debug Paint" command in Visual Studio Code)
-          // to see the wireframe for each widget.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const Text(
-              'You have pushed the button this many times:',
-            ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headline4,
-            ),
-          ],
+        child: BuildInFuture<List<Widget>>(
+          itemFromFuture: compute(viewCommandParser, ''),
+          childInFuture: (_, items, rebuilder) => ListView.builder(
+            itemCount: items!.length,
+            itemBuilder: (context, index) => items[index],
+          ),
         ),
       ),
       floatingActionButton: FloatingActionButton(
@@ -113,3 +246,156 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 }
+
+Map<String, CommandModel> commandMap = {
+  'ContainerGenerator': const CommandModel(
+    command: 'ContainerGenerator',
+    commandRunner: containerGenerator,
+    forcedParams: [
+      'width',
+      'height',
+      'decoration',
+    ],
+    optionalParams: [
+      'margin',
+      'padding',
+      'alignment',
+      'transform',
+    ],
+  ),
+  'TextView': const CommandModel(
+    command: 'TextView',
+    optionalParams: [],
+    forcedParams: ['text', 'builder'],
+    commandRunner: textViewGenerator,
+    // optionalAssertion: (params, results) {
+    //   if (results['TextViewContainerGenerator'] is! WidgetGenerator) {
+    //     return 'cannot find TextViewContainerGenerator as widget generator';
+    //   }
+    //   return null;
+    // },
+  ),
+  'DecorationGenerator': const CommandModel(
+    command: 'DecorationGenerator',
+    optionalParams: ['color', 'borderRadius', 'shape', 'border'],
+    forcedParams: [],
+    commandRunner: decoration,
+    // optionalAssertion: (params, results) {
+    //   if (results['TextViewContainerGenerator'] is! WidgetGenerator) {
+    //     return 'cannot find TextViewContainerGenerator as widget generator';
+    //   }
+    //   return null;
+    // },
+  ),
+};
+typedef WidgetGenerator = Widget Function(Widget child);
+BoxDecoration decoration(Map<String, ParamsModel> params, Map<String, dynamic> results) {
+  BorderRadius borderRadius = BorderRadius.zero;
+  if (params['borderRadius'] != null) {
+    borderRadius = BorderRadius.circular(double.parse(params['borderRadius']!.value));
+  }
+
+  BoxShape shape = BoxShape.rectangle;
+  if (params['shape'].toString() == 'circle') {
+    shape = BoxShape.circle;
+  }
+
+  Border? border = params['border']?.extractValue<Border>(mappers: mappers, results: results);
+
+  return BoxDecoration(
+    // backgroundBlendMode: ,
+    border: border,
+    borderRadius: borderRadius,
+    // boxShadow: ,
+    color: params['color']?.extractValue<Color>(mappers: mappers, results: results),
+    // gradient: ,
+    // image: ,
+    shape: shape,
+  );
+}
+
+WidgetGenerator containerGenerator(Map<String, ParamsModel> params, Map<String, dynamic> results) {
+  Alignment? alignment;
+  if (params['alignment'] != null) {
+    alignment = alignmentFromString(params['alignment']!.value);
+  }
+
+  EdgeInsets? margin;
+  if (params['margin'] != null) {
+    margin = edgeInsetsFromString(params['margin']!.value.toString());
+  }
+
+  EdgeInsets? padding;
+  if (params['padding'] != null) {
+    padding = edgeInsetsFromString(params['padding']!.value.toString());
+  }
+
+  return (Widget child) => Container(
+        alignment: alignment,
+        width: params['width']!.extractValue<double>(mappers: mappers, results: results),
+        height: double.parse(params['height']!.value),
+        decoration: params['decoration']!.extractValue<BoxDecoration>(mappers: mappers, results: results),
+        margin: margin,
+        padding: padding,
+        child: child,
+      );
+}
+
+EdgeInsets edgeInsetsFromString(String edgeParams) {
+  final sliced = edgeParams.split(',');
+  final padding = EdgeInsets.fromLTRB(
+    double.parse(sliced[0]),
+    double.parse(sliced[1]),
+    double.parse(sliced[2]),
+    double.parse(sliced[3]),
+  );
+  return padding;
+}
+
+Widget textViewGenerator(Map<String, ParamsModel> params, Map<String, dynamic> results) {
+  final textParams = params['text']!.extractValue<String>(mappers: mappers, results: results);
+  final builder = params['builder']!.extractValue<WidgetGenerator>(mappers: mappers, results: results);
+  // final Widget Function(Widget child) containerGenerator = results['TextViewContainerGenerator']!;
+
+  return builder(TextField(
+    onChanged: (value) {
+      print(value);
+      mamad[textParams] = value;
+    },
+  ));
+}
+
+Alignment alignmentFromString(String align) {
+  final alignArray = align.split(',');
+  alignArray.breakOnLengthMissMatch([2]);
+  return Alignment(double.parse(alignArray[0]), double.parse(alignArray[1]));
+}
+
+extension AlignmentTools on Alignment {
+  String toAlignString() {
+    return '$x,$y';
+  }
+}
+
+Map<Type, ValueParser> mappers = {
+  String: (String value) => value,
+  double: (String value) => double.parse(value),
+  Color: (String value) => Color(int.parse(value)),
+  BorderRadius: (String value) => BorderRadius.circular(double.parse(value)),
+  EdgeInsets: (String value) => edgeInsetsFromString(value),
+  Alignment: (String value) => alignmentFromString(value),
+  Border: (String value) {
+    // final borderParams = params['border']!.value;
+
+    final sliced = value.toString().split(',');
+    sliced.breakOnLengthMissMatch([2]);
+    final color = Color(int.parse(sliced[0]));
+    final width = double.parse(sliced[1]);
+    return Border.all(
+      color: color,
+      width: width,
+      style: BorderStyle.solid,
+    );
+  }
+};
+Map<String, String> mamad = {};
