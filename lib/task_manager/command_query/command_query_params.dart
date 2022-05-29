@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import '../../debug/error_handler.dart';
+import '../../extensions/map_verification_tools.dart';
 
 typedef Parameters = Map<String, ParamsModel>;
 
@@ -50,23 +51,26 @@ class ParamsModel {
   factory ParamsModel.fromMap(
     Map<String, dynamic> map,
   ) {
-    if (![2, 3].contains(map.length) ||
-        !map.containsKey(
-          'name',
-        ) ||
-        !map.containsKey(
-          'value',
-        )) {
-      throw ErrorHandler(
-        '''
+    map
+      ..killOnMissingKey(['name', 'value'])
+      ..killOnLengthMissMatch([2, 3]);
+    // if (!map.verifyLength([2, 3]) ||
+    //     !map.containsKey(
+    //       'name',
+    //     ) ||
+    //     !map.containsKey(
+    //       'value',
+    //     )) {
+    //   throw ErrorHandler(
+    //     '''
 
-        cannot find forced fields on params map or found extra values
-        given map is : $map''',
-        {
-          ErrorType.variableError,
-        },
-      );
-    }
+    //     cannot find forced fields on params map or found extra values
+    //     given map is : $map''',
+    //     {
+    //       ErrorType.variableError,
+    //     },
+    //   );
+    // }
     return ParamsModel(
       name: map['name'],
       value: map['value'],
