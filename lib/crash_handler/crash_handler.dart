@@ -213,7 +213,7 @@ class CrashHandler {
 
   ///check module has device and app info
   bool get hasBasicData => _hasBasicData;
-  List<String> _cleanFromDeviceInfo;
+  final List<String> _cleanFromDeviceInfo;
 
   ///device info gathered with [gatherBasicData]
   Map<String, dynamic> _deviceInfo = <String, dynamic>{
