@@ -10,7 +10,7 @@ import 'command_query_params.dart';
 ///then can run command by using [parsAndRunFromString] or [parsAndRunFromJson]
 class CommandQueryParser {
   final Map<String, CommandModel> commands;
-  final Map<String, dynamic> _results = <String, dynamic>{};
+  Map<String, dynamic> _results = <String, dynamic>{};
   dynamic getResultOf(String key, {bool isRequired = true}) {
     if (!_results.containsKey(key) && isRequired) {
       throw ErrorHandler(
@@ -35,10 +35,13 @@ class CommandQueryParser {
   Future<Map<String, dynamic>> parsAndRunFromString(
     String query, {
     bool resetOldResultTable = false,
+    bool storeResultOfThisRunInResultsTable = true,
+    bool returnWithOlderResults = true,
   }) async {
     if (resetOldResultTable) {
       resetResultTable();
     }
+    final internalResultTable = {..._results};
     final microQueries = query.split(';');
     for (final mq in microQueries) {
       var commandName = mq.split(' ')[0];
@@ -57,8 +60,8 @@ class CommandQueryParser {
             final param = ParamsModel.fromString(ps);
             params.addAll({param.name: param});
           }
-          final result = await relatedCommand.run(params, _results);
-          _results.addAll({resultTag: result});
+          final result = await relatedCommand.run(params, internalResultTable);
+          internalResultTable.addAll({resultTag: result});
         } else {
           throw ErrorHandler('Command not found: $commandName', {
             ErrorType.variableError,
@@ -66,16 +69,27 @@ class CommandQueryParser {
         }
       }
     }
-    return _results;
+    final output = internalResultTable;
+    if (!returnWithOlderResults) {
+      output.removeWhere((key, value) => _results[key] == value);
+    }
+    if (storeResultOfThisRunInResultsTable) {
+      _results = internalResultTable;
+    }
+
+    return output;
   }
 
   Future<Map<String, dynamic>> parsAndRunFromJson(
     List<Map<String, dynamic>> query, {
     bool resetOldResultTable = false,
+    bool storeResultOfThisRunInResultsTable = true,
+    bool returnWithOlderResults = true,
   }) async {
     if (resetOldResultTable) {
       resetResultTable();
     }
+    final internalResultTable = {..._results};
     final queryCommands = query.map(CommandQueryModel.fromMap);
 
     for (final cmd in queryCommands) {
@@ -89,15 +103,22 @@ class CommandQueryParser {
             ),
           ),
         );
-        final result = await command.run(params, _results);
-        _results.addAll({cmd.resultTag: result});
+        final result = await command.run(params, internalResultTable);
+        internalResultTable.addAll({cmd.resultTag: result});
       } else {
         throw ErrorHandler('Command not found: ${cmd.command}', {
           ErrorType.variableError,
         });
       }
     }
-    return _results;
+    final output = internalResultTable;
+    if (!returnWithOlderResults) {
+      output.removeWhere((key, value) => _results[key] == value);
+    }
+    if (storeResultOfThisRunInResultsTable) {
+      _results = internalResultTable;
+    }
+    return internalResultTable;
   }
 
   @override

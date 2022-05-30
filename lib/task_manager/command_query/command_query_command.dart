@@ -43,13 +43,6 @@ class CommandModel {
         ErrorType.variableError,
       });
     }
-    // final reflectedParams = Map<String, ParamsModel>.fromEntries(
-    //   params.entries.map((e) {
-    //     final value = e.value;
-
-    //     return MapEntry(e.key, value);
-    //   }),
-    // );
 
     return await commandRunner(params, results);
   }
