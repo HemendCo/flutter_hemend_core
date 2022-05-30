@@ -52,10 +52,8 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
-
   void _incrementCounter() {
-    print(mamad);
+    print(internalResultTable);
   }
 
   Future<List<Widget>> viewCommandParser(dynamic mamad) async {
@@ -359,8 +357,7 @@ Widget textViewGenerator(Map<String, ParamsModel> params, Map<String, dynamic> r
 
   return builder(TextField(
     onChanged: (value) {
-      print(value);
-      mamad[textParams] = value;
+      internalResultTable[textParams] = value;
     },
   ));
 }
@@ -378,15 +375,14 @@ extension AlignmentTools on Alignment {
 }
 
 Map<Type, ValueParser> mappers = {
-  String: (String value) => value,
-  double: (String value) => double.parse(value),
-  Color: (String value) => Color(int.parse(value)),
-  BorderRadius: (String value) => BorderRadius.circular(double.parse(value)),
-  EdgeInsets: (String value) => edgeInsetsFromString(value),
-  Alignment: (String value) => alignmentFromString(value),
-  Border: (String value) {
+  String: (value) => value,
+  double: (value) => double.parse(value),
+  Color: (value) => Color(int.parse(value)),
+  BorderRadius: (value) => BorderRadius.circular(double.parse(value)),
+  EdgeInsets: edgeInsetsFromString,
+  Alignment: alignmentFromString,
+  Border: (value) {
     // final borderParams = params['border']!.value;
-
     final sliced = value.toString().split(',');
     sliced.breakOnLengthMissMatch([2]);
     final color = Color(int.parse(sliced[0]));
@@ -398,4 +394,4 @@ Map<Type, ValueParser> mappers = {
     );
   }
 };
-Map<String, String> mamad = {};
+Map<String, String> internalResultTable = {};

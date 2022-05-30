@@ -1,9 +1,29 @@
-import 'dart:convert';
+import 'dart:convert' show json;
 
 import '../../debug/error_handler.dart';
 import '../../extensions/map_verification_tools.dart';
 
 typedef Parameters = Map<String, ParamsModel>;
+typedef ResultTable = Map<String, dynamic>;
+
+// TODO(FMotalleb): need to change to TypeAdapter used by Hive checkout
+///code runner will receive its parameters as [String] they may have a flag
+///to show its from result table or not if flag is true it will access its value
+///from [ResultTable] and if flag is false it will use its value directly
+///since its always from a [String] it need to be parsed to its real type
+///for this purpose we will use a method called [ValueParser] of type [T]
+///it will have one [String] parameter (the value of parameter) and it will
+///return [T] as the type of data we need
+///
+///example:
+///
+///```dart
+///Map<Type, ValueParser> mappers = {
+///String: (value) => value,
+///double: (value) => double.parse(value),
+///Color: (value) => Color(int.parse(value)),
+///BorderRadius: (value) => BorderRadius.circular(double.parse(value)),```
+
 typedef ValueParser<T> = T Function(String);
 
 class ParamsModel {
@@ -17,7 +37,7 @@ class ParamsModel {
   });
   T extractValue<T>({
     required Map<Type, ValueParser> mappers,
-    required Map<String, dynamic> results,
+    required ResultTable results,
   }) {
     if (isFromResults) {
       return extractFromResultsTable<T>(results);
@@ -31,7 +51,7 @@ class ParamsModel {
     return mappers[T]!.call(value);
   }
 
-  T extractFromResultsTable<T>(Map<String, dynamic> results) {
+  T extractFromResultsTable<T>(ResultTable results) {
     final referencedObject = results[value];
     if (referencedObject == null) {
       throw ErrorHandler(

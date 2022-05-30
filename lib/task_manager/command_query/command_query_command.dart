@@ -1,21 +1,41 @@
 import 'dart:async' show FutureOr;
 
 import '../../debug/error_handler.dart';
-import 'command_query_params.dart';
+import '../../extensions/list_verification_tools.dart';
+import 'command_query_params.dart' show Parameters, ResultTable;
 
 class CommandModel {
+  ///instruction name
   final String command;
+
+  ///parameters that command will break on absence
   final List<String> forcedParams;
+
+  ///extra optional parameters that command can use but are not required
+  ///
+  ///internal assertion test will use this list to check parameters given
+  ///to check for extra unusable parameters and throw error for them
   final List<String> optionalParams;
 
+  ///optional assertion test that will be run before running command to validate
+  ///parameters given or other cases
+  ///
+  ///for more information => [extraAssertion]
   final String? Function(
     Parameters,
-    Map<String, dynamic> results,
+    ResultTable results,
   )? optionalAssertion;
 
+  ///the function that this instruction will call
+  ///it will have parameters given via [Parameters]
+  ///and will will receive older result table as [ResultTable]
+  ///the key of result table is commandTag and value is result of command
+  ///
+  ///result type is [FutureOr] so it can be called like async methods
+  ///currently it will not support [Stream]
   final FutureOr<dynamic> Function(
     Parameters,
-    Map<String, dynamic> results,
+    ResultTable,
   ) commandRunner;
 
   const CommandModel({
@@ -26,12 +46,26 @@ class CommandModel {
     this.optionalAssertion,
   });
 
-  FutureOr<T> call<T>(Parameters params, Map<String, dynamic> results) async {
+  ///command runner will take [params] and older [results]
+  ///
+  ///will run optional assertion [optionalAssertion]
+  ///
+  ///then will run internal assertion [extraAssertion] to check parameters
+  ///
+  ///if [optionalAssertion] or [extraAssertion] both where ok
+  ///and returned *null* value then it will run [commandRunner]
+
+  FutureOr<T> call<T>(Parameters params, ResultTable results) async {
+    ///testing optional assertion
     final optionalAssertResult = (optionalAssertion ?? (_, __) => null)(
       params,
       results,
     );
+
+    ///checking parameters before running command
     final paramsChk = extraAssertion(params);
+
+    ///throw if one or all of assertions failed
     if (optionalAssertResult != null || paramsChk != null) {
       throw ErrorHandler('''Assertion failed
           Command: $command
@@ -47,28 +81,39 @@ class CommandModel {
     return await commandRunner(params, results);
   }
 
-  FutureOr<T> run<T>(Parameters params, Map<String, dynamic> results) {
-    return this(params, results);
-  }
+  ///points to the callable method
+  FutureOr<T> run<T>(
+    Parameters params,
+    ResultTable results,
+  ) =>
+      this(
+        params,
+        results,
+      );
 
+  ///will return nullable [String] string as result of assertion
+  ///if result is null then it means that assertion passed
+  ///otherwise it will return [String] with error message
   String? extraAssertion(Parameters params) {
-    final sentParams = params.entries.map((e) => e.key);
-    final allParams = forcedParams + optionalParams;
     final result = StringBuffer();
-    final missingForcedParams = forcedParams.any(
-      (element) => !sentParams.contains(element),
-    );
-    if (missingForcedParams) {
-      result.writeln('Missing forced params');
+    final sentParams = params.keys;
+    final allParams = forcedParams + optionalParams;
+
+    ///check missing forced params
+    final missingForcedParams = sentParams.getMissingItems(forcedParams);
+    if (missingForcedParams.isNotEmpty) {
+      result.writeln('Missing forced params: $missingForcedParams\n');
     }
-    final extraParams = sentParams.any(
-      (element) => !allParams.contains(element),
-    );
-    if (extraParams) {
-      result.writeln('Extra params found');
+
+    ///check extra given params
+    final extraParams = allParams.getMissingItems(sentParams);
+    if (extraParams.isNotEmpty) {
+      result.writeln('Extra params found: $extraParams\n');
     }
+
+    ///return result if has any data
     if (result.isNotEmpty) {
-      return '$result\n';
+      return '$result';
     }
     return null;
   }

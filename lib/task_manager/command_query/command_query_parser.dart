@@ -1,16 +1,14 @@
-import 'dart:convert';
+import 'dart:convert' show json;
 
 import '../../debug/error_handler.dart';
-
 import '../../extensions/map_verification_tools.dart';
-import 'command_query_command.dart';
-import 'command_query_params.dart';
+import 'command_query.dart' show CommandModel, ParamsModel, ResultTable;
 
 ///command runner will take instruction set named [commands]
 ///then can run command by using [parsAndRunFromString] or [parsAndRunFromJson]
 class CommandQueryParser {
   final Map<String, CommandModel> commands;
-  Map<String, dynamic> _results = <String, dynamic>{};
+  ResultTable _results = <String, dynamic>{};
   dynamic getResultOf(String key, {bool isRequired = true}) {
     if (!_results.containsKey(key) && isRequired) {
       throw ErrorHandler(
@@ -32,7 +30,7 @@ class CommandQueryParser {
   CommandQueryParser({
     required this.commands,
   });
-  Future<Map<String, dynamic>> parsAndRunFromString(
+  Future<ResultTable> parsAndRunFromString(
     String query, {
     bool resetOldResultTable = false,
     bool storeResultOfThisRunInResultsTable = true,
@@ -80,8 +78,8 @@ class CommandQueryParser {
     return output;
   }
 
-  Future<Map<String, dynamic>> parsAndRunFromJson(
-    List<Map<String, dynamic>> query, {
+  Future<ResultTable> parsAndRunFromJson(
+    List<ResultTable> query, {
     bool resetOldResultTable = false,
     bool storeResultOfThisRunInResultsTable = true,
     bool returnWithOlderResults = true,

@@ -5,6 +5,14 @@ extension ListVerifications<T> on Iterable<T> {
     return possibleOptions.contains(length);
   }
 
+  Iterable<T> getMissingItems(Iterable<T> possibleOptions) sync* {
+    for (final option in possibleOptions) {
+      if (!contains(option)) {
+        yield option;
+      }
+    }
+  }
+
   void breakOnLengthMissMatch(List<int> possibleOptions) {
     final lengthCheck = verifyLength(possibleOptions);
     if (!lengthCheck) {

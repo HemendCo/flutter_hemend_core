@@ -23,13 +23,21 @@ extension MapVerifier<TK, TV> on Map<TK, TV> {
     return null;
   }
 
+  Iterable<TK> getMissingKeys(List<TK> possibleOptions) sync* {
+    for (final option in possibleOptions) {
+      if (!containsKey(option)) {
+        yield option;
+      }
+    }
+  }
+
   void breakOnMissingKey(List<TK> possibleOptions) {
-    final missingItem = getMissingKey(possibleOptions);
-    if (missingItem != null) {
+    final missingItems = getMissingKeys(possibleOptions);
+    if (missingItems.isNotEmpty) {
       throw ErrorHandler('''
 
-Cannot find a required entry in map: $this
-Missing key: $missingItem''', {
+Cannot find a required entries in map: $this
+Missing keys: $missingItems''', {
         ErrorType.variableError,
         ErrorType.notFound,
       });
