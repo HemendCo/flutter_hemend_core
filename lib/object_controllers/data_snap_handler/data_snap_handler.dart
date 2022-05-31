@@ -176,11 +176,6 @@ class DataSnapHandler<T> with EqualizerMixin {
     }
   }
 
-  // @override
-  // String toString() {
-  //   return 'DataSnap: \n\tData: $data \n\tException: $exception \n\tProgress: $progress \n\tSender: $sender \n\tStatus: $status';
-  // }
-
   @override
   List<dynamic> get equalCheckItems => [data.toString(), exception, sender, progress, status.name];
 }

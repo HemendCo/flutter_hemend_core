@@ -19,7 +19,6 @@ extension Debugger on Object {
   /// This function was designed to map closely to the logging information
   /// collected by `package:logging`.
   ///
-  /// - [message] is the log message
   /// - [time] (optional) is the timestamp
   /// - [sequenceNumber] (optional) is a monotonically increasing sequence number
   /// - [level] (optional) is the severity level (a value between 0 and 2000); see

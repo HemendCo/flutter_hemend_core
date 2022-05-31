@@ -1,10 +1,16 @@
+import 'dart:developer';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:hemend/crash_handler/crash_handler.dart';
+import 'package:hemend/debug/runtime_calculator.dart';
 import 'package:hemend/extensions/list_verification_tools.dart';
 import 'package:hemend/task_manager/command_query/command_query.dart';
 import 'package:hemend/ui_related/pre_built_widgets/future_builder.dart';
 
 void main() {
+  CrashHandler.register();
+
   runApp(const MyApp());
 }
 
@@ -53,12 +59,18 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   void _incrementCounter() {
-    print(internalResultTable);
+    runCommandsWithTrace().then((value) => print(internalResultTable));
   }
 
-  Future<List<Widget>> viewCommandParser(dynamic mamad) async {
+  Future<List<Widget>> runCommandsWithTrace() async {
+    print('is performance : $kProfileMode');
+    final runtimeResult = await RuntimeCalculator().calculateFor(() => viewCommandParser());
+    log(runtimeResult.duration.toString());
+    return runtimeResult.value;
+  }
+
+  Future<List<Widget>> viewCommandParser() async {
     // testChecker();
-    final start = DateTime.now();
 
     final query = [
       {
@@ -224,8 +236,6 @@ class _MyHomePageState extends State<MyHomePage> {
         result.add(item);
       }
     }
-    final end = DateTime.now();
-    print(end.difference(start).inMilliseconds);
     return result;
   }
 
@@ -247,7 +257,7 @@ class _MyHomePageState extends State<MyHomePage> {
         // Center is a layout widget. It takes a single child and positions it
         // in the middle of the parent.
         child: BuildInFuture<List<Widget>>(
-          itemFromFuture: compute(viewCommandParser, ''),
+          itemFromFuture: runCommandsWithTrace(),
           childInFuture: (_, items, rebuilder) => ListView.builder(
             itemCount: items!.length,
             itemBuilder: (context, index) => items[index],

@@ -5,7 +5,8 @@ import 'dart:convert' as converter show jsonDecode, jsonEncode;
 import 'dart:developer' as dev;
 import 'dart:io' show Platform;
 import 'package:device_info_plus/device_info_plus.dart' as device_info show DeviceInfoPlugin;
-import 'package:flutter/material.dart' as ui_part;
+import 'package:flutter/material.dart' as material_lib
+    show runApp, Widget, FlutterErrorDetails, Material, Container, ErrorWidget, Colors, Center, Text, TextStyle;
 import 'package:http/http.dart' as http;
 import 'package:package_info_plus/package_info_plus.dart' as package_info show PackageInfo;
 import 'package:shared_preferences/shared_preferences.dart' as storage show SharedPreferences;
@@ -44,7 +45,7 @@ class CrashHandler {
     ],
 
     ///it is a placeholder for crashed widgets
-    ui_part.Widget Function(ui_part.FlutterErrorDetails)? errorWidget,
+    material_lib.Widget Function(material_lib.FlutterErrorDetails)? errorWidget,
   })  : _extraInfo = extraInfo,
         _onCrash = onCrash,
         _cleanFromDeviceInfo = cleanFromDeviceInfo,
@@ -52,16 +53,16 @@ class CrashHandler {
     _instance = this;
 
     ///will replace (red in debug mode / grey in release mode) default error widget and will catch its error and report it
-    ui_part.ErrorWidget.builder = (ui_part.FlutterErrorDetails details) {
+    material_lib.ErrorWidget.builder = (material_lib.FlutterErrorDetails details) {
       recordError(details.exception, details.stack ?? StackTrace.empty, {'fullErrorLog': details.toString()});
       return (errorWidget ??
-          (_) => ui_part.Material(
-                child: ui_part.Container(
-                  color: ui_part.Colors.red,
-                  child: const ui_part.Center(
-                    child: ui_part.Text(
+          (_) => material_lib.Material(
+                child: material_lib.Container(
+                  color: material_lib.Colors.red,
+                  child: const material_lib.Center(
+                    child: material_lib.Text(
                       'found a bug inside this view.',
-                      style: ui_part.TextStyle(color: ui_part.Colors.white),
+                      style: material_lib.TextStyle(color: material_lib.Colors.white),
                     ),
                   ),
                 ),
@@ -72,6 +73,10 @@ class CrashHandler {
       '$_kModuleName initialized',
     );
   }
+
+  /// runs a method or function in a [runZonedGuarded]
+  /// to catch any exception happens in it and report it
+  /// it's main usecase is running the [material_lib.runApp] method
   R? runZoned<R>(
     R Function() body, {
     Map<Object?, Object?>? zoneValues,
