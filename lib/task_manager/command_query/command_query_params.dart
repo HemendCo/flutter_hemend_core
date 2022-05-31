@@ -1,30 +1,42 @@
 import 'dart:convert' show json;
 
 import '../../debug/error_handler.dart';
+import '../../extensions/list_verification_tools.dart';
 import '../../extensions/map_verification_tools.dart';
+import '../../extensions/type_caster/type_caster.dart';
 
 typedef Parameters = Map<String, ParamsModel>;
 typedef ResultTable = Map<String, dynamic>;
 
-// TODO(FMotalleb): need to change to TypeAdapter used by Hive checkout
 ///code runner will receive its parameters as [String] they may have a flag
 ///to show its from result table or not if flag is true it will access its value
 ///from [ResultTable] and if flag is false it will use its value directly
 ///since its always from a [String] it need to be parsed to its real type
-///for this purpose we will use a method called [ValueParser] of type [T]
+///for this purpose we will use a method called [StringValueParser] of type [T]
 ///it will have one [String] parameter (the value of parameter) and it will
 ///return [T] as the type of data we need
 ///
-///example:
+///example using [ParserMap] :
 ///
-///```dart
-///Map<Type, ValueParser> mappers = {
-///String: (value) => value,
-///double: (value) => double.parse(value),
-///Color: (value) => Color(int.parse(value)),
-///BorderRadius: (value) => BorderRadius.circular(double.parse(value)),```
-
-typedef ValueParser<T> = T Function(String);
+/// ```dart
+///
+/// Map<Type, ValueParser> mappers = {
+///   String: ValueParser<String>(
+///     toBaseCaster: (p0) => p0,
+///     toDestinationCaster: (p0) => p0,
+///   ),
+///   double: ValueParser<double>(
+///     toBaseCaster: (p0) => p0.toString(),
+///     toDestinationCaster: (p0) => double.parse(p0),
+///   ),
+///   Color: ValueParser<Color>(
+///     toBaseCaster: (p0) => p0.value.toString(),
+///     toDestinationCaster: (p0) => Color(int.parse(p0)),
+///   ),
+/// };
+/// ```
+typedef StringValueParser<T> = TypeCaster<String, T>;
+typedef ParserMap = Map<Type, StringValueParser<Type>>;
 
 class ParamsModel {
   final String name;
@@ -35,8 +47,14 @@ class ParamsModel {
     required this.value,
     required this.isFromResults,
   });
+
+  /// extract value of params from [mappers] parser or [results] table
+  /// it will throw errors if cant find parser or result table
+  /// if [isFromResults] is true it will access its value from [results] table
+  /// if [isFromResults] is false it will use its value directly and cast it
+  /// to the type of [T] using [mappers] parser
   T extractValue<T>({
-    required Map<Type, ValueParser> mappers,
+    required Map<Type, StringValueParser> mappers,
     required ResultTable results,
   }) {
     if (isFromResults) {
@@ -46,25 +64,20 @@ class ParamsModel {
     }
   }
 
-  T extractValueUsingTypeMappers<T>(Map<Type, ValueParser> mappers) {
+  /// use mappers table to cast [value] to [T]
+  /// will throw if mapper was not found
+  /// for more information about parsers look at [StringValueParser]
+  T extractValueUsingTypeMappers<T>(Map<Type, StringValueParser> mappers) {
     mappers.breakOnMissingKey([T]);
-    return mappers[T]!.call(value);
+    return mappers[T]!.toDestinationCaster(value);
   }
 
+  /// extract val
   T extractFromResultsTable<T>(ResultTable results) {
+    results.breakOnMissingKey([value]);
     final referencedObject = results[value];
-    if (referencedObject == null) {
-      throw ErrorHandler(
-        '''
 
-cannot find referenced object on result table for $value
-result table items: ${results.keys}''',
-        <ErrorType>{
-          ErrorType.variableError,
-          ErrorType.notFound,
-        },
-      );
-    }
+    /// checking if the value from result table has correct type in type cast
     if (referencedObject is! T) {
       throw ErrorHandler(
         '''
@@ -81,31 +94,34 @@ result table items: ${results.keys}''',
     return referencedObject;
   }
 
+  /// create a [ParamsModel] from a string like
+  /// `name=value`
+  ///
+  /// if value is braced in tow `|` will set [isFromResults] to true
+  /// like `name=|value|`
+  ///
+  /// in this case it will remove the `|` and set value to `value`
   factory ParamsModel.fromString(String element) {
-    final split = element.split('=');
+    final split = element.split('=')
+      ..breakOnLengthMismatch(
+        [
+          2,
+        ],
+      );
     final key = split[0];
     var value = split[1];
     final readFromResults = value.startsWith('|') && value.endsWith('|');
     if (readFromResults) {
       value = value.substring(1, value.length - 1);
-      // value = results[value].toString();
     }
-
     return ParamsModel(
       name: key,
       value: value,
-
-      ///the reason is that the value is from results
-      ///but we set value from results here
-      ///and this flag will active command runners value parser to replace
-      ///results[value] with the real value
-      ///like what we did here so it will be false but in [fromMap()]
-      ///we don't have access to results and command runner will do the job
-      isFromResults: false,
+      isFromResults: readFromResults,
     );
   }
   @override
-  String toString() => ' $name = $value ';
+  String toString() => '$name=$value';
 
   Map<String, dynamic> toMap() {
     return {
@@ -121,23 +137,6 @@ result table items: ${results.keys}''',
     map
       ..breakOnMissingKey(['name', 'value'])
       ..breakOnLengthMissMatch([2, 3]);
-    // if (!map.verifyLength([2, 3]) ||
-    //     !map.containsKey(
-    //       'name',
-    //     ) ||
-    //     !map.containsKey(
-    //       'value',
-    //     )) {
-    //   throw ErrorHandler(
-    //     '''
-
-    //     cannot find forced fields on params map or found extra values
-    //     given map is : $map''',
-    //     {
-    //       ErrorType.variableError,
-    //     },
-    //   );
-    // }
     return ParamsModel(
       name: map['name'],
       value: map['value'],

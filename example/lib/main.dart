@@ -188,6 +188,24 @@ class _MyHomePageState extends State<MyHomePage> {
           },
         ],
       },
+      {
+        'command': 'DecorationGenerator',
+        'resultTag': 'master',
+        'params': [
+          {
+            'name': 'color',
+            'value': '0xFF34C517',
+          },
+          {
+            'name': 'borderRadius',
+            'value': '15',
+          },
+          {
+            'name': 'border',
+            'value': '0xFFA03F3F,2',
+          },
+        ],
+      },
     ]);
     final parsResult = await parser.parsAndRunFromJson(
       query,
@@ -245,8 +263,8 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 }
 
-Map<String, CommandModel> commandMap = {
-  'ContainerGenerator': const CommandModel(
+InstructionSet commandMap = InstructionSet(const [
+  CommandModel(
     command: 'ContainerGenerator',
     commandRunner: containerGenerator,
     forcedParams: [
@@ -261,31 +279,20 @@ Map<String, CommandModel> commandMap = {
       'transform',
     ],
   ),
-  'TextView': const CommandModel(
+  CommandModel(
     command: 'TextView',
     optionalParams: [],
     forcedParams: ['text', 'builder'],
     commandRunner: textViewGenerator,
-    // optionalAssertion: (params, results) {
-    //   if (results['TextViewContainerGenerator'] is! WidgetGenerator) {
-    //     return 'cannot find TextViewContainerGenerator as widget generator';
-    //   }
-    //   return null;
-    // },
   ),
-  'DecorationGenerator': const CommandModel(
+  CommandModel(
     command: 'DecorationGenerator',
     optionalParams: ['color', 'borderRadius', 'shape', 'border'],
     forcedParams: [],
     commandRunner: decoration,
-    // optionalAssertion: (params, results) {
-    //   if (results['TextViewContainerGenerator'] is! WidgetGenerator) {
-    //     return 'cannot find TextViewContainerGenerator as widget generator';
-    //   }
-    //   return null;
-    // },
   ),
-};
+]);
+
 typedef WidgetGenerator = Widget Function(Widget child);
 BoxDecoration decoration(Map<String, ParamsModel> params, Map<String, dynamic> results) {
   BorderRadius borderRadius = BorderRadius.zero;
@@ -364,7 +371,7 @@ Widget textViewGenerator(Map<String, ParamsModel> params, Map<String, dynamic> r
 
 Alignment alignmentFromString(String align) {
   final alignArray = align.split(',');
-  alignArray.breakOnLengthMissMatch([2]);
+  alignArray.breakOnLengthMismatch([2]);
   return Alignment(double.parse(alignArray[0]), double.parse(alignArray[1]));
 }
 
@@ -374,24 +381,47 @@ extension AlignmentTools on Alignment {
   }
 }
 
-Map<Type, ValueParser> mappers = {
-  String: (value) => value,
-  double: (value) => double.parse(value),
-  Color: (value) => Color(int.parse(value)),
-  BorderRadius: (value) => BorderRadius.circular(double.parse(value)),
-  EdgeInsets: edgeInsetsFromString,
-  Alignment: alignmentFromString,
-  Border: (value) {
-    // final borderParams = params['border']!.value;
-    final sliced = value.toString().split(',');
-    sliced.breakOnLengthMissMatch([2]);
-    final color = Color(int.parse(sliced[0]));
-    final width = double.parse(sliced[1]);
-    return Border.all(
-      color: color,
-      width: width,
-      style: BorderStyle.solid,
-    );
-  }
+Map<Type, StringValueParser> mappers = {
+  String: StringValueParser<String>(
+    toBaseCaster: (p0) => p0,
+    toDestinationCaster: (p0) => p0,
+  ),
+  double: StringValueParser<double>(
+    toBaseCaster: (p0) => p0.toString(),
+    toDestinationCaster: (p0) => double.parse(p0),
+  ),
+  Color: StringValueParser<Color>(
+    toBaseCaster: (p0) => p0.value.toString(),
+    toDestinationCaster: (p0) => Color(int.parse(p0)),
+  ),
+  BorderRadius: StringValueParser<BorderRadius>(
+    toBaseCaster: (p0) => p0.topLeft.x.toString(),
+    toDestinationCaster: (p0) => BorderRadius.circular(double.parse(p0)),
+  ),
+  EdgeInsets: StringValueParser<EdgeInsets>(
+    toBaseCaster: (p0) {
+      return '${p0.left},${p0.top},${p0.right},${p0.bottom},';
+    },
+    toDestinationCaster: (p0) => edgeInsetsFromString(p0),
+  ),
+  Alignment: StringValueParser<Alignment>(
+    toBaseCaster: (p0) => '${p0.x},${p0.y}',
+    toDestinationCaster: (p0) => alignmentFromString(p0),
+  ),
+  Border: StringValueParser<Border>(
+    toBaseCaster: (p0) => '${p0.bottom.color.value},${p0.bottom.width}',
+    toDestinationCaster: (p0) {
+      final sliced = p0.split(',');
+      sliced.breakOnLengthMismatch([2]);
+      final color = Color(int.parse(sliced[0]));
+      final width = double.parse(sliced[1]);
+
+      return Border.all(
+        color: color,
+        width: width,
+        style: BorderStyle.solid,
+      );
+    },
+  ),
 };
 Map<String, String> internalResultTable = {};
