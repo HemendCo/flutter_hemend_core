@@ -13,7 +13,7 @@ extension ListVerifications<T> on Iterable<T> {
     }
   }
 
-  void breakOnLengthMissMatch(List<int> possibleOptions) {
+  void breakOnLengthMismatch(List<int> possibleOptions) {
     final lengthCheck = verifyLength(possibleOptions);
     if (!lengthCheck) {
       throw ErrorHandler(

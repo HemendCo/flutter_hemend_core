@@ -8,7 +8,10 @@
             "name": "example",
             "cwd": "example",
             "request": "launch",
-            "type": "dart"
+            "type": "dart",
+            "toolArgs": [
+                " --host-vmservice-port 9989"
+            ]
         },
         {
             "name": "example (profile mode)",
