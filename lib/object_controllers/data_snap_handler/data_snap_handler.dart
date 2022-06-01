@@ -132,10 +132,10 @@ class DataSnapHandler<T> with EqualizerMixin {
 
   ///this method will force you to handle all types of responses
   R call<R>({
-    required R Function(T data) onDone,
+    required R Function(T? data) onDone,
     required R Function(Object data, Object sender) onError,
     required R Function(double progress) onProgress,
-    required R Function(T data, double progress) onDataSnapshot,
+    required R Function(T? data, double progress) onDataSnapshot,
   }) =>
       singleAct(
         onDone: onDone,
@@ -146,14 +146,14 @@ class DataSnapHandler<T> with EqualizerMixin {
 
   ///this method will force you to handle all types of responses
   R singleAct<R>({
-    required R Function(T data) onDone,
+    required R Function(T? data) onDone,
     required R Function(Object error, Object sender) onError,
     required R Function(double progress) onProgress,
-    required R Function(T data, double progress) onDataSnapshot,
+    required R Function(T? data, double progress) onDataSnapshot,
   }) {
     switch (status) {
       case SnapStatus.done:
-        return onDone(data!);
+        return onDone(data);
       case SnapStatus.error:
         return onError(
           exception!,
@@ -162,18 +162,18 @@ class DataSnapHandler<T> with EqualizerMixin {
       case SnapStatus.progress:
         return onProgress(progress);
       case SnapStatus.progressWithData:
-        return onDataSnapshot(data!, progress);
+        return onDataSnapshot(data, progress);
       case SnapStatus.singleSnap:
-        return onDataSnapshot(data!, progress);
+        return onDataSnapshot(data, progress);
     }
   }
 
   R singleActOnFinished<R>({
-    required R Function(T data) onDone,
+    required R Function(T? data) onDone,
     required R Function(Object? error, Object? sender) onError,
   }) {
     if (status == SnapStatus.done) {
-      return onDone(data!);
+      return onDone(data);
     } else {
       return onError(exception, sender);
     }

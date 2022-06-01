@@ -314,7 +314,7 @@ class CrashHandler {
         (value) {
           value.singleActOnFinished(
             onDone: (result) {
-              if (result) {
+              if (result != null) {
                 _reportBucket();
               } else {
                 final logData = converter.jsonEncode(params);
