@@ -96,7 +96,7 @@ class CrashHandler {
       final taskResult = await tryThis(task);
       taskResult.singleActOnFinished(
         onDone: (p0) => results.add(true),
-        onError: (p0) => results.add(false),
+        onError: (p0, _) => results.add(false),
       );
     }
     return results;
@@ -265,7 +265,7 @@ class CrashHandler {
   }) async {
     try {
       final result = await function();
-      return snap.DataSnapHandler<TResult>.done(data: result);
+      return snap.DataSnapHandler<TResult>.done(data: result, sender: StackTrace.current);
     } catch (ex, st) {
       recordError(ex, st, extraInfo);
       return snap.DataSnapHandler<TResult>.error(
@@ -314,7 +314,7 @@ class CrashHandler {
         (value) {
           value.singleActOnFinished(
             onDone: (result) {
-              if (result ?? false == true) {
+              if (result) {
                 _reportBucket();
               } else {
                 final logData = converter.jsonEncode(params);
@@ -327,7 +327,7 @@ class CrashHandler {
                 );
               }
             },
-            onError: (_) {
+            onError: (_, stack) {
               final logData = converter.jsonEncode(params);
               _internalLog(
                 'cannot upload log data for now it will be placed in ${logData.hashCode}',

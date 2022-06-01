@@ -65,8 +65,8 @@ class _MyHomePageState extends State<MyHomePage> {
   Future<List<Widget>> runCommandsWithTrace() async {
     print('is performance : $kProfileMode');
     final runtimeResult = await RuntimeCalculator().calculateFor(() => viewCommandParser());
-    log(runtimeResult.duration.toString());
-    return runtimeResult.value;
+    log(runtimeResult.left.toString());
+    return runtimeResult.right;
   }
 
   Future<List<Widget>> viewCommandParser() async {

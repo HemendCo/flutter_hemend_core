@@ -146,7 +146,14 @@ abstract class IsolationCore {
   static Future<void> _taskRunner<T>(SingleTaskIsolateParams<T> params) async {
     late DataSnapHandler<T> result;
     try {
-      result = DataSnapHandler.done(data: await params.task(params.taskParams));
+      result = DataSnapHandler.done(
+        data: await params.task(params.taskParams),
+        sender: {
+          'name': 'Isolate Manager->_taskRunner',
+          'task': params.task,
+          'taskParams': params.taskParams,
+        },
+      );
     } catch (exception) {
       result = DataSnapHandler.error(
         exception: exception,

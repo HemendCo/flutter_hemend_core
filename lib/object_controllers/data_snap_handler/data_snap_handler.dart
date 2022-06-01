@@ -85,7 +85,7 @@ class DataSnapHandler<T> with EqualizerMixin {
   ///an instance with [data] and no exception sender is done
   const DataSnapHandler.done({
     required this.data,
-    this.sender,
+    required this.sender,
   })  : exception = null,
         progress = 1,
         status = SnapStatus.done;
@@ -93,7 +93,7 @@ class DataSnapHandler<T> with EqualizerMixin {
   ///an instance with [exception] and no data sender has an error
   const DataSnapHandler.error({
     required this.exception,
-    this.sender,
+    required this.sender,
   })  : data = null,
         progress = 0,
         status = SnapStatus.error;
@@ -132,10 +132,10 @@ class DataSnapHandler<T> with EqualizerMixin {
 
   ///this method will force you to handle all types of responses
   R call<R>({
-    required R Function(T?) onDone,
-    required R Function(Object?) onError,
-    required R Function(double) onProgress,
-    required R Function(T?, double) onDataSnapshot,
+    required R Function(T data) onDone,
+    required R Function(Object data, Object sender) onError,
+    required R Function(double progress) onProgress,
+    required R Function(T data, double progress) onDataSnapshot,
   }) =>
       singleAct(
         onDone: onDone,
@@ -146,36 +146,45 @@ class DataSnapHandler<T> with EqualizerMixin {
 
   ///this method will force you to handle all types of responses
   R singleAct<R>({
-    required R Function(T?) onDone,
-    required R Function(Object?) onError,
-    required R Function(double) onProgress,
-    required R Function(T?, double) onDataSnapshot,
+    required R Function(T data) onDone,
+    required R Function(Object error, Object sender) onError,
+    required R Function(double progress) onProgress,
+    required R Function(T data, double progress) onDataSnapshot,
   }) {
     switch (status) {
       case SnapStatus.done:
-        return onDone(data);
+        return onDone(data!);
       case SnapStatus.error:
-        return onError(exception);
+        return onError(
+          exception!,
+          sender!,
+        );
       case SnapStatus.progress:
         return onProgress(progress);
       case SnapStatus.progressWithData:
-        return onDataSnapshot(data, progress);
+        return onDataSnapshot(data!, progress);
       case SnapStatus.singleSnap:
-        return onDataSnapshot(data, progress);
+        return onDataSnapshot(data!, progress);
     }
   }
 
   R singleActOnFinished<R>({
-    required R Function(T?) onDone,
-    required R Function(Object?) onError,
+    required R Function(T data) onDone,
+    required R Function(Object? error, Object? sender) onError,
   }) {
     if (status == SnapStatus.done) {
-      return onDone(data);
+      return onDone(data!);
     } else {
-      return onError(exception);
+      return onError(exception, sender);
     }
   }
 
   @override
-  List<dynamic> get equalCheckItems => [data.toString(), exception, sender, progress, status.name];
+  List<dynamic> get equalCheckItems => [
+        data.toString(),
+        exception,
+        sender,
+        progress,
+        status.name,
+      ];
 }

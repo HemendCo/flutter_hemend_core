@@ -17,6 +17,13 @@ enum ErrorType {
   final String info;
 }
 
+/// a class that extends Exception to provide a more detailed error message
+/// and type of error
+///
+/// [ErrorType] is used to provide a more detailed error message
+///
+/// [errorTypes] is a [Set] that contains all the [ErrorType]s that are
+/// cause of the error
 class ErrorHandler implements Exception {
   final String message;
   final Set<ErrorType> errorTypes;
