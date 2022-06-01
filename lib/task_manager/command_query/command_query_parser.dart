@@ -8,6 +8,7 @@ import 'command_query.dart' show CommandModel, ParamsModel, ResultTable;
 typedef InstructionMap = Map<String, CommandModel>;
 
 ///command runner will take instruction set named [commands]
+// ignore: deprecated_member_use_from_same_package
 ///then can run command by using [parsAndRunFromString] or [parsAndRunFromJson]
 class CommandQueryParser {
   /// instruction set of this query parser
@@ -299,8 +300,7 @@ class CommandQueryModel {
       );
 
   @override
-  // ignore: lines_longer_than_80_chars
-  String toString() => 'CommandQueryModel(command: $command, _resultTag: $resultTag, params: $params)';
+  String toString() => '''CommandQueryModel(command: $command, _resultTag: $resultTag, params: $params)''';
 }
 
 /// [InstructionSet] is a class that contains all of the commands that can be

@@ -143,7 +143,7 @@ class _MyHomePageState extends State<MyHomePage> {
         ]
       },
       ...List.generate(
-        9500,
+        10,
         (index) => {
           'command': 'TextView',
           'resultTag': 'TextViewTest$index#Widget',

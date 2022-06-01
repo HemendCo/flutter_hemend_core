@@ -1,5 +1,3 @@
-// ignore_for_file: lines_longer_than_80_chars
-
 import 'package:flutter/material.dart';
 import '../../ui_related/state_extensions/safe_state.dart';
 
@@ -11,7 +9,7 @@ abstract class SingleBindableObject implements BaseBindableObject {
   void bind(BindableState state) {
     assert(
       !isBonded,
-      'Assertion Failed this bindable object is singleBounded and cant have 2 state at same time use MultipleBindableObject instead if needed',
+      '''Assertion Failed this bindable object is singleBounded and cant have 2 state at same time use MultipleBindableObject instead if needed''',
     );
     if (isBonded) return;
     _bondedState = state;
@@ -78,6 +76,7 @@ abstract class BaseBindableObject {
   void update();
 }
 
+// ignore: lines_longer_than_80_chars
 abstract class BindableState<T extends StatefulWidget, B extends BaseBindableObject> extends SafeState<T>
     implements _ObjectCarrier<B> {
   bool get isBonded => bondedObject != null;

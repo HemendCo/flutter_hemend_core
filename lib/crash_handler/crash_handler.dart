@@ -1,19 +1,48 @@
-// ignore_for_file: lines_longer_than_80_chars
-
-import 'dart:async' show Future, FutureOr, Zone, ZoneSpecification, runZonedGuarded;
-import 'dart:convert' as converter show jsonDecode, jsonEncode;
+import 'dart:async' //
+    show
+        Future,
+        FutureOr,
+        Zone,
+        ZoneSpecification,
+        runZonedGuarded;
+import 'dart:convert' as converter //
+    show
+        jsonDecode,
+        jsonEncode;
 import 'dart:developer' as dev;
-import 'dart:io' show Platform;
-import 'package:device_info_plus/device_info_plus.dart' as device_info show DeviceInfoPlugin;
-import 'package:flutter/material.dart' as material_lib
-    show runApp, Widget, FlutterErrorDetails, Material, Container, ErrorWidget, Colors, Center, Text, TextStyle;
+import 'dart:io' //
+    show
+        Platform;
+import 'package:device_info_plus/device_info_plus.dart' as device_info //
+    show
+        DeviceInfoPlugin;
+
+import 'package:flutter/material.dart' as material_lib //
+    show
+        runApp,
+        Widget,
+        FlutterErrorDetails,
+        Material,
+        Container,
+        ErrorWidget,
+        Colors,
+        Center,
+        Text,
+        TextStyle;
 import 'package:http/http.dart' as http;
-import 'package:package_info_plus/package_info_plus.dart' as package_info show PackageInfo;
-import 'package:shared_preferences/shared_preferences.dart' as storage show SharedPreferences;
+import 'package:package_info_plus/package_info_plus.dart' as package_info //
+    show
+        PackageInfo;
+import 'package:shared_preferences/shared_preferences.dart' as storage //
+    show
+        SharedPreferences;
 
 import '../debug/developer_tools.dart';
+import '../debug/error_handler.dart';
 import '../object_controllers/data_snap_handler/data_snap_handler.dart' as snap;
-import '../task_manager/isolate_manager/isolation_core.dart' as treads show IsolationCore;
+import '../task_manager/isolate_manager/isolation_core.dart' as treads //
+    show
+        IsolationCore;
 
 class CrashHandler {
   static const _kModuleName = 'Crashlytix';
@@ -33,8 +62,27 @@ class CrashHandler {
   ///
   ///although you can pass [Map<String,dynamic>] with extraInfo parameter to
   ///[call] [tryThis] or [recordError] methods and attach extra info to report
-  static CrashHandler get instance => _instance;
-  static late CrashHandler _instance;
+  static CrashHandler get instance {
+    if (_instance == null) {
+      throw const ErrorHandler.isNotInitializedYet(
+        objectName: 'Crashlytics',
+        extraInformation: '''
+<============================>
+Crashlytics is not initialized 
+you can initialize it by using
+CrashHandler.register(
+  //Params here,
+);
+<============================>
+if you don't want to use Crashlytics check what method calling it
+''',
+      );
+    }
+    return _instance!;
+  }
+
+  static CrashHandler get I => instance;
+  static CrashHandler? _instance;
   CrashHandler.register({
     this.reportUri,
     void Function(Object, StackTrace)? onCrash,
@@ -52,9 +100,18 @@ class CrashHandler {
         _reportHeaders = reportHeaders {
     _instance = this;
 
-    ///will replace (red in debug mode / grey in release mode) default error widget and will catch its error and report it
-    material_lib.ErrorWidget.builder = (material_lib.FlutterErrorDetails details) {
-      recordError(details.exception, details.stack ?? StackTrace.empty, {'fullErrorLog': details.toString()});
+    ///will replace (red in debug mode / grey in release mode)
+    ///default error widget and will catch its error and report it
+    material_lib.ErrorWidget.builder = (
+      material_lib.FlutterErrorDetails details,
+    ) {
+      recordError(
+        details.exception,
+        details.stack ?? StackTrace.empty,
+        {
+          'fullErrorLog': details.toString(),
+        },
+      );
       return (errorWidget ??
           (_) => material_lib.Material(
                 child: material_lib.Container(
@@ -62,7 +119,9 @@ class CrashHandler {
                   child: const material_lib.Center(
                     child: material_lib.Text(
                       'found a bug inside this view.',
-                      style: material_lib.TextStyle(color: material_lib.Colors.white),
+                      style: material_lib.TextStyle(
+                        color: material_lib.Colors.white,
+                      ),
                     ),
                   ),
                 ),
@@ -120,10 +179,13 @@ class CrashHandler {
 
     if ((items?.isNotEmpty ?? false) == true) {
       _internalLog(
-        'starting to upload locally recorded data\nfound ${items?.length} items to upload',
+        '''starting to upload locally recorded data 
+        found ${items?.length} items to upload''',
       );
       for (final item in items!) {
-        final data = converter.jsonDecode(_bucket?.getString(item) ?? '{}');
+        final data = converter.jsonDecode(
+          _bucket?.getString(item) ?? '{}',
+        );
         await recordRawMap(data).then(
           (value) async =>
               (await _bucket?.remove(
@@ -258,14 +320,18 @@ class CrashHandler {
   ///
   ///if faces error it will call [recordError]
   ///
-  ///return type is a future of [snap.DataSnapHandler] so you can handle result with it
+  ///return type is a future of [snap.DataSnapHandler] so
+  ///you can handle result with it
   FutureOr<snap.DataSnapHandler<TResult>> tryThis<TResult>(
     FutureOr<TResult> Function() function, {
     Map<String, dynamic> extraInfo = const {},
   }) async {
     try {
       final result = await function();
-      return snap.DataSnapHandler<TResult>.done(data: result, sender: StackTrace.current);
+      return snap.DataSnapHandler<TResult>.done(
+        data: result,
+        sender: StackTrace.current,
+      );
     } catch (ex, st) {
       recordError(ex, st, extraInfo);
       return snap.DataSnapHandler<TResult>.error(
@@ -283,8 +349,14 @@ class CrashHandler {
   ///by later i mean when calling [_reportBucket]
   ///that is when app is connected to a local storage via [activateLocalStorage]
   ///or it sent a report successfully
-  Future<void> recordRawMap(Map<String, dynamic> data, {bool attachInfo = true}) async {
+  Future<void> recordRawMap(
+    Map<String, dynamic> data, {
+    bool attachInfo = true,
+  }) async {
     final crashTime = DateTime.now().millisecondsSinceEpoch;
+
+    /// if you did set the [reportUri] it will use it to upload the error
+    /// information
     if (reportUri != null) {
       final params = PostRequestParams(
         reportUri!,
@@ -319,7 +391,7 @@ class CrashHandler {
               } else {
                 final logData = converter.jsonEncode(params);
                 _internalLog(
-                  'cannot upload log data for now it will be placed in ${logData.hashCode}',
+                  '''cannot upload log data for now it will be placed in ${logData.hashCode}''',
                 );
                 _bucket?.setString(
                   '$_kBucketPrefix-${logData.hashCode}',
@@ -330,7 +402,7 @@ class CrashHandler {
             onError: (_, stack) {
               final logData = converter.jsonEncode(params);
               _internalLog(
-                'cannot upload log data for now it will be placed in ${logData.hashCode}',
+                '''cannot upload log data for now it will be placed in ${logData.hashCode}''',
               );
               _bucket?.setString(
                 '$_kBucketPrefix-${logData.hashCode}',

@@ -1,5 +1,3 @@
-// ignore_for_file: lines_longer_than_80_chars
-
 import '../../extensions/equalizer/equalizer.dart';
 
 enum SnapStatus {
@@ -19,17 +17,28 @@ enum SnapStatus {
   singleSnap,
 }
 
-///this class is used to carry data from unreliable source like network
-///can carry data, exception, progress and sender
-///at the same time only can have one of data or exception
-///but can carry a snap of data along with progress
-///the reason of creation of this class is that u can handle all type of responses at the end
-///also its callable so u can use [instance()] instead of [singleAct]
+/// this class is used to carry data from unreliable source like network
+///
+/// can carry data, exception, progress and sender
+///
+/// at the same time only can have one of data or exception
+///
+/// but can carry a snap of data along with progress
+///
+/// the reason of creation of this class is that u can handle all type of
+/// responses at the end
+///
+/// also its callable so u can use [instance()] instead of [singleAct]
 class DataSnapHandler<T> with EqualizerMixin {
-  ///will cast data type to [C]
-  ///the reason is that some times data snap loses its type during some transmissions
-  ///be careful with caster it will check the type of data before casting
-  ///if data type is not [C] it will throw an exception if you are not passing [castErrorHandler]
+  /// will cast data type to [C]
+  ///
+  /// the reason is that some times data snap loses its type during some
+  /// transmissions
+  ///
+  /// be careful with caster it will check the type of data before casting
+  ///
+  /// if data type is not [C] it will throw an exception if you are not passing
+  /// [castErrorHandler]
   DataSnapHandler<C> castTo<C>({void Function(T?)? castErrorHandler}) {
     if (data is! C?) {
       if (castErrorHandler != null) {
@@ -107,7 +116,8 @@ class DataSnapHandler<T> with EqualizerMixin {
         exception = null,
         status = SnapStatus.progress;
 
-  ///an instance with [data] and [progress] set to -1 and [sender] is still working
+  ///an instance with [data] and [progress] set to -1 and [sender] is
+  ///still working
   const DataSnapHandler.singleSnap({
     required this.data,
     this.sender,
@@ -128,7 +138,11 @@ class DataSnapHandler<T> with EqualizerMixin {
   bool get hasEnded => !isLoading;
 
   ///call the parameter with all information [data] [exception] [progress]
-  R runForAll<R>(R Function(T?, Object?, double) worker) => worker(data, exception, progress);
+  R runForAll<R>(R Function(T?, Object?, double) worker) => worker(
+        data,
+        exception,
+        progress,
+      );
 
   ///this method will force you to handle all types of responses
   R call<R>({

@@ -1,5 +1,3 @@
-// ignore_for_file: lines_longer_than_80_chars
-
 import 'dart:async';
 import 'dart:isolate';
 
@@ -66,13 +64,15 @@ abstract class IsolationCore {
     try {
       ///awaiting for first result that has ended (Done or Error)
       ///
-      ///then because the port will receive dynamic version of result it will cast it back to [DataSnapHandler]
+      ///then because the port will receive dynamic version of result it will
+      ///cast it back to [DataSnapHandler]
       final finishedTasks = await receivePort.firstWhere(
         (element) => (element as DataSnapHandler).hasEnded,
       ) as DataSnapHandler;
       return finishedTasks.castTo<T>();
     } catch (exception) {
-      ///if there is an exception in the isolate or in casting part this will throw it
+      ///if there is an exception in the isolate or in casting part this will
+      ///throw it
       return DataSnapHandler<T>.error(
         exception: exception,
         sender: {
@@ -88,9 +88,11 @@ abstract class IsolationCore {
 
   ///spawn an [Isolate] for Stream async generator tasks
   ///
-  ///receives a pointer to task and task params and listener for streaming data then spawn an isolate
+  ///receives a pointer to task and task params and listener for streaming data
+  ///then spawn an isolate
   ///and
-  ///**run task inside it until task yield a [DataSnapHandler] with done or error state**
+  ///run task inside it until task yield a [DataSnapHandler] with done or error
+  ///state
   ///
   ///it has internal exception handling and will not break the main process
   ///
@@ -170,7 +172,8 @@ abstract class IsolationCore {
     StreamTaskIsolateParams<T> params,
   ) async {
     try {
-      ///awaiting for each result from the task loop and will exit the isolate on Done or Error
+      ///awaiting for each result from the task loop and will exit the isolate
+      ///on Done or Error
       await for (final response in params.task(params.taskParams)) {
         switch (response.status) {
           case SnapStatus.done:
@@ -181,7 +184,8 @@ abstract class IsolationCore {
 
           default:
 
-            ///will pass data to stream but this time it will not close the isolate and will go on until receives Done or Error or on error
+            ///will pass data to stream but this time it will not close the
+            ///isolate and will go on until receives Done or Error or on error
             params.sendPort.send(response);
         }
       }
