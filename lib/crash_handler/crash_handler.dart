@@ -183,16 +183,24 @@ if you don't want to use Crashlytics check what method calling it
         found ${items?.length} items to upload''',
       );
       for (final item in items!) {
-        final data = converter.jsonDecode(
-          _bucket?.getString(item) ?? '{}',
-        );
-        await recordRawMap(data).then(
-          (value) async =>
-              (await _bucket?.remove(
-                item,
-              )) ??
-              false,
-        );
+        try {
+          final data = converter.jsonDecode(
+            _bucket?.getString(item) ?? '{}',
+          );
+          await recordRawMap(data).then(
+            (value) async =>
+                (await _bucket?.remove(
+                  item,
+                )) ??
+                false,
+          );
+        } catch (e, st) {
+          _internalLog(
+            'error sending data from bucket',
+            error: e,
+            stackTrace: st,
+          );
+        }
       }
       _internalLog(
         'done uploading logged data',
@@ -389,7 +397,7 @@ if you don't want to use Crashlytics check what method calling it
               if (result != null) {
                 _reportBucket();
               } else {
-                final logData = converter.jsonEncode(params);
+                final logData = converter.jsonEncode(params.body);
                 _internalLog(
                   '''cannot upload log data for now it will be placed in ${logData.hashCode}''',
                 );
@@ -400,7 +408,7 @@ if you don't want to use Crashlytics check what method calling it
               }
             },
             onError: (_, stack) {
-              final logData = converter.jsonEncode(params);
+              final logData = converter.jsonEncode(params.body);
               _internalLog(
                 '''cannot upload log data for now it will be placed in ${logData.hashCode}''',
               );
@@ -460,5 +468,58 @@ class PostRequestParams {
   final Map<String, String>? headers;
   final Map<String, dynamic>? body;
   final Map<String, dynamic>? params;
-  const PostRequestParams(this.uri, this.headers, this.body, this.params);
+  const PostRequestParams(
+    this.uri,
+    this.headers,
+    this.body,
+    this.params,
+  );
+
+  PostRequestParams copyWith({
+    Uri? uri,
+    Map<String, String>? headers,
+    Map<String, dynamic>? body,
+    Map<String, dynamic>? params,
+  }) {
+    return PostRequestParams(
+      uri ?? this.uri,
+      headers ?? this.headers,
+      body ?? this.body,
+      params ?? this.params,
+    );
+  }
+
+  Map<String, dynamic> toMap() {
+    return {
+      'uri': uri.path,
+      'headers': headers,
+      'body': body,
+      'params': params,
+    };
+  }
+
+  factory PostRequestParams.fromMap(Map<String, dynamic> map) {
+    return PostRequestParams(
+      Uri.parse(map['uri']),
+      Map<String, String>.from(map['headers']),
+      Map<String, dynamic>.from(map['body']),
+      Map<String, dynamic>.from(map['params']),
+    );
+  }
+
+  String toJson() => converter.jsonEncode(toMap());
+
+  factory PostRequestParams.fromJson(
+    String source,
+  ) =>
+      PostRequestParams.fromMap(
+        converter.jsonDecode(
+          source,
+        ),
+      );
+
+  @override
+  String toString() {
+    return '''PostRequestParams(uri: $uri, headers: $headers, body: $body, params: $params)''';
+  }
 }
