@@ -16,11 +16,16 @@ import 'dart:io' //
 import 'package:device_info_plus/device_info_plus.dart' as device_info //
     show
         DeviceInfoPlugin;
+import 'package:flutter/foundation.dart' //
+    show
+        FlutterError,
+        FlutterErrorDetails;
 
 import 'package:flutter/material.dart' as material_lib //
     show
         runApp,
         Widget,
+        WidgetsFlutterBinding,
         FlutterErrorDetails,
         Material,
         Container,
@@ -142,7 +147,19 @@ if you don't want to use Crashlytics check what method calling it
     ZoneSpecification? zoneSpecification,
   }) {
     return runZonedGuarded(
-      body,
+      () {
+        material_lib.WidgetsFlutterBinding.ensureInitialized();
+        FlutterError.onError = (FlutterErrorDetails errorDetails) {
+          recordError(
+            errorDetails.exception,
+            errorDetails.stack ?? StackTrace.current,
+            {
+              'fullErrorLog': errorDetails.toString(),
+            },
+          );
+        };
+        return body();
+      },
       recordError,
       zoneValues: zoneValues,
       zoneSpecification: zoneSpecification,
