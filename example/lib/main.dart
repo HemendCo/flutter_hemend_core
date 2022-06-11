@@ -1,16 +1,63 @@
 import 'dart:developer';
+import 'dart:io';
 
+import 'package:example/rive_utils/rive_loader.dart';
+import 'package:example/rive_utils/rive_viewport.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:hemend/crash_handler/crash_handler.dart';
 import 'package:hemend/debug/runtime_calculator.dart';
 import 'package:hemend/extensions/list_verification_tools.dart';
 import 'package:hemend/task_manager/command_query/command_query.dart';
-import 'package:hemend/ui_related/pre_built_widgets/future_builder.dart';
+import 'package:hive/hive.dart';
+import 'package:path_provider/path_provider.dart';
 
-void main() {
+import 'data_models/exercise.dart';
+
+Future<String> getDestPath([String? name]) async {
+  final path = await getApplicationDocumentsDirectory();
+  return path.path + (name ?? '');
+}
+
+Future<void> initDataSource() async {
+  final bytes = await rootBundle.load('test_db/exercise_box.hive');
+  final destPath = await getDestPath('test_db');
+  final file = File('$destPath/exercise_box.hive');
+}
+
+void initHive() {
+  if (!kIsWeb) {
+    Hive.init('test_db');
+  }
+  Hive.registerAdapter(ExerciseModelAdapter());
+  Hive.registerAdapter(ExerciseTypeAdapter());
+}
+
+Future<Box<dynamic>> getBox() {
+  return Hive.openBox('exercise_box');
+}
+
+Future<void> test(Box<dynamic> box) async {
+  throw box.values;
+}
+
+Future<void> hiveTest() async {
+  // var connectivityResult = await (Connectivity().checkConnectivity());
+
+  WidgetsFlutterBinding.ensureInitialized();
+  initHive();
+  // final values = await DataSetHandler.loadData();
+  final box = await getBox();
+  await test(box);
+  // await box.addAll(values);
+  // WidgetsBinding.instance.addObserver(ScreenSizeObserver());
+  // runApp(const SnackBarDemo());
+}
+
+Future<void> main() async {
   CrashHandler.register();
-
+  // await hiveTest();
   runApp(const MyApp());
 }
 
@@ -256,11 +303,10 @@ class _MyHomePageState extends State<MyHomePage> {
       body: Center(
         // Center is a layout widget. It takes a single child and positions it
         // in the middle of the parent.
-        child: BuildInFuture<List<Widget>>(
-          itemFromFuture: runCommandsWithTrace(),
-          childInFuture: (_, items, rebuilder) => ListView.builder(
-            itemCount: items!.length,
-            itemBuilder: (context, index) => items[index],
+        child: RiveViewport(
+          loader: RiveLoaderFromAsset(
+            assetPath: 'assets/rive/like_tog.riv',
+            shouldCache: true,
           ),
         ),
       ),
