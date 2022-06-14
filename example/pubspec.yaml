@@ -61,7 +61,7 @@ flutter:
   # the material Icons class.
   uses-material-design: true
   assets:
-    - test_db/
+    - db/
     - assets/rive/
 
   # To add assets to your application, add an assets section, like this:

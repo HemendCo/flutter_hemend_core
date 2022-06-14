@@ -1,6 +1,8 @@
 import 'dart:developer';
 import 'dart:io';
 
+import 'package:example/migrated_models/exercise_day_model.dart';
+import 'package:example/migrated_models/exercise_model.dart';
 import 'package:example/rive_utils/rive_loader.dart';
 import 'package:example/rive_utils/rive_viewport.dart';
 import 'package:flutter/foundation.dart';
@@ -13,29 +15,38 @@ import 'package:hemend/task_manager/command_query/command_query.dart';
 import 'package:hive/hive.dart';
 import 'package:path_provider/path_provider.dart';
 
-import 'data_models/exercise.dart';
+import 'migrated_models/diet_model.dart';
+
+// import 'migrated_models/migrator.dart';
 
 Future<String> getDestPath([String? name]) async {
-  final path = await getApplicationDocumentsDirectory();
-  return path.path + (name ?? '');
+  final path = await getApplicationSupportDirectory();
+  return '$path/$name';
 }
 
 Future<void> initDataSource() async {
-  final bytes = await rootBundle.load('test_db/exercise_box.hive');
-  final destPath = await getDestPath('test_db');
-  final file = File('$destPath/exercise_box.hive');
+  final bytes = await rootBundle.load('db/mankan_sho.hive');
+
+  final destPath = await getDestPath('db');
+  Directory(destPath).createSync(recursive: true);
+  final file = File('$destPath/mankan_sho.hive');
+  file.writeAsBytesSync(bytes.buffer.asUint8List());
 }
 
-void initHive() {
+Future<void> initHive() async {
+  // await initDataSource();
   if (!kIsWeb) {
-    Hive.init('test_db');
+    Hive.init(await getDestPath('db'));
   }
-  Hive.registerAdapter(ExerciseModelAdapter());
-  Hive.registerAdapter(ExerciseTypeAdapter());
+  Hive
+    ..registerAdapter(ExerciseDayModelAdapter())
+    ..registerAdapter(ExerciseExecutionTypeAdapter())
+    ..registerAdapter(ExerciseModelAdapter())
+    ..registerAdapter(DietModelAdapter());
 }
 
-Future<Box<dynamic>> getBox() {
-  return Hive.openBox('exercise_box');
+Future<Box<ExerciseDayModel>> getBox() {
+  return Hive.openBox('mankan_sho');
 }
 
 Future<void> test(Box<dynamic> box) async {
@@ -45,19 +56,37 @@ Future<void> test(Box<dynamic> box) async {
 Future<void> hiveTest() async {
   // var connectivityResult = await (Connectivity().checkConnectivity());
 
-  WidgetsFlutterBinding.ensureInitialized();
-  initHive();
+  // initHive();
   // final values = await DataSetHandler.loadData();
-  final box = await getBox();
-  await test(box);
+  // final box = await setupHive('db');
+  // final data = convertAll(box);
+  // final box2 = await Hive.openBox<ExerciseDayModel>('migrated');
+  // File('db/migrated.json').writeAsStringSync(json.encode(data));
+  // await box2.addAll(data);
+  // await test(box);
   // await box.addAll(values);
   // WidgetsBinding.instance.addObserver(ScreenSizeObserver());
   // runApp(const SnackBarDemo());
 }
 
 Future<void> main() async {
-  CrashHandler.register();
-  // await hiveTest();
+  CrashHandler.register(reportUri: Uri.parse('http://localhost:8081/crashlytix/log'));
+  CrashHandler.I.runZoned(startup);
+}
+
+Future<void> startup() async {
+  // await initDataSource();
+  // fu();
+  await initHive();
+  final test = await getBox();
+  // final jsonlist = await rootBundle.loadString('db/mankan_sho.json');
+  // final list = json.decode(jsonlist);
+  // final migrated = List<ExerciseDayModel>.from(list.map((e) => ExerciseDayModel.fromMap(e)));
+  // for (final i in test.values) {
+  //   await i.save();
+  // }
+  // await test.addAll(migrated);
+  // throw test;
   runApp(const MyApp());
 }
 
