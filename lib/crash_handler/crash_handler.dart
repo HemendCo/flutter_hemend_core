@@ -88,6 +88,63 @@ if you don't want to use Crashlytics check what method calling it
 
   static CrashHandler get I => instance;
   static CrashHandler? _instance;
+  CrashHandler.registerAndRunZoned(
+    void Function() body, {
+    Map<Object?, Object?>? zoneValues,
+    ZoneSpecification? zoneSpecification,
+    this.reportUri,
+    void Function(Object, StackTrace)? onCrash,
+    Map<String, String>? reportHeaders,
+    Map<String, dynamic>? extraInfo,
+    List<String> cleanFromDeviceInfo = const [
+      'systemFeatures',
+    ],
+
+    ///it is a placeholder for crashed widgets
+    material_lib.Widget Function(material_lib.FlutterErrorDetails)? errorWidget,
+  })  : _extraInfo = extraInfo,
+        _onCrash = onCrash,
+        _cleanFromDeviceInfo = cleanFromDeviceInfo,
+        _reportHeaders = reportHeaders {
+    _instance = this;
+
+    ///will replace (red in debug mode / grey in release mode)
+    ///default error widget and will catch its error and report it
+    material_lib.ErrorWidget.builder = (
+      material_lib.FlutterErrorDetails details,
+    ) {
+      recordError(
+        details.exception,
+        details.stack ?? StackTrace.empty,
+        {
+          'fullErrorLog': details.toString(),
+        },
+      );
+      return (errorWidget ??
+          (_) => material_lib.Material(
+                child: material_lib.Container(
+                  color: material_lib.Colors.red,
+                  child: const material_lib.Center(
+                    child: material_lib.Text(
+                      'found a bug inside this view.',
+                      style: material_lib.TextStyle(
+                        color: material_lib.Colors.white,
+                      ),
+                    ),
+                  ),
+                ),
+              ))(details);
+    };
+
+    _internalLog(
+      '$_kModuleName initialized',
+    );
+    runZoned(
+      body,
+      zoneValues: zoneValues,
+      zoneSpecification: zoneSpecification,
+    );
+  }
   CrashHandler.register({
     this.reportUri,
     void Function(Object, StackTrace)? onCrash,
