@@ -42,6 +42,7 @@ import 'package:shared_preferences/shared_preferences.dart' as storage //
     show
         SharedPreferences;
 
+import '../build_environments/build_environments.dart';
 import '../debug/developer_tools.dart';
 import '../debug/error_handler.dart';
 import '../object_controllers/data_snap_handler/data_snap_handler.dart' as snap;
@@ -88,11 +89,11 @@ if you don't want to use Crashlytics check what method calling it
 
   static CrashHandler get I => instance;
   static CrashHandler? _instance;
-  CrashHandler.registerAndRunZoned(
-    void Function() body, {
+  static T? registerAndRunZoned<T>(
+    T Function() body, {
     Map<Object?, Object?>? zoneValues,
     ZoneSpecification? zoneSpecification,
-    this.reportUri,
+    Uri? reportUri,
     void Function(Object, StackTrace)? onCrash,
     Map<String, String>? reportHeaders,
     Map<String, dynamic>? extraInfo,
@@ -102,51 +103,25 @@ if you don't want to use Crashlytics check what method calling it
 
     ///it is a placeholder for crashed widgets
     material_lib.Widget Function(material_lib.FlutterErrorDetails)? errorWidget,
-  })  : _extraInfo = extraInfo,
-        _onCrash = onCrash,
-        _cleanFromDeviceInfo = cleanFromDeviceInfo,
-        _reportHeaders = reportHeaders {
-    _instance = this;
-
-    ///will replace (red in debug mode / grey in release mode)
-    ///default error widget and will catch its error and report it
-    material_lib.ErrorWidget.builder = (
-      material_lib.FlutterErrorDetails details,
-    ) {
-      recordError(
-        details.exception,
-        details.stack ?? StackTrace.empty,
-        {
-          'fullErrorLog': details.toString(),
-        },
-      );
-      return (errorWidget ??
-          (_) => material_lib.Material(
-                child: material_lib.Container(
-                  color: material_lib.Colors.red,
-                  child: const material_lib.Center(
-                    child: material_lib.Text(
-                      'found a bug inside this view.',
-                      style: material_lib.TextStyle(
-                        color: material_lib.Colors.white,
-                      ),
-                    ),
-                  ),
-                ),
-              ))(details);
-    };
-
-    _internalLog(
-      '$_kModuleName initialized',
+  }) {
+    _instance = CrashHandler.register(
+      reportUri: reportUri,
+      errorWidget: errorWidget,
+      extraInfo: extraInfo,
+      onCrash: onCrash,
+      cleanFromDeviceInfo: cleanFromDeviceInfo,
+      reportHeaders: reportHeaders,
     );
-    runZoned(
+
+    return instance.runZoned(
       body,
       zoneValues: zoneValues,
       zoneSpecification: zoneSpecification,
     );
   }
+
   CrashHandler.register({
-    this.reportUri,
+    Uri? reportUri,
     void Function(Object, StackTrace)? onCrash,
     Map<String, String>? reportHeaders,
     Map<String, dynamic>? extraInfo,
@@ -156,10 +131,20 @@ if you don't want to use Crashlytics check what method calling it
 
     ///it is a placeholder for crashed widgets
     material_lib.Widget Function(material_lib.FlutterErrorDetails)? errorWidget,
-  })  : _extraInfo = extraInfo,
+  })  : _extraInfo = extraInfo ?? {},
         _onCrash = onCrash,
+        reportUri = reportUri ??
+            Uri.parse(
+              BuildEnvironments.CRASHLYTIX_SERVER_ADDRESS,
+            ),
         _cleanFromDeviceInfo = cleanFromDeviceInfo,
-        _reportHeaders = reportHeaders {
+        _reportHeaders = reportHeaders ?? {} {
+    _reportHeaders.addAll({
+      'secret': BuildEnvironments.CRASHLYTIX_APP_SECRET,
+      'app_id': BuildEnvironments.CRASHLYTIX_APP_ID,
+    });
+    _extraInfo.addAll(BuildEnvironments.toMap());
+    print(_reportHeaders);
     _instance = this;
 
     ///will replace (red in debug mode / grey in release mode)
@@ -318,13 +303,12 @@ if you don't want to use Crashlytics check what method calling it
   final Uri? reportUri;
 
   ///headers of crash report eg. token, ...
-  final Map<String, String>? _reportHeaders;
+  final Map<String, String> _reportHeaders;
 
   ///extra info to attach to every report
-  Map<String, dynamic>? _extraInfo;
+  final Map<String, dynamic> _extraInfo;
   void addExtraInfo(Map<String, dynamic> info) {
-    _extraInfo ??= {};
-    _extraInfo!.addAll(info);
+    _extraInfo.addAll(info);
   }
 
   ///callback to call when crash happens to handle internally
@@ -452,7 +436,7 @@ if you don't want to use Crashlytics check what method calling it
                     'errorTime': crashTime,
                     ...data,
                     'crashIndex': (crashCounter++).toString(),
-                    'extraInfo': _extraInfo ?? 'none',
+                    'extraInfo': _extraInfo,
                     '$_kModuleName Log': crashlytixLog,
                   },
                 )
