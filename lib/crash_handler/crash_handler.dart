@@ -46,6 +46,7 @@ import '../build_environments/build_environments.dart';
 import '../debug/developer_tools.dart';
 import '../debug/error_handler.dart';
 import '../object_controllers/data_snap_handler/data_snap_handler.dart' as snap;
+import '../task_manager/async_queue/async_task_queue.dart';
 import '../task_manager/isolate_manager/isolation_core.dart' as treads //
     show
         IsolationCore;
@@ -120,6 +121,8 @@ if you don't want to use Crashlytics check what method calling it
     );
   }
 
+  /// task queue for uploading reports
+  IAsyncTaskQueue _taskQueue;
   CrashHandler.register({
     Uri? reportUri,
     void Function(Object, StackTrace)? onCrash,
@@ -128,11 +131,16 @@ if you don't want to use Crashlytics check what method calling it
     List<String> cleanFromDeviceInfo = const [
       'systemFeatures',
     ],
+    IAsyncTaskQueue? taskQueue,
 
     ///it is a placeholder for crashed widgets
     material_lib.Widget Function(material_lib.FlutterErrorDetails)? errorWidget,
   })  : _extraInfo = extraInfo ?? {},
         _onCrash = onCrash,
+        _taskQueue = taskQueue ??
+            IAsyncTaskQueue.SynchronizedTaskQueue(
+              maxWorkers: 2,
+            ),
         reportUri = reportUri ??
             Uri.parse(
               BuildEnvironments.CRASHLYTIX_SERVER_ADDRESS,
@@ -246,12 +254,14 @@ if you don't want to use Crashlytics check what method calling it
           final data = converter.jsonDecode(
             _bucket?.getString(item) ?? '{}',
           );
-          await recordRawMap(data).then(
-            (value) async =>
-                (await _bucket?.remove(
-                  item,
-                )) ??
-                false,
+          _taskQueue.execute(
+            () => recordRawMap(data).then(
+              (value) async =>
+                  (await _bucket?.remove(
+                    item,
+                  )) ??
+                  false,
+            ),
           );
         } catch (e, st) {
           _internalLog(
@@ -444,17 +454,29 @@ if you don't want to use Crashlytics check what method calling it
             : data,
         null,
       );
-      await treads.IsolationCore.createIsolateForSingleTask<bool>(
-        task: onlineReport,
-        taskParams: params,
-        debugName: 'crash_report_$crashCounter',
-      ).then(
-        (value) {
-          value.singleActOnFinished(
-            onDone: (result) {
-              if (result != null) {
-                _reportBucket();
-              } else {
+      await _taskQueue.execute(
+        () => treads.IsolationCore.createIsolateForSingleTask<bool>(
+          task: onlineReport,
+          taskParams: params,
+          debugName: 'crash_report_$crashCounter',
+        ).then(
+          (value) {
+            value.singleActOnFinished(
+              onDone: (result) {
+                if (result != null) {
+                  _reportBucket();
+                } else {
+                  final logData = converter.jsonEncode(params.body);
+                  _internalLog(
+                    '''cannot upload log data for now it will be placed in ${logData.hashCode}''',
+                  );
+                  _bucket?.setString(
+                    '$_kBucketPrefix-${logData.hashCode}',
+                    logData,
+                  );
+                }
+              },
+              onError: (_, stack) {
                 final logData = converter.jsonEncode(params.body);
                 _internalLog(
                   '''cannot upload log data for now it will be placed in ${logData.hashCode}''',
@@ -463,20 +485,10 @@ if you don't want to use Crashlytics check what method calling it
                   '$_kBucketPrefix-${logData.hashCode}',
                   logData,
                 );
-              }
-            },
-            onError: (_, stack) {
-              final logData = converter.jsonEncode(params.body);
-              _internalLog(
-                '''cannot upload log data for now it will be placed in ${logData.hashCode}''',
-              );
-              _bucket?.setString(
-                '$_kBucketPrefix-${logData.hashCode}',
-                logData,
-              );
-            },
-          );
-        },
+              },
+            );
+          },
+        ),
       );
     }
   }
