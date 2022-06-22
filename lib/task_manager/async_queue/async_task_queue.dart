@@ -21,6 +21,7 @@ abstract class IAsyncTaskQueue {
 
   /// clear tasks queue
   void clearQueue();
+  int get queueLength;
 
   /// run all tasks in the queue and then return all of the values in an array
   Future<List<Object?>> drain();
@@ -65,6 +66,7 @@ class SynchronizedTaskQueue implements IAsyncTaskQueue {
 
   /// max amount of workers available for the Queue runner
   final int maxWorkers;
+  int get queueLength => _queue.length;
 
   /// if true, then the task will be run in an isolate using compute method,
   final bool useIsolate;

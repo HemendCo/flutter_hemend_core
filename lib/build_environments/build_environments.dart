@@ -33,7 +33,7 @@ abstract class BuildEnvironments {
       'BUILD_DATE_TIME': BUILD_DATE_TIME.toIso8601String(),
       'LAST_GIT_COMMIT': LAST_GIT_COMMIT,
       'RELEASE_MODE': RELEASE_MODE,
-      'BUILD_TYPE': BUILD_TYPE,
+      'BUILD_TYPE': BUILD_TYPE.toMap(),
       'DEBUG_LEVEL': DEBUG_LEVEL,
       'CRASHLYTIX_APP_SECRET': CRASHLYTIX_APP_SECRET,
       'CRASHLYTIX_APP_ID': CRASHLYTIX_APP_ID,
@@ -97,6 +97,11 @@ enum BuildType {
       values.firstWhere(
         (element) => element.name == name.toLowerCase(),
       );
+  Map<String, dynamic> toMap() => {
+        'type': name,
+        'buildParams': buildParams,
+        'environmentParams': environmentParams,
+      };
 
   final List<String> buildParams;
   final Map<String, String> environmentParams;
