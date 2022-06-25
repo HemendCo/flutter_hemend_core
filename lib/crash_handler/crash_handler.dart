@@ -97,6 +97,7 @@ if you don't want to use Crashlytics check what method calling it
     Uri? reportUri,
     void Function(Object, StackTrace)? onCrash,
     Map<String, String>? reportHeaders,
+    IAsyncTaskQueue? taskQueue,
     Map<String, dynamic>? extraInfo,
     List<String> cleanFromDeviceInfo = const [
       'systemFeatures',
@@ -109,6 +110,7 @@ if you don't want to use Crashlytics check what method calling it
       reportUri: reportUri,
       errorWidget: errorWidget,
       extraInfo: extraInfo,
+      taskQueue: taskQueue,
       onCrash: onCrash,
       cleanFromDeviceInfo: cleanFromDeviceInfo,
       reportHeaders: reportHeaders,
@@ -122,7 +124,7 @@ if you don't want to use Crashlytics check what method calling it
   }
 
   /// task queue for uploading reports
-  IAsyncTaskQueue _taskQueue;
+  final IAsyncTaskQueue _taskQueue;
   CrashHandler.register({
     Uri? reportUri,
     void Function(Object, StackTrace)? onCrash,
@@ -139,7 +141,7 @@ if you don't want to use Crashlytics check what method calling it
         _onCrash = onCrash,
         _taskQueue = taskQueue ??
             IAsyncTaskQueue.SynchronizedTaskQueue(
-              maxWorkers: 2,
+              maxWorkers: 4,
             ),
         reportUri = reportUri ??
             Uri.parse(
@@ -458,7 +460,7 @@ if you don't want to use Crashlytics check what method calling it
         () => treads.IsolationCore.createIsolateForSingleTask<bool>(
           task: onlineReport,
           taskParams: params,
-          debugName: 'crash_report_$crashCounter',
+          debugName: 'crash_report_${params.hashCode}',
         ).then(
           (value) {
             value.singleActOnFinished(
@@ -491,6 +493,10 @@ if you don't want to use Crashlytics check what method calling it
         ),
       );
     }
+  }
+
+  Future<void> cleanBucket() async {
+    _bucket?.clear();
   }
 
   ///[Object] ex is the exception
