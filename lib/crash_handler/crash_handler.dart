@@ -45,6 +45,7 @@ import 'package:shared_preferences/shared_preferences.dart' as storage //
 import '../build_environments/build_environments.dart';
 import '../debug/developer_tools.dart';
 import '../debug/error_handler.dart';
+import '../generated_env.dart';
 import '../object_controllers/data_snap_handler/data_snap_handler.dart' as snap;
 import '../task_manager/async_queue/async_task_queue.dart';
 import '../task_manager/isolate_manager/isolation_core.dart' as treads //
@@ -145,13 +146,13 @@ if you don't want to use Crashlytics check what method calling it
             ),
         reportUri = reportUri ??
             Uri.parse(
-              BuildEnvironments.CRASHLYTIX_SERVER_ADDRESS,
+              $Environments.CONFIG_CRASHLYTIX_SERVER_ADDRESS,
             ),
         _cleanFromDeviceInfo = cleanFromDeviceInfo,
         _reportHeaders = reportHeaders ?? {} {
     _reportHeaders.addAll({
-      'secret': BuildEnvironments.CRASHLYTIX_APP_SECRET,
-      'app_id': BuildEnvironments.CRASHLYTIX_APP_ID,
+      'secret': $Environments.CONFIG_CRASHLYTIX_APP_SECRET,
+      'app_id': $Environments.CONFIG_CRASHLYTIX_APP_ID,
     });
     _extraInfo.addAll(BuildEnvironments.toMap());
     print(_reportHeaders);
