@@ -529,8 +529,7 @@ if you don't want to use Crashlytics check what method calling it
       );
       return true;
     } catch (e, st) {
-      CrashHandler.instance._internalLog(
-        'Request failed',
+      'Request failed'.log(
         time: DateTime.now(),
         error: e,
         stackTrace: st,
