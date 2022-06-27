@@ -258,7 +258,7 @@ if you don't want to use Crashlytics check what method calling it
             _bucket?.getString(item) ?? '{}',
           );
           _taskQueue.execute(
-            () => recordRawMap(data).then(
+            () => recordRawMap(data, attachInfo: false).then(
               (value) async =>
                   (await _bucket?.remove(
                     item,
