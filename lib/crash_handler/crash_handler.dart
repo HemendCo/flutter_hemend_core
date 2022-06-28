@@ -239,9 +239,10 @@ if you don't want to use Crashlytics check what method calling it
   storage.SharedPreferences? _bucket;
   Future<void> activateLocalStorage() async {
     _bucket = await storage.SharedPreferences.getInstance();
-    _reportBucket();
+    _taskQueue.execute(_reportBucket);
   }
 
+  //TODO(Fmotalleb): fix this (wont send some data)
   Future<void> _reportBucket() async {
     final items = _bucket?.getKeys().where(
           (element) => element.startsWith(_kBucketPrefix),
@@ -253,26 +254,26 @@ if you don't want to use Crashlytics check what method calling it
         found ${items?.length} items to upload''',
       );
       for (final item in items!) {
-        try {
-          final data = converter.jsonDecode(
-            _bucket?.getString(item) ?? '{}',
-          );
-          _taskQueue.execute(
-            () => recordRawMap(data, attachInfo: false).then(
-              (value) async =>
-                  (await _bucket?.remove(
-                    item,
-                  )) ??
-                  false,
-            ),
-          );
-        } catch (e, st) {
-          _internalLog(
-            'error sending data from bucket',
-            error: e,
-            stackTrace: st,
-          );
-        }
+        final data = converter.jsonDecode(
+          _bucket?.getString(item) ?? '{}',
+        );
+        _taskQueue.addToQueue(
+          () => recordRawMap(
+            data,
+            attachInfo: false,
+            onDone: () async {
+              await _bucket!.remove(
+                item,
+              );
+            },
+          ),
+        );
+      }
+      var count = 0;
+      await for (final task in _taskQueue.drainStream()) {
+        _internalLog(
+          'stream draining index: ${count++}',
+        );
       }
       _internalLog(
         'done uploading logged data',
@@ -431,6 +432,7 @@ if you don't want to use Crashlytics check what method calling it
   Future<void> recordRawMap(
     Map<String, dynamic> data, {
     bool attachInfo = true,
+    void Function()? onDone,
   }) async {
     final crashTime = DateTime.now().millisecondsSinceEpoch;
 
@@ -442,17 +444,15 @@ if you don't want to use Crashlytics check what method calling it
         _reportHeaders,
         attachInfo
             ? {
-                'data': converter.jsonEncode(
-                  {
-                    'packageInfo': _appInfo,
-                    'deviceInfo': _deviceInfo,
-                    'errorTime': crashTime,
-                    ...data,
-                    'crashIndex': (crashCounter++).toString(),
-                    'extraInfo': _extraInfo,
-                    '$_kModuleName Log': crashlytixLog,
-                  },
-                )
+                'data': {
+                  'packageInfo': _appInfo,
+                  'deviceInfo': _deviceInfo,
+                  'errorTime': crashTime,
+                  ...data,
+                  'crashIndex': (crashCounter++).toString(),
+                  'extraInfo': _extraInfo,
+                  '$_kModuleName Log': crashlytixLog,
+                },
               }
             : data,
         null,
@@ -467,8 +467,25 @@ if you don't want to use Crashlytics check what method calling it
             value.singleActOnFinished(
               onDone: (result) {
                 if (result != null) {
-                  _reportBucket();
+                  if (attachInfo) {
+                    _taskQueue.execute(_reportBucket);
+                  }
+                  if (onDone != null) onDone();
                 } else {
+                  if (attachInfo) {
+                    final logData = converter.jsonEncode(params.body);
+                    _internalLog(
+                      '''cannot upload log data for now it will be placed in ${logData.hashCode}''',
+                    );
+                    _bucket?.setString(
+                      '$_kBucketPrefix-${logData.hashCode}',
+                      logData,
+                    );
+                  }
+                }
+              },
+              onError: (_, stack) {
+                if (attachInfo) {
                   final logData = converter.jsonEncode(params.body);
                   _internalLog(
                     '''cannot upload log data for now it will be placed in ${logData.hashCode}''',
@@ -478,16 +495,6 @@ if you don't want to use Crashlytics check what method calling it
                     logData,
                   );
                 }
-              },
-              onError: (_, stack) {
-                final logData = converter.jsonEncode(params.body);
-                _internalLog(
-                  '''cannot upload log data for now it will be placed in ${logData.hashCode}''',
-                );
-                _bucket?.setString(
-                  '$_kBucketPrefix-${logData.hashCode}',
-                  logData,
-                );
               },
             );
           },
@@ -511,11 +518,13 @@ if you don't want to use Crashlytics check what method calling it
   ]) async {
     (_onCrash ?? (_, __) {})(ex, st);
     logCrash(ex, st);
-    await recordRawMap({
-      'exception': ex.toString(),
-      'stacktrace': st.toString(),
-      'carryInfo': extraInfo,
-    });
+    await _taskQueue.execute(
+      () => recordRawMap({
+        'exception': ex.toString(),
+        'stacktrace': st.toString(),
+        'carryInfo': extraInfo,
+      }),
+    );
   }
 
   ///report error to server
@@ -524,7 +533,9 @@ if you don't want to use Crashlytics check what method calling it
     try {
       await http.post(
         params.uri,
-        body: params.body,
+        body: converter.jsonEncode(
+          params.body,
+        ),
         headers: params.headers,
       );
       return true;
