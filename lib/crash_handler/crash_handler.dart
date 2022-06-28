@@ -242,7 +242,6 @@ if you don't want to use Crashlytics check what method calling it
     _taskQueue.execute(_reportBucket);
   }
 
-  //TODO(Fmotalleb): fix this (wont send some data)
   Future<void> _reportBucket() async {
     final items = _bucket?.getKeys().where(
           (element) => element.startsWith(_kBucketPrefix),
@@ -270,6 +269,7 @@ if you don't want to use Crashlytics check what method calling it
         );
       }
       var count = 0;
+      // ignore: unused_local_variable
       await for (final task in _taskQueue.drainStream()) {
         _internalLog(
           'stream draining index: ${count++}',

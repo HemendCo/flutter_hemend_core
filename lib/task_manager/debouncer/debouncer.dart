@@ -68,7 +68,7 @@ class Debounce {
   }
 
   /// Returns the number of active debouncers (debouncers that haven't yet called their
-  /// [onExecute] methods).
+  /// onExecute methods).
   static int count() {
     return _operations.length;
   }

@@ -66,6 +66,7 @@ class SynchronizedTaskQueue implements IAsyncTaskQueue {
 
   /// max amount of workers available for the Queue runner
   final int maxWorkers;
+  @override
   int get queueLength => _queue.length;
 
   /// if true, then the task will be run in an isolate using compute method,
