@@ -449,9 +449,9 @@ if you don't want to use Crashlytics check what method calling it
                   'deviceInfo': _deviceInfo,
                   'errorTime': crashTime,
                   ...data,
-                  'crashIndex': (crashCounter++).toString(),
+                  'crashIndex': crashCounter++,
                   'extraInfo': _extraInfo,
-                  '$_kModuleName Log': crashlytixLog,
+                  '${_kModuleName}Log': crashlytixLog,
                 },
               }
             : data,
@@ -522,7 +522,7 @@ if you don't want to use Crashlytics check what method calling it
       () => recordRawMap({
         'exception': ex.toString(),
         'stacktrace': st.toString(),
-        'carryInfo': extraInfo,
+        if (extraInfo.isNotEmpty) 'carryInfo': extraInfo,
       }),
     );
   }
