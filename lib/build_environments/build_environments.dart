@@ -6,7 +6,7 @@ abstract class BuildEnvironments {
   static DateTime get BUILD_DATE_TIME_OBJECT => DateTime.fromMillisecondsSinceEpoch(
         $Environments.BUILD_DATE_TIME * 1000,
       );
-  static BuildType get BUILD_TYPE => BuildType.fromString($Environments.RELEASE_MODE);
+  static BuildType get BUILD_TYPE => BuildType.fromString($Environments.HEMEND_CONFIG_RELEASE_MODE);
 
   static Map<String, dynamic> toMap() {
     return {
@@ -18,11 +18,11 @@ abstract class BuildEnvironments {
       'BUILD_DATE_TIME_HOUR': $Environments.BUILD_DATE_TIME_HOUR,
       'BUILD_DATE_TIME_MINUTE': $Environments.BUILD_DATE_TIME_MINUTE,
       'BUILD_DATE_TIME_SECOND': $Environments.BUILD_DATE_TIME_SECOND,
-      'IS_FORCED': $Environments.IS_FORCED,
-      'BUILD_MODE': $Environments.BUILD_MODE,
-      'RELEASE_MODE': $Environments.RELEASE_MODE,
-      'DEBUG_LEVEL': $Environments.DEBUG_LEVEL,
-      'PLATFORM': $Environments.PLATFORM,
+      'HEMEND_CONFIG_IS_FORCED': $Environments.HEMEND_CONFIG_IS_FORCED,
+      'HEMEND_CONFIG_BUILD_MODE': $Environments.HEMEND_CONFIG_BUILD_MODE,
+      'HEMEND_CONFIG_RELEASE_MODE': $Environments.HEMEND_CONFIG_RELEASE_MODE,
+      'HEMEND_CONFIG_DEBUG_LEVEL': $Environments.HEMEND_CONFIG_DEBUG_LEVEL,
+      'HEMEND_CONFIG_BUILD_PLATFORM': $Environments.HEMEND_CONFIG_BUILD_PLATFORM,
       'LAST_COMMIT_HASH': $Environments.LAST_COMMIT_HASH,
       'LAST_COMMIT_AUTHOR_EMAIL': $Environments.LAST_COMMIT_AUTHOR_EMAIL,
       'LAST_COMMIT_DATE_TIME': $Environments.LAST_COMMIT_DATE_TIME,
@@ -42,20 +42,20 @@ abstract class BuildEnvironments {
 enum BuildType {
   release(
     environmentParams: {
-      'RELEASE_MODE': 'RELEASE',
-      'DEBUG_LEVEL': '0',
+      'HEMEND_CONFIG_RELEASE_MODE': 'RELEASE',
+      'HEMEND_CONFIG_DEBUG_LEVEL': '0',
     },
   ),
   debug(
     environmentParams: {
-      'RELEASE_MODE': 'DEBUG',
-      'DEBUG_LEVEL': '1',
+      'HEMEND_CONFIG_RELEASE_MODE': 'DEBUG',
+      'HEMEND_CONFIG_DEBUG_LEVEL': '1',
     },
   ),
   profile(
     environmentParams: {
-      'RELEASE_MODE': 'PROFILE',
-      'DEBUG_LEVEL': '0',
+      'HEMEND_CONFIG_RELEASE_MODE': 'PROFILE',
+      'HEMEND_CONFIG_DEBUG_LEVEL': '0',
     },
   ),
   debugBuild(
@@ -63,8 +63,8 @@ enum BuildType {
       '--debug',
     ],
     environmentParams: {
-      'RELEASE_MODE': 'DEBUG',
-      'DEBUG_LEVEL': '1',
+      'HEMEND_CONFIG_RELEASE_MODE': 'DEBUG',
+      'HEMEND_CONFIG_DEBUG_LEVEL': '1',
     },
   ),
   performance(
@@ -72,14 +72,14 @@ enum BuildType {
       '--profile',
     ],
     environmentParams: {
-      'RELEASE_MODE': 'PERFORMANCE',
-      'DEBUG_LEVEL': '2',
+      'HEMEND_CONFIG_RELEASE_MODE': 'PERFORMANCE',
+      'HEMEND_CONFIG_DEBUG_LEVEL': '2',
     },
   ),
   presentation(
     environmentParams: {
-      'RELEASE_MODE': 'PRESENTATION',
-      'DEBUG_LEVEL': '1',
+      'HEMEND_CONFIG_RELEASE_MODE': 'PRESENTATION',
+      'HEMEND_CONFIG_DEBUG_LEVEL': '1',
     },
   );
 
