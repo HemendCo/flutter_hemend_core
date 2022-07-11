@@ -14,7 +14,6 @@ dependencies:
   http: null
   package_info_plus: ^1.4.2
   path_provider: ^2.0.11
-  rive: ^0.8.4
   rxdart: ^0.27.4
   shared_preferences: ^2.0.13
   web_socket_channel: ^2.1.0
