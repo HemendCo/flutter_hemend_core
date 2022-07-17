@@ -156,10 +156,10 @@ abstract class IsolationCore {
           'taskParams': params.taskParams,
         },
       );
-    } catch (exception) {
+    } catch (exception, st) {
       result = DataSnapHandler.error(
         exception: exception,
-        sender: 'Main Loop Of Single Shot Isolate',
+        sender: st,
       );
     } finally {
       ///exiting the isolate after done a single shot
