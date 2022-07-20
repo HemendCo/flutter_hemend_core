@@ -32,6 +32,9 @@ enum ErrorType {
   strategyFail(
     'strategy failed possibly a rare issue accrued',
   ),
+  paramsError(
+    'given params is not suitable for this method',
+  ),
   notImplementedYet(
     'called method is not implemented yet',
   );
