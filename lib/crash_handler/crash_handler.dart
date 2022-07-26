@@ -361,6 +361,7 @@ if you don't want to use Crashlytics check what method calling it
   ///check module has device and app info
   bool get hasBasicData => _hasBasicData;
   final List<String> _cleanFromDeviceInfo;
+  Map<String, dynamic> get deviceInfo => Map.from(_deviceInfo);
 
   ///device info gathered with [gatherBasicData]
   Map<String, dynamic> _deviceInfo = <String, dynamic>{
