@@ -390,12 +390,12 @@ if you don't want to use Crashlytics check what method calling it
     );
   }
 
-  ///will pass its params to [tryThis]
-  FutureOr<snap.DataSnapHandler<TResult>> call<TResult>(
-    FutureOr<TResult> Function() function, {
+  ///will pass its params to [trySync]
+  snap.DataSnapHandler<TResult> call<TResult>(
+    TResult Function() function, {
     Map<String, dynamic> extraInfo = const {},
   }) =>
-      tryThis(function, extraInfo: extraInfo);
+      trySync(function, extraInfo: extraInfo);
 
   ///will run the given function in try catch clause
   ///
@@ -403,7 +403,45 @@ if you don't want to use Crashlytics check what method calling it
   ///
   ///return type is a future of [snap.DataSnapHandler] so
   ///you can handle result with it
+  snap.DataSnapHandler<TResult> trySync<TResult>(
+    TResult Function() function, {
+    Map<String, dynamic> extraInfo = const {},
+  }) {
+    try {
+      final result = function();
+      return snap.DataSnapHandler<TResult>.done(
+        data: result,
+        sender: StackTrace.current,
+      );
+    } catch (ex, st) {
+      recordError(ex, st, extraInfo);
+      return snap.DataSnapHandler<TResult>.error(
+        exception: ex,
+        sender: st,
+      );
+    }
+  }
+
+  ///will run the given function in try catch clause
+  ///
+  ///if faces error it will call [recordError]
+  ///
+  ///return type is a future of [snap.DataSnapHandler] so
+  ///you can handle result with it
+  @Deprecated('use tryAsync instead')
   FutureOr<snap.DataSnapHandler<TResult>> tryThis<TResult>(
+    FutureOr<TResult> Function() function, {
+    Map<String, dynamic> extraInfo = const {},
+  }) =>
+      tryAsync(function, extraInfo: extraInfo);
+
+  ///will run the given function in try catch clause
+  ///
+  ///if faces error it will call [recordError]
+  ///
+  ///return type is a future of [snap.DataSnapHandler] so
+  ///you can handle result with it
+  Future<snap.DataSnapHandler<TResult>> tryAsync<TResult>(
     FutureOr<TResult> Function() function, {
     Map<String, dynamic> extraInfo = const {},
   }) async {
