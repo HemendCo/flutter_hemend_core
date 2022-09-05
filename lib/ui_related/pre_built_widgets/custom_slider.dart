@@ -141,7 +141,7 @@ class _CustomSliderViewState extends SafeState<_CustomSliderView> with Overlayer
   double changeValueScope({
     num baseMin = 0,
     required num baseValue,
-    num baseMax = double.infinity,
+    num baseMax = 1,
     num dstMin = 0,
     num dstMax = 1,
   }) {
