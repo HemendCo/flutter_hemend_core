@@ -13,14 +13,18 @@ import 'dart:developer' as dev;
 import 'dart:io' //
     show
         Platform;
+
 import 'package:device_info_plus/device_info_plus.dart' as device_info //
     show
         DeviceInfoPlugin;
+import 'package:dio/dio.dart' //
+    show
+        Dio,
+        Options;
 import 'package:flutter/foundation.dart' //
     show
         FlutterError,
         FlutterErrorDetails;
-
 import 'package:flutter/material.dart' as material_lib //
     show
         runApp,
@@ -34,7 +38,6 @@ import 'package:flutter/material.dart' as material_lib //
         Center,
         Text,
         TextStyle;
-import 'package:http/http.dart' as http;
 import 'package:package_info_plus/package_info_plus.dart' as package_info //
     show
         PackageInfo;
@@ -570,12 +573,14 @@ if you don't want to use Crashlytics check what method calling it
   static Future<bool> onlineReport(dynamic input) async {
     final params = input as PostRequestParams;
     try {
-      await http.post(
+      await Dio().postUri(
         params.uri,
-        body: converter.jsonEncode(
+        data: converter.jsonEncode(
           params.body,
         ),
-        headers: params.headers,
+        options: Options(
+          headers: params.headers,
+        ),
       );
       return true;
     } catch (e, st) {
