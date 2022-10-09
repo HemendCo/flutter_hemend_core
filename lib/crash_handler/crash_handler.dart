@@ -96,6 +96,7 @@ if you don't want to use Crashlytics check what method calling it
   static CrashHandler? _instance;
   static T? registerAndRunZoned<T>(
     T Function() body, {
+    bool useDefaultUri = true,
     Map<Object?, Object?>? zoneValues,
     ZoneSpecification? zoneSpecification,
     Uri? reportUri,
@@ -112,6 +113,7 @@ if you don't want to use Crashlytics check what method calling it
   }) {
     _instance = CrashHandler.register(
       reportUri: reportUri,
+      useDefaultUri: useDefaultUri,
       errorWidget: errorWidget,
       extraInfo: extraInfo,
       taskQueue: taskQueue,
@@ -131,6 +133,7 @@ if you don't want to use Crashlytics check what method calling it
   final IAsyncTaskQueue _taskQueue;
   CrashHandler.register({
     Uri? reportUri,
+    bool useDefaultUri = true,
     void Function(Object, StackTrace)? onCrash,
     Map<String, String>? reportHeaders,
     Map<String, dynamic>? extraInfo,
@@ -147,10 +150,11 @@ if you don't want to use Crashlytics check what method calling it
             IAsyncTaskQueue.SynchronizedTaskQueue(
               maxWorkers: 4,
             ),
-        reportUri = reportUri ??
-            Uri.parse(
-              $Environments.CONFIG_CRASHLYTIX_SERVER_ADDRESS,
-            ),
+        reportUri = useDefaultUri && reportUri == null
+            ? Uri.parse(
+                $Environments.CONFIG_CRASHLYTIX_SERVER_ADDRESS,
+              )
+            : reportUri,
         _cleanFromDeviceInfo = cleanFromDeviceInfo,
         _reportHeaders = reportHeaders ?? {} {
     _reportHeaders.addAll({
