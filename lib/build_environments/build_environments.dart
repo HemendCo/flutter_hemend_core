@@ -49,13 +49,13 @@ enum BuildType {
   debug(
     environmentParams: {
       'HEMEND_CONFIG_RELEASE_MODE': 'DEBUG',
-      'HEMEND_CONFIG_DEBUG_LEVEL': '1',
+      'HEMEND_CONFIG_DEBUG_LEVEL': '2',
     },
   ),
   profile(
     environmentParams: {
       'HEMEND_CONFIG_RELEASE_MODE': 'PROFILE',
-      'HEMEND_CONFIG_DEBUG_LEVEL': '0',
+      'HEMEND_CONFIG_DEBUG_LEVEL': '1',
     },
   ),
   debugBuild(
@@ -64,7 +64,7 @@ enum BuildType {
     ],
     environmentParams: {
       'HEMEND_CONFIG_RELEASE_MODE': 'DEBUG',
-      'HEMEND_CONFIG_DEBUG_LEVEL': '1',
+      'HEMEND_CONFIG_DEBUG_LEVEL': '2',
     },
   ),
   performance(
@@ -73,13 +73,13 @@ enum BuildType {
     ],
     environmentParams: {
       'HEMEND_CONFIG_RELEASE_MODE': 'PERFORMANCE',
-      'HEMEND_CONFIG_DEBUG_LEVEL': '2',
+      'HEMEND_CONFIG_DEBUG_LEVEL': '1',
     },
   ),
   presentation(
     environmentParams: {
       'HEMEND_CONFIG_RELEASE_MODE': 'PRESENTATION',
-      'HEMEND_CONFIG_DEBUG_LEVEL': '1',
+      'HEMEND_CONFIG_DEBUG_LEVEL': '0',
     },
   );
 

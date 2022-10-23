@@ -8,6 +8,7 @@ final List<Object> _temp = [];
 
 ///use this only for debug purposes and don't use it in release version
 extension Debugger on Object {
+  //TODO add max size for _temp items
   /// **DO NOT USE IN RELEASE MODE**
   ///
   /// **Use in Assertion or DevTools.runInDebugMode**
@@ -64,6 +65,7 @@ extension Debugger on Object {
   /// references garbage collector will remove it and will be lost
   ///
   /// you may need to use [resetInspectCache] to clear cached objects
+  @Deprecated('remove on production')
   void inspect() {
     _temp.add(this);
     dev.inspect(_temp.last);
