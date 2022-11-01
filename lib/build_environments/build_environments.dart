@@ -79,7 +79,7 @@ enum BuildType {
   presentation(
     environmentParams: {
       'HEMEND_CONFIG_RELEASE_MODE': 'PRESENTATION',
-      'HEMEND_CONFIG_DEBUG_LEVEL': '0',
+      'HEMEND_CONFIG_DEBUG_LEVEL': '1',
     },
   );
 

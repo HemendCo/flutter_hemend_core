@@ -36,13 +36,13 @@ class RuntimeCalculator {
         name: runtimeName,
       );
     }.runInDebugMode();
-    return DurationAndValueCarrier(left: stopwatch.elapsed, right: result);
+    return DurationAndValueCarrier(duration: stopwatch.elapsed, result: result);
   }
 }
 
 class DataPairValueCarrier<L, R> {
-  final L left;
-  final R right;
+  final L duration;
+  final R result;
 
-  DataPairValueCarrier({required this.left, required this.right});
+  DataPairValueCarrier({required this.duration, required this.result});
 }
