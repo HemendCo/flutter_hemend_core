@@ -8,11 +8,11 @@ environment:
   flutter: ">=3.0.0"
 
 dependencies:
-  device_info_plus: ^4.1.2
+  device_info_plus: ^8.0.0
   flutter:
     sdk: flutter
   dio: null
-  package_info_plus: ^1.4.2
+  package_info_plus: ^3.0.2
   path_provider: ^2.0.11
   rxdart: ^0.27.4
   shared_preferences: ^2.0.13
