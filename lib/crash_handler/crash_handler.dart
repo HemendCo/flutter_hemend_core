@@ -100,7 +100,7 @@ if you don't want to use Crashlytics check what method calling it
     Map<Object?, Object?>? zoneValues,
     ZoneSpecification? zoneSpecification,
     Uri? reportUri,
-    void Function(Object, StackTrace)? onCrash,
+    void Function(Object exception, StackTrace stackTrace)? onCrash,
     Map<String, String>? reportHeaders,
     IAsyncTaskQueue? taskQueue,
     Map<String, dynamic>? extraInfo,
@@ -134,7 +134,7 @@ if you don't want to use Crashlytics check what method calling it
   CrashHandler.register({
     Uri? reportUri,
     bool useDefaultUri = true,
-    void Function(Object, StackTrace)? onCrash,
+    void Function(Object exception, StackTrace stackTrace)? onCrash,
     Map<String, String>? reportHeaders,
     Map<String, dynamic>? extraInfo,
     List<String> cleanFromDeviceInfo = const [
@@ -333,7 +333,7 @@ if you don't want to use Crashlytics check what method calling it
   }
 
   ///callback to call when crash happens to handle internally
-  final void Function(Object, StackTrace)? _onCrash;
+  final void Function(Object exception, StackTrace stackTrace)? _onCrash;
 
   ///[_deviceInfo] and [_appInfo] grabbed with [gatherBasicData]
   ///
