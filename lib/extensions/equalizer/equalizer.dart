@@ -1,3 +1,5 @@
+import 'package:flutter/foundation.dart';
+
 /// a mixin that will override the == operator and hashCode to
 /// make it easier to handle
 mixin EqualizerMixin implements _BaseEqualizer {
@@ -9,17 +11,7 @@ mixin EqualizerMixin implements _BaseEqualizer {
     ///checking if both are the same type
     if (runtimeType != other.runtimeType) return false;
 
-    ///checking if both have same length of check items
-    ///(actually it cannot be false cause each type may have same type
-    ///but if used generative list it can handle that)
-    if (equalCheckItems.length != other.equalCheckItems.length) return false;
-
-    ///checking if both equalCheckItems have identical items
-    for (var index = 0; index < equalCheckItems.length; index++) {
-      if (equalCheckItems[index] != other.equalCheckItems[index]) return false;
-    }
-
-    return true;
+    return listEquals(equalCheckItems, other.equalCheckItems);
   }
 
   @override
