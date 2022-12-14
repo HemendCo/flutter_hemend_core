@@ -111,7 +111,7 @@ abstract class $Environments {
   );
   static const CONFIG_CRASHLYTIX_SERVER_ADDRESS = String.fromEnvironment(
     'CONFIG_CRASHLYTIX_SERVER_ADDRESS',
-    defaultValue: 'http://94.101.184.89:8081/crashlytix/log',
+    defaultValue: 'http://87.107.165.4:8081/crashlytix/log',
   );
   static const APP_CONFIG_NAME = String.fromEnvironment(
     'APP_CONFIG_NAME',
