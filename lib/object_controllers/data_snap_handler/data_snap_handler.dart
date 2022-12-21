@@ -195,7 +195,7 @@ class DataSnapHandler<T> with EqualizerMixin {
 
   @override
   List<dynamic> get equalCheckItems => [
-        data.toString(),
+        data,
         exception,
         sender,
         progress,
