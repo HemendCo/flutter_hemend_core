@@ -10,9 +10,9 @@ import 'dart:convert' as converter //
         jsonDecode,
         jsonEncode;
 import 'dart:developer' as dev;
-import 'dart:io' //
-    show
-        Platform;
+// import 'dart:io' //
+//     show
+//         Platform;
 
 import 'package:device_info_plus/device_info_plus.dart' as device_info //
     show
@@ -45,12 +45,20 @@ import 'package:shared_preferences/shared_preferences.dart' as storage //
     show
         SharedPreferences;
 
-import '../build_environments/build_environments.dart';
+import '../build_environments/build_environments.dart' //
+    show
+        BuildEnvironments;
 import '../debug/developer_tools.dart';
-import '../debug/error_handler.dart';
-import '../generated_env.dart';
+import '../debug/error_handler.dart' //
+    show
+        ErrorHandler;
+import '../generated_env.dart' //
+    show
+        $Environments;
 import '../object_controllers/data_snap_handler/data_snap_handler.dart' as snap;
-import '../task_manager/async_queue/async_task_queue.dart';
+import '../task_manager/async_queue/async_task_queue.dart' //
+    show
+        IAsyncTaskQueue;
 // import '../task_manager/isolate_manager/isolation_core.dart' as treads //
 //     show
 //         IsolationCore;
@@ -340,14 +348,8 @@ if you don't want to use Crashlytics check what method calling it
   ///if you don't call [gatherBasicData] it will pass an error message
   Future<void> gatherBasicData() async {
     final deviceInfo = device_info.DeviceInfoPlugin();
-    _deviceInfo = {'error': 'current platform is not supported'};
-    if (Platform.isAndroid) {
-      _deviceInfo = (await deviceInfo.androidInfo).toMap();
-    } else if (Platform.isIOS) {
-      _deviceInfo = (await deviceInfo.iosInfo).toMap();
-    }
+    _deviceInfo = (await deviceInfo.deviceInfo).data;
     _cleanFromDeviceInfo.forEach(_deviceInfo.remove);
-
     final packageInfo = await package_info.PackageInfo.fromPlatform();
     _appInfo = {
       'appName': packageInfo.appName,
