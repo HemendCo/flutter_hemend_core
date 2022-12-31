@@ -10,16 +10,13 @@ import 'dart:convert' as converter //
         jsonDecode,
         jsonEncode;
 import 'dart:developer' as dev;
-// import 'dart:io' //
-//     show
-//         Platform;
-
 import 'package:device_info_plus/device_info_plus.dart' as device_info //
     show
         DeviceInfoPlugin;
 import 'package:dio/dio.dart' //
     show
         Dio,
+        DioError,
         Options;
 import 'package:flutter/foundation.dart' //
     show
@@ -59,9 +56,6 @@ import '../object_controllers/data_snap_handler/data_snap_handler.dart' as snap;
 import '../task_manager/async_queue/async_task_queue.dart' //
     show
         IAsyncTaskQueue;
-// import '../task_manager/isolate_manager/isolation_core.dart' as treads //
-//     show
-//         IsolationCore;
 
 class CrashHandler {
   static const _kModuleName = 'Crashlytix';
@@ -482,11 +476,10 @@ if you don't want to use Crashlytics check what method calling it
     bool attachInfo = true,
     void Function()? onDone,
   }) async {
-    final crashTime = DateTime.now().millisecondsSinceEpoch;
-
     /// if you did set the [reportUri] it will use it to upload the error
     /// information
     if (reportUri != null) {
+      final crashTime = DateTime.now().millisecondsSinceEpoch;
       final params = PostRequestParams(
         reportUri!,
         _reportHeaders,
@@ -507,25 +500,17 @@ if you don't want to use Crashlytics check what method calling it
       );
       onlineReport(params).then(
         (result) {
-          if (result != null) {
-            if (attachInfo) {
-              _taskQueue.execute(_reportBucket);
-            }
-            if (onDone != null) onDone();
-          } else {
-            if (attachInfo) {
-              final logData = converter.jsonEncode(params.body);
-              _internalLog(
-                '''cannot upload log data for now it will be placed in ${logData.hashCode}''',
-              );
-              _bucket?.setString(
-                '$_kBucketPrefix-${logData.hashCode}',
-                logData,
-              );
-            }
+          if (attachInfo) {
+            _taskQueue.execute(_reportBucket);
           }
+          if (onDone != null) onDone();
         },
-      ).onError((error, stackTrace) {
+      ).onError<DioError>((error, stackTrace) {
+        dev.log(
+          'Dio Exception',
+          error: error,
+          stackTrace: stackTrace,
+        );
         if (attachInfo) {
           final logData = converter.jsonEncode(params.body);
           _internalLog(
@@ -536,19 +521,18 @@ if you don't want to use Crashlytics check what method calling it
             logData,
           );
         }
+      }).onError((error, stackTrace) {
+        dev.log(
+          'Unknown Exception',
+          error: error,
+          stackTrace: stackTrace,
+        );
       });
-      // await _taskQueue.execute(
-      //   () => treads.IsolationCore.createIsolateForSingleTask<bool>(
-      //     task: onlineReport,
-      //     taskParams: params,
-      //     debugName: 'crash_report_${params.hashCode}',
-      //   ),
-      // );
     }
   }
 
   Future<void> cleanBucket() async {
-    _bucket?.clear();
+    await _bucket?.clear();
   }
 
   ///[Object] ex is the exception
@@ -572,27 +556,17 @@ if you don't want to use Crashlytics check what method calling it
   }
 
   ///report error to server
-  static Future<bool> onlineReport(dynamic input) async {
-    final params = input as PostRequestParams;
-    try {
-      await Dio().postUri(
-        params.uri,
-        data: converter.jsonEncode(
-          params.body,
-        ),
-        options: Options(
-          headers: params.headers,
-        ),
-      );
-      return true;
-    } catch (e, st) {
-      'Request failed'.log(
-        time: DateTime.now(),
-        error: e,
-        stackTrace: st,
-      );
-      rethrow;
-    }
+  static Future<void> onlineReport(PostRequestParams input) async {
+    //TODO - make it possible to use custom http client
+    await Dio().postUri(
+      input.uri,
+      data: converter.jsonEncode(
+        input.body,
+      ),
+      options: Options(
+        headers: input.headers,
+      ),
+    );
   }
 }
 
