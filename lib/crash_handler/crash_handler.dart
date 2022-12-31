@@ -231,7 +231,7 @@ if you don't want to use Crashlytics check what method calling it
   Future<List<bool>> runTasks(List<FutureOr<void> Function()> tasks) async {
     final results = <bool>[];
     for (final task in tasks) {
-      final taskResult = await tryAsync(task);
+      final taskResult = await tryThis(task);
       taskResult.singleActOnFinished(
         onDone: (p0) => results.add(true),
         onError: (p0, _) => results.add(false),
@@ -268,7 +268,7 @@ if you don't want to use Crashlytics check what method calling it
         _taskQueue.addToQueue(
           () => recordRawMap(
             data,
-            attachInfo: false,
+            invokeBucketMechanism: false,
             onDone: () async {
               await _bucket!.remove(
                 item,
@@ -431,12 +431,18 @@ if you don't want to use Crashlytics check what method calling it
   ///
   ///return type is a future of [snap.DataSnapHandler] so
   ///you can handle result with it
-  @Deprecated('use tryAsync instead')
   FutureOr<snap.DataSnapHandler<TResult>> tryThis<TResult>(
     FutureOr<TResult> Function() function, {
     Map<String, dynamic> extraInfo = const {},
-  }) =>
-      tryAsync(function, extraInfo: extraInfo);
+  }) {
+    if (function is Future<TResult> Function()) {
+      return tryAsync<TResult>(function, extraInfo: extraInfo);
+    } else if (function is TResult Function()) {
+      return trySync(function, extraInfo: extraInfo);
+    } else {
+      throw const ErrorHandler('Impossible Happened');
+    }
+  }
 
   ///will run the given function in try catch clause
   ///
@@ -445,7 +451,7 @@ if you don't want to use Crashlytics check what method calling it
   ///return type is a future of [snap.DataSnapHandler] so
   ///you can handle result with it
   Future<snap.DataSnapHandler<TResult>> tryAsync<TResult>(
-    FutureOr<TResult> Function() function, {
+    Future<TResult> Function() function, {
     Map<String, dynamic> extraInfo = const {},
   }) async {
     try {
@@ -473,7 +479,7 @@ if you don't want to use Crashlytics check what method calling it
   ///or it sent a report successfully
   Future<void> recordRawMap(
     Map<String, dynamic> data, {
-    bool attachInfo = true,
+    bool invokeBucketMechanism = true,
     void Function()? onDone,
   }) async {
     /// if you did set the [reportUri] it will use it to upload the error
@@ -483,7 +489,7 @@ if you don't want to use Crashlytics check what method calling it
       final params = PostRequestParams(
         reportUri!,
         _reportHeaders,
-        attachInfo
+        invokeBucketMechanism
             ? {
                 'data': {
                   'packageInfo': _appInfo,
@@ -500,7 +506,7 @@ if you don't want to use Crashlytics check what method calling it
       );
       onlineReport(params).then(
         (result) {
-          if (attachInfo) {
+          if (invokeBucketMechanism) {
             _taskQueue.execute(_reportBucket);
           }
           if (onDone != null) onDone();
@@ -511,7 +517,7 @@ if you don't want to use Crashlytics check what method calling it
           error: error,
           stackTrace: stackTrace,
         );
-        if (attachInfo) {
+        if (invokeBucketMechanism) {
           final logData = converter.jsonEncode(params.body);
           _internalLog(
             '''cannot upload log data for now it will be placed in ${logData.hashCode}''',
