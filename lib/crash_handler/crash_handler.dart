@@ -51,9 +51,9 @@ import '../debug/error_handler.dart';
 import '../generated_env.dart';
 import '../object_controllers/data_snap_handler/data_snap_handler.dart' as snap;
 import '../task_manager/async_queue/async_task_queue.dart';
-import '../task_manager/isolate_manager/isolation_core.dart' as treads //
-    show
-        IsolationCore;
+// import '../task_manager/isolate_manager/isolation_core.dart' as treads //
+//     show
+//         IsolationCore;
 
 class CrashHandler {
   static const _kModuleName = 'Crashlytix';
@@ -503,49 +503,45 @@ if you don't want to use Crashlytics check what method calling it
             : data,
         null,
       );
-      await _taskQueue.execute(
-        () => treads.IsolationCore.createIsolateForSingleTask<bool>(
-          task: onlineReport,
-          taskParams: params,
-          debugName: 'crash_report_${params.hashCode}',
-        ).then(
-          (value) {
-            value.singleActOnFinished(
-              onDone: (result) {
-                if (result != null) {
-                  if (attachInfo) {
-                    _taskQueue.execute(_reportBucket);
-                  }
-                  if (onDone != null) onDone();
-                } else {
-                  if (attachInfo) {
-                    final logData = converter.jsonEncode(params.body);
-                    _internalLog(
-                      '''cannot upload log data for now it will be placed in ${logData.hashCode}''',
-                    );
-                    _bucket?.setString(
-                      '$_kBucketPrefix-${logData.hashCode}',
-                      logData,
-                    );
-                  }
-                }
-              },
-              onError: (_, stack) {
-                if (attachInfo) {
-                  final logData = converter.jsonEncode(params.body);
-                  _internalLog(
-                    '''cannot upload log data for now it will be placed in ${logData.hashCode}''',
-                  );
-                  _bucket?.setString(
-                    '$_kBucketPrefix-${logData.hashCode}',
-                    logData,
-                  );
-                }
-              },
-            );
-          },
-        ),
-      );
+      onlineReport(params).then(
+        (result) {
+          if (result != null) {
+            if (attachInfo) {
+              _taskQueue.execute(_reportBucket);
+            }
+            if (onDone != null) onDone();
+          } else {
+            if (attachInfo) {
+              final logData = converter.jsonEncode(params.body);
+              _internalLog(
+                '''cannot upload log data for now it will be placed in ${logData.hashCode}''',
+              );
+              _bucket?.setString(
+                '$_kBucketPrefix-${logData.hashCode}',
+                logData,
+              );
+            }
+          }
+        },
+      ).onError((error, stackTrace) {
+        if (attachInfo) {
+          final logData = converter.jsonEncode(params.body);
+          _internalLog(
+            '''cannot upload log data for now it will be placed in ${logData.hashCode}''',
+          );
+          _bucket?.setString(
+            '$_kBucketPrefix-${logData.hashCode}',
+            logData,
+          );
+        }
+      });
+      // await _taskQueue.execute(
+      //   () => treads.IsolationCore.createIsolateForSingleTask<bool>(
+      //     task: onlineReport,
+      //     taskParams: params,
+      //     debugName: 'crash_report_${params.hashCode}',
+      //   ),
+      // );
     }
   }
 
