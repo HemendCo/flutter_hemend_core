@@ -23,7 +23,12 @@ class ListenableVar<T> {
   }
 
   ///Get value of variable
-  T call() => _value;
+  T? call([T? newValue]) {
+    if (newValue == null) {
+      return _value;
+    }
+    value = newValue;
+  }
 
   ///Invoke All Listeners
   Future<void> invokeListeners() async {
