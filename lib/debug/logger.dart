@@ -1,3 +1,5 @@
+// ignore_for_file: do_not_use_environment
+
 import 'dart:async';
 import 'dart:developer' as dev show log, inspect;
 
@@ -5,6 +7,22 @@ String get currentTimeTag => '''${DateTime.now().hour}:${DateTime.now().minute}:
 
 ///cache objects that are currently sent to debugger
 final List<Object> _temp = [];
+
+/// limits the length of _temp array
+///
+/// override using `--dart-define=inspect_cache_size=<MaxSize>`
+///
+/// example: `flutter run --dart-define=inspect_cache_size=25`
+const kMaxTempLength = int.fromEnvironment(
+  'inspect_cache_size',
+  defaultValue: 5,
+);
+void _addToTemp(Object object) {
+  if (_temp.length > kMaxTempLength) {
+    _temp.removeAt(0);
+  }
+  _temp.add(object);
+}
 
 ///use this only for debug purposes and don't use it in release version
 extension Debugger on Object {
@@ -38,7 +56,7 @@ extension Debugger on Object {
     Object? error,
     StackTrace? stackTrace,
   }) {
-    _temp.add(this);
+    _addToTemp(this);
     dev.log(
       toString(),
       level: level,
@@ -67,7 +85,7 @@ extension Debugger on Object {
   /// you may need to use [resetInspectCache] to clear cached objects
   @Deprecated('remove on production')
   void inspect() {
-    _temp.add(this);
+    _addToTemp(this);
     dev.inspect(_temp.last);
   }
 

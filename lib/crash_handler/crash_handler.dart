@@ -10,16 +10,13 @@ import 'dart:convert' as converter //
         jsonDecode,
         jsonEncode;
 import 'dart:developer' as dev;
-import 'dart:io' //
-    show
-        Platform;
-
 import 'package:device_info_plus/device_info_plus.dart' as device_info //
     show
         DeviceInfoPlugin;
 import 'package:dio/dio.dart' //
     show
         Dio,
+        DioError,
         Options;
 import 'package:flutter/foundation.dart' //
     show
@@ -45,15 +42,20 @@ import 'package:shared_preferences/shared_preferences.dart' as storage //
     show
         SharedPreferences;
 
-import '../build_environments/build_environments.dart';
-import '../debug/developer_tools.dart';
-import '../debug/error_handler.dart';
-import '../generated_env.dart';
-import '../object_controllers/data_snap_handler/data_snap_handler.dart' as snap;
-import '../task_manager/async_queue/async_task_queue.dart';
-import '../task_manager/isolate_manager/isolation_core.dart' as treads //
+import '../build_environments/build_environments.dart' //
     show
-        IsolationCore;
+        BuildEnvironments;
+import '../debug/developer_tools.dart';
+import '../debug/error_handler.dart' //
+    show
+        ErrorHandler;
+import '../generated_env.dart' //
+    show
+        $Environments;
+import '../object_controllers/data_snap_handler/data_snap_handler.dart' as snap;
+import '../task_manager/async_queue/async_task_queue.dart' //
+    show
+        IAsyncTaskQueue;
 
 class CrashHandler {
   static const _kModuleName = 'Crashlytix';
@@ -266,7 +268,7 @@ if you don't want to use Crashlytics check what method calling it
         _taskQueue.addToQueue(
           () => recordRawMap(
             data,
-            attachInfo: false,
+            invokeBucketMechanism: false,
             onDone: () async {
               await _bucket!.remove(
                 item,
@@ -340,14 +342,8 @@ if you don't want to use Crashlytics check what method calling it
   ///if you don't call [gatherBasicData] it will pass an error message
   Future<void> gatherBasicData() async {
     final deviceInfo = device_info.DeviceInfoPlugin();
-    _deviceInfo = {'error': 'current platform is not supported'};
-    if (Platform.isAndroid) {
-      _deviceInfo = (await deviceInfo.androidInfo).toMap();
-    } else if (Platform.isIOS) {
-      _deviceInfo = (await deviceInfo.iosInfo).toMap();
-    }
+    _deviceInfo = (await deviceInfo.deviceInfo).data;
     _cleanFromDeviceInfo.forEach(_deviceInfo.remove);
-
     final packageInfo = await package_info.PackageInfo.fromPlatform();
     _appInfo = {
       'appName': packageInfo.appName,
@@ -435,12 +431,18 @@ if you don't want to use Crashlytics check what method calling it
   ///
   ///return type is a future of [snap.DataSnapHandler] so
   ///you can handle result with it
-  @Deprecated('use tryAsync instead')
   FutureOr<snap.DataSnapHandler<TResult>> tryThis<TResult>(
     FutureOr<TResult> Function() function, {
     Map<String, dynamic> extraInfo = const {},
-  }) =>
-      tryAsync(function, extraInfo: extraInfo);
+  }) {
+    if (function is Future<TResult> Function()) {
+      return tryAsync<TResult>(function, extraInfo: extraInfo);
+    } else if (function is TResult Function()) {
+      return trySync(function, extraInfo: extraInfo);
+    } else {
+      throw const ErrorHandler('Impossible Happened');
+    }
+  }
 
   ///will run the given function in try catch clause
   ///
@@ -449,7 +451,7 @@ if you don't want to use Crashlytics check what method calling it
   ///return type is a future of [snap.DataSnapHandler] so
   ///you can handle result with it
   Future<snap.DataSnapHandler<TResult>> tryAsync<TResult>(
-    FutureOr<TResult> Function() function, {
+    Future<TResult> Function() function, {
     Map<String, dynamic> extraInfo = const {},
   }) async {
     try {
@@ -477,18 +479,17 @@ if you don't want to use Crashlytics check what method calling it
   ///or it sent a report successfully
   Future<void> recordRawMap(
     Map<String, dynamic> data, {
-    bool attachInfo = true,
+    bool invokeBucketMechanism = true,
     void Function()? onDone,
   }) async {
-    final crashTime = DateTime.now().millisecondsSinceEpoch;
-
     /// if you did set the [reportUri] it will use it to upload the error
     /// information
     if (reportUri != null) {
+      final crashTime = DateTime.now().millisecondsSinceEpoch;
       final params = PostRequestParams(
         reportUri!,
         _reportHeaders,
-        attachInfo
+        invokeBucketMechanism
             ? {
                 'data': {
                   'packageInfo': _appInfo,
@@ -503,54 +504,41 @@ if you don't want to use Crashlytics check what method calling it
             : data,
         null,
       );
-      await _taskQueue.execute(
-        () => treads.IsolationCore.createIsolateForSingleTask<bool>(
-          task: onlineReport,
-          taskParams: params,
-          debugName: 'crash_report_${params.hashCode}',
-        ).then(
-          (value) {
-            value.singleActOnFinished(
-              onDone: (result) {
-                if (result != null) {
-                  if (attachInfo) {
-                    _taskQueue.execute(_reportBucket);
-                  }
-                  if (onDone != null) onDone();
-                } else {
-                  if (attachInfo) {
-                    final logData = converter.jsonEncode(params.body);
-                    _internalLog(
-                      '''cannot upload log data for now it will be placed in ${logData.hashCode}''',
-                    );
-                    _bucket?.setString(
-                      '$_kBucketPrefix-${logData.hashCode}',
-                      logData,
-                    );
-                  }
-                }
-              },
-              onError: (_, stack) {
-                if (attachInfo) {
-                  final logData = converter.jsonEncode(params.body);
-                  _internalLog(
-                    '''cannot upload log data for now it will be placed in ${logData.hashCode}''',
-                  );
-                  _bucket?.setString(
-                    '$_kBucketPrefix-${logData.hashCode}',
-                    logData,
-                  );
-                }
-              },
-            );
-          },
-        ),
-      );
+      onlineReport(params).then(
+        (result) {
+          if (invokeBucketMechanism) {
+            _taskQueue.execute(_reportBucket);
+          }
+          if (onDone != null) onDone();
+        },
+      ).onError<DioError>((error, stackTrace) {
+        dev.log(
+          'Dio Exception',
+          error: error,
+          stackTrace: stackTrace,
+        );
+        if (invokeBucketMechanism) {
+          final logData = converter.jsonEncode(params.body);
+          _internalLog(
+            '''cannot upload log data for now it will be placed in ${logData.hashCode}''',
+          );
+          _bucket?.setString(
+            '$_kBucketPrefix-${logData.hashCode}',
+            logData,
+          );
+        }
+      }).onError((error, stackTrace) {
+        dev.log(
+          'Unknown Exception',
+          error: error,
+          stackTrace: stackTrace,
+        );
+      });
     }
   }
 
   Future<void> cleanBucket() async {
-    _bucket?.clear();
+    await _bucket?.clear();
   }
 
   ///[Object] ex is the exception
@@ -574,27 +562,17 @@ if you don't want to use Crashlytics check what method calling it
   }
 
   ///report error to server
-  static Future<bool> onlineReport(dynamic input) async {
-    final params = input as PostRequestParams;
-    try {
-      await Dio().postUri(
-        params.uri,
-        data: converter.jsonEncode(
-          params.body,
-        ),
-        options: Options(
-          headers: params.headers,
-        ),
-      );
-      return true;
-    } catch (e, st) {
-      'Request failed'.log(
-        time: DateTime.now(),
-        error: e,
-        stackTrace: st,
-      );
-      rethrow;
-    }
+  static Future<void> onlineReport(PostRequestParams input) async {
+    //TODO - make it possible to use custom http client
+    await Dio().postUri(
+      input.uri,
+      data: converter.jsonEncode(
+        input.body,
+      ),
+      options: Options(
+        headers: input.headers,
+      ),
+    );
   }
 }
 

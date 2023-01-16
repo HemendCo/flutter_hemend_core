@@ -38,11 +38,14 @@ class DataSnapHandler<T> with EqualizerMixin {
   /// be careful with caster it will check the type of data before casting
   ///
   /// if data type is not [C] it will throw an exception if you are not passing
-  /// [castErrorHandler]
-  DataSnapHandler<C> castTo<C>({void Function(T?)? castErrorHandler}) {
-    if (data is! C?) {
-      if (castErrorHandler != null) {
-        castErrorHandler(data);
+  /// [mapper]
+  DataSnapHandler<C> castTo<C>({C Function(T)? mapper}) {
+    if (data != null && data is! C) {
+      if (mapper != null) {
+        return DataSnapHandler<C>.done(
+          data: mapper(data!),
+          sender: sender,
+        );
       } else {
         throw Exception(
           'data type is not $C cannot cast ${data.runtimeType} to it',
