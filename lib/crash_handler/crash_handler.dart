@@ -231,7 +231,7 @@ if you don't want to use Crashlytics check what method calling it
   Future<List<bool>> runTasks(List<FutureOr<void> Function()> tasks) async {
     final results = <bool>[];
     for (final task in tasks) {
-      final taskResult = await tryAsync(task);
+      final taskResult = await tryThis(task);
       taskResult.singleActOnFinished(
         onDone: (p0) => results.add(true),
         onError: (p0, _) => results.add(false),
