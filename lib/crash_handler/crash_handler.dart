@@ -538,7 +538,10 @@ if you don't want to use Crashlytics check what method calling it
   }
 
   Future<void> cleanBucket() async {
-    await _bucket?.clear();
+    final keys = _bucket?.getKeys() ?? {};
+    for (final key in keys.where((element) => element.startsWith(_kBucketPrefix))) {
+      await _bucket?.remove(key);
+    }
   }
 
   ///[Object] ex is the exception
