@@ -20,7 +20,7 @@ mixin EqualizerMixin implements _BaseEqualizer {
   @override
   String toString() {
     // ignore: lines_longer_than_80_chars
-    return '\n=================================\n$runtimeType:\n--------------------------\n${equalCheckItems.join('\n--------------------------\n')}\n=================================';
+    return '\n=====\n$runtimeType:\n-----\n\t${equalCheckItems.join('\n-----\n\t')}\n=====';
   }
 }
 
