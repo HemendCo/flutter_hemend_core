@@ -1,4 +1,4 @@
-// ignore_for_file: constant_identifier_names, do_not_use_environment, lines_longer_than_80_chars
+// ignore_for_file: constant_identifier_names, do_not_use_environment, lines_longer_than_80_chars, avoid_redundant_argument_values
 abstract class $Environments {
   $Environments._();
   static const BUILD_DATE_TIME = int.fromEnvironment(

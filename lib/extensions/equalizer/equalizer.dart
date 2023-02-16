@@ -26,7 +26,7 @@ mixin EqualizerMixin implements _BaseEqualizer {
 
 ///base abstract class for equalizer
 ///
-///all subclasses should overrider equalCheckItems
+///all subclasses should override equalCheckItems
 abstract class _BaseEqualizer {
   List<dynamic> get equalCheckItems;
   _BaseEqualizer._();
