@@ -59,6 +59,7 @@ import '../task_manager/async_queue/async_task_queue.dart' //
 
 class CrashHandler {
   static const _kModuleName = 'Crashlytix';
+  static bool get hasInstance => _instance != null;
 
   ///uses singleton pattern first u need to initialize it with registerer
   ///then you can use report methods

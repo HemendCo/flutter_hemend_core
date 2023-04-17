@@ -54,9 +54,9 @@ class Debounce {
   }
 
   /// Cancels any active debounce operation with the given [tag].
-  static void cancel(String tag) {
+  static bool cancel(String tag) {
     _operations[tag]?.timer.cancel();
-    _operations.remove(tag);
+    return _operations.remove(tag) != null;
   }
 
   /// Cancels all active debouncers.
