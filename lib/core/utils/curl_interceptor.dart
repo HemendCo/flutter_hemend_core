@@ -1,101 +1,124 @@
 import 'dart:convert';
 
 import 'package:dio/dio.dart';
+import 'package:logging/logging.dart';
 
-class DioCurlRequestInfo {
-  final RequestOptions requestOptions;
-  final String? curl;
-  final DateTime time;
+class DioLoggerException implements Exception {
+  DioLoggerException(this.message);
 
-  DioCurlRequestInfo({
-    required this.requestOptions,
-    required this.curl,
-    required this.time,
-  });
+  final String message;
+  @override
+  String toString() {
+    return 'DioLoggerException: $message';
+  }
 }
 
-class DioCurlInterceptor extends Interceptor {
-  final bool printOnSuccess;
-  final bool convertFormData;
-
-  final void Function(
-    DioCurlRequestInfo info,
-  ) onLog;
-
-  DioCurlInterceptor({
-    this.printOnSuccess = true,
-    this.convertFormData = true,
-    required this.onLog,
+class CurlLoggerDioInterceptor extends Interceptor {
+  CurlLoggerDioInterceptor({
+    required this.logger,
+    this.multilineUnixFormat = true,
   });
+  final bool multilineUnixFormat;
+  final Logger logger;
 
   @override
   void onError(DioError err, ErrorInterceptorHandler handler) {
-    _renderCurlRepresentation(err.requestOptions);
+    logger.severe(
+      _renderCurlRepresentation(err.requestOptions),
+      err,
+    );
+
     return handler.next(err);
   }
 
   @override
   void onResponse(
-    Response response,
+    Response<dynamic> response,
     ResponseInterceptorHandler handler,
   ) {
-    if (printOnSuccess) {
-      _renderCurlRepresentation(response.requestOptions);
-    }
+    logger.fine(
+      _renderCurlRepresentation(response.requestOptions),
+    );
 
     /// continue
     return handler.next(response);
   }
 
-  void _renderCurlRepresentation(RequestOptions requestOptions) {
+  String _renderCurlRepresentation(RequestOptions requestOptions) {
     try {
-      final curl = _cURLRepresentation(requestOptions);
-      onLog(
-        DioCurlRequestInfo(
-          requestOptions: requestOptions,
-          curl: curl,
-          time: DateTime.now(),
-        ),
+      final command = _cURLRepresentation(requestOptions);
+      return command;
+    } catch (err, st) {
+      logger.shout(
+        'Fall into an error during converting request to curl representation',
+        err,
+        st,
       );
-    } catch (err) {
-      onLog(
-        DioCurlRequestInfo(
-          requestOptions: requestOptions,
-          curl: null,
-          time: DateTime.now(),
-        ),
-      );
+      throw DioLoggerException('cannot convert request to curl representation');
     }
   }
 
   String _cURLRepresentation(RequestOptions options) {
-    final components = ['curl -i'];
+    final buffer = StringBuffer('curl') //
+      ..addParameter(
+        '-i',
+        multiline: multilineUnixFormat,
+      );
+    // final components = <String>['curl', '-i'];
 
     options.headers.forEach((k, v) {
       if (!['Cookie', 'content-length'].contains(k)) {
-        components.add('-H "$k: $v"');
+        final headerValue = '-H "$k: $v"';
+        buffer.addParameter(
+          headerValue,
+          multiline: multilineUnixFormat,
+        );
       }
     });
 
-    if (options.data != null || options.method.toLowerCase() == 'post') {
-      if (options.data is FormData && convertFormData) {
-        options.data = Map.fromEntries((options.data as FormData).fields);
+    if (options.data != null) {
+      /// FormData can't be JSON-serialized, so keep only their field attributes
+      final data = options.data;
+      if (data is FormData) {
+        for (final field in data.fields) {
+          buffer.addParameter(
+            "-F '${field.key}:\"${field.value}\"'",
+            multiline: multilineUnixFormat,
+          );
+        }
+      } else if (data is Map) {
+        final rawData = jsonEncode(data);
+        buffer.addParameter(
+          '--data-raw "$rawData"',
+          multiline: multilineUnixFormat,
+        );
+      } else if (data is String) {
+        buffer.addParameter(
+          '--data-raw "$data"',
+          multiline: multilineUnixFormat,
+        );
       }
+    }
+    buffer
+      ..addParameter(
+        '-X ${options.method.toUpperCase()}',
+        multiline: multilineUnixFormat,
+      )
+      ..addParameter(
+        '"${options.uri}"',
+        multiline: multilineUnixFormat,
+      );
 
-      final data = json.encode(options.data ?? {});
-      components.add('-d $data');
-    }
-    var contains = false;
-    for (final element in components) {
-      if (element.contains('-X')) {
-        contains = true;
-      }
-    }
-    if (contains) {
-      components.add('-X ${options.method}');
-    }
-    components.add('"${options.uri.toString()}"');
+    return buffer.toString();
+  }
+}
 
-    return components.join(' \\\n\t');
+extension on StringBuffer {
+  void addParameter(String parameter, {required bool multiline}) {
+    write(parameter);
+    write(' ');
+    if (multiline) {
+      write('\\\n\t');
+    }
   }
 }

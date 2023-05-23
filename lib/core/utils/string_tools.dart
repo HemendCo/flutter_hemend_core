@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 extension StringTools on String {
@@ -13,7 +12,7 @@ extension StringTools on String {
     final stripped = replaceAll(comma, '').replaceAll(RegExp(r'[^\d]'), '');
     final reversed = stripped.codeUnits.reversed;
     final output = StringBuffer(sign);
-    int counter = 0;
+    var counter = 0;
     for (final i in reversed) {
       if (counter % 3 == 0 && counter != 0) {
         output.write(comma);
