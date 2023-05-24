@@ -59,7 +59,7 @@ class CurlLoggerDioInterceptor extends Interceptor {
   }
 
   String _cURLRepresentation(RequestOptions options) {
-    final buffer = StringBuffer('curl') //
+    final buffer = StringBuffer('curl ') //
       ..addParameter(
         '-i',
         multiline: multilineUnixFormat,
@@ -104,9 +104,9 @@ class CurlLoggerDioInterceptor extends Interceptor {
         '-X ${options.method.toUpperCase()}',
         multiline: multilineUnixFormat,
       )
-      ..addParameter(
+      ..write(
         '"${options.uri}"',
-        multiline: multilineUnixFormat,
+        // multiline: multilineUnixFormat,
       );
 
     return buffer.toString();
