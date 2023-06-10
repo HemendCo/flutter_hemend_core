@@ -64,7 +64,6 @@ class CurlLoggerDioInterceptor extends Interceptor {
         '-i',
         multiline: multilineUnixFormat,
       );
-    // final components = <String>['curl', '-i'];
 
     options.headers.forEach((k, v) {
       if (!['Cookie', 'content-length'].contains(k)) {
@@ -82,7 +81,7 @@ class CurlLoggerDioInterceptor extends Interceptor {
       if (data is FormData) {
         for (final field in data.fields) {
           buffer.addParameter(
-            "-F '${field.key}:\"${field.value}\"'",
+            "-F '${field.key}=\"${field.value}\"'",
             multiline: multilineUnixFormat,
           );
         }
