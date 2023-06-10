@@ -28,6 +28,7 @@ class ListenableVar<T> {
       return _value;
     }
     value = newValue;
+    return null;
   }
 
   ///Invoke All Listeners

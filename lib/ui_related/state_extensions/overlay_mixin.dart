@@ -66,7 +66,7 @@ mixin OverlayerViewMixin<T extends StatefulWidget> on State<T> implements _IOver
           ],
           false,
         ).values;
-    final overlay = Overlay.of(context);
+    final overlay = Overlay.maybeOf(context);
     if (overlay == null) {
       return false;
     }
