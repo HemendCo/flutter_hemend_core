@@ -144,7 +144,7 @@ class HiddenWrapperView<T extends Widget> extends StatelessWidget
           Widget Function(
             Widget child,
             Animation<double> animation,
-          )>.has('transitionBuilder', transitionBuilder))
+          )>.has('transitionBuilder', transitionBuilder),)
       ..add(DiagnosticsProperty<Curve>('switchInCurve', switchInCurve))
       ..add(DiagnosticsProperty<Curve>('switchOutCurve', switchOutCurve))
       ..add(
