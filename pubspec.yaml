@@ -12,7 +12,7 @@ dependencies:
   flutter:
     sdk: flutter
   dio: null
-  package_info_plus: ^4.0.1
+  package_info_plus: ^5.0.1
   path_provider: ^2.0.11
   rxdart: ^0.27.4
   shared_preferences: ^2.0.13
@@ -26,7 +26,7 @@ dependencies:
   hydrated_bloc: ^9.1.4
 
 dev_dependencies:
-  flutter_lints: ^2.0.1
+  flutter_lints: ^3.0.1
   flutter_test:
     sdk: flutter
 
