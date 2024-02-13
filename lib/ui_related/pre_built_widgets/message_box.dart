@@ -45,6 +45,7 @@ class MessageBoxSegment extends CustomPainter {
     double height, [
     Radius borderRadius = Radius.zero,
     Size sharpPointSize = Size.zero,
+    // ignore: avoid_positional_boolean_parameters
     bool sharpPointAtEnd = false,
     Offset? sharpPointOffset,
     Path? sharpPointPath,

@@ -22,7 +22,10 @@ class HiddenWrapper<T extends Widget> extends StatelessWidget
   @override
   final Duration duration;
   @override
-  final Widget Function(Widget child, Animation<double> animation) transitionBuilder;
+  final Widget Function(
+    Widget child,
+    Animation<double> animation,
+  ) transitionBuilder;
   @override
   final Curve switchInCurve;
   @override
@@ -47,7 +50,9 @@ class HiddenWrapper<T extends Widget> extends StatelessWidget
 }
 
 extension TransitionChain on AnimatedSwitcherTransitionBuilder {
-  AnimatedSwitcherTransitionBuilder chainWith(AnimatedSwitcherTransitionBuilder next) {
+  AnimatedSwitcherTransitionBuilder chainWith(
+    AnimatedSwitcherTransitionBuilder next,
+  ) {
     return (child, animation) => this(next(child, animation), animation);
   }
 }
@@ -68,7 +73,10 @@ class HiddenWrapperView<T extends Widget> extends StatelessWidget
   @override
   final Widget child;
   final Duration duration;
-  final Widget Function(Widget child, Animation<double> animation) transitionBuilder;
+  final Widget Function(
+    Widget child,
+    Animation<double> animation,
+  ) transitionBuilder;
   final Curve switchInCurve;
   final Curve switchOutCurve;
   final HiddenWrapperController<T>? controller;
@@ -76,7 +84,8 @@ class HiddenWrapperView<T extends Widget> extends StatelessWidget
   @override
   Widget build(BuildContext context) {
     return Builder(
-      builder: (context) => AnimatedBlocBuilder<HiddenWrapperController<T>, bool>(
+      builder: (context) => //
+          AnimatedBlocBuilder<HiddenWrapperController<T>, bool>(
         bloc: controller,
         transitionBuilder: transitionBuilder,
         duration: duration,
@@ -140,11 +149,13 @@ class HiddenWrapperView<T extends Widget> extends StatelessWidget
     super.debugFillProperties(properties);
     properties
       ..add(DiagnosticsProperty<Duration>('duration', duration))
-      ..add(ObjectFlagProperty<
-          Widget Function(
-            Widget child,
-            Animation<double> animation,
-          )>.has('transitionBuilder', transitionBuilder),)
+      ..add(
+        ObjectFlagProperty<
+            Widget Function(
+              Widget child,
+              Animation<double> animation,
+            )>.has('transitionBuilder', transitionBuilder),
+      )
       ..add(DiagnosticsProperty<Curve>('switchInCurve', switchInCurve))
       ..add(DiagnosticsProperty<Curve>('switchOutCurve', switchOutCurve))
       ..add(

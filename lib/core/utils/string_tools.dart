@@ -63,8 +63,10 @@ extension StringTools on String {
           text: phone,
           locale: const Locale('en', 'US'),
           recognizer: TapGestureRecognizer()
-            ..onTap = () {
-              onClick(Uri.parse('tel:$phone'));
+            ..onTap = () async {
+              await onClick(
+                Uri.parse('tel:$phone'),
+              );
             },
           style: const TextStyle(
             color: Colors.blueAccent,

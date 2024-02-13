@@ -3,7 +3,11 @@ abstract class IKeyValueStorageRepository<K, V extends Object> {
     K key,
   );
   Future<K> add(V value);
-  V getValueOrDefault(K key, {required V defaultValue}) => getValue(key) ?? defaultValue;
+  V getValueOrDefault(
+    K key, {
+    required V defaultValue,
+  }) =>
+      getValue(key) ?? defaultValue;
 
   Future<void> setValue(K key, V value);
 

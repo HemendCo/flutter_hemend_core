@@ -28,6 +28,7 @@ class DebugViewBuilder extends StatefulWidget {
     List<dynamic> segmentsResults,
   ) builder;
   @override
+  // ignore: library_private_types_in_public_api
   _DebugViewBuilderState createState() => _DebugViewBuilderState();
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {

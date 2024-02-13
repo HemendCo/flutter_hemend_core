@@ -53,11 +53,11 @@ enum ErrorType {
 /// [errorTypes] is a [Set] that contains all the [ErrorType]s that are
 /// cause of the error
 class ErrorHandler implements Exception {
-
   const ErrorHandler(this.message, [this.errorTypes = const {}]);
   const ErrorHandler.isNotInitializedYet({
     required String objectName,
     String extraInformation = '',
+    // ignore: leading_newlines_in_multiline_strings
   })  : message = '''the instance of $objectName is not initialized yet try calling the initializer factory
   $extraInformation''',
         errorTypes = const {

@@ -20,7 +20,10 @@ class KeyboardNotifiedView extends StatelessWidget {
   final Widget Function(Widget?, List<Widget>) layoutBuilder;
   final Curve switchInCurve;
   final Curve switchOutCurve;
-  static Widget defaultTransitionBuilder(Widget child, Animation<double> animation) {
+  static Widget defaultTransitionBuilder(
+    Widget child,
+    Animation<double> animation,
+  ) {
     return FadeScaleTransition(
       animation: animation,
       child: child,
@@ -44,6 +47,33 @@ class KeyboardNotifiedView extends StatelessWidget {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(DiagnosticsProperty<KeyboardCubit?>('controller', controller));
+    properties
+      ..add(DiagnosticsProperty<KeyboardCubit?>('controller', controller))
+      ..add(DiagnosticsProperty<Duration>('duration', duration))
+      ..add(DiagnosticsProperty<Duration>('reverseDuration', reverseDuration))
+      ..add(
+        ObjectFlagProperty<
+            Widget Function(
+              Widget p1,
+              Animation<double> p2,
+            )>.has(
+          'transitionBuilder',
+          transitionBuilder,
+        ),
+      )
+      ..add(
+        ObjectFlagProperty<Widget? Function(KeyboardState state)>.has(
+          'builder',
+          builder,
+        ),
+      )
+      ..add(
+        ObjectFlagProperty<Widget Function(Widget? p1, List<Widget> p2)>.has(
+          'layoutBuilder',
+          layoutBuilder,
+        ),
+      )
+      ..add(DiagnosticsProperty<Curve>('switchInCurve', switchInCurve))
+      ..add(DiagnosticsProperty<Curve>('switchOutCurve', switchOutCurve));
   }
 }

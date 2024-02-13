@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-class AnimatedBlocBuilder<B extends StateStreamable<S>, S> extends BlocBuilder<B, S> {
+class AnimatedBlocBuilder<B extends StateStreamable<S>, S> //
+    extends BlocBuilder<B, S> {
   AnimatedBlocBuilder({
     super.key,
     required BlocWidgetBuilder<S> builder,
@@ -11,8 +12,10 @@ class AnimatedBlocBuilder<B extends StateStreamable<S>, S> extends BlocBuilder<B
     Duration? reverseDuration,
     Curve switchInCurve = Curves.linear,
     Curve switchOutCurve = Curves.linear,
-    AnimatedSwitcherTransitionBuilder transitionBuilder = AnimatedSwitcher.defaultTransitionBuilder,
-    AnimatedSwitcherLayoutBuilder layoutBuilder = AnimatedSwitcher.defaultLayoutBuilder,
+    AnimatedSwitcherTransitionBuilder transitionBuilder = //
+        AnimatedSwitcher.defaultTransitionBuilder,
+    AnimatedSwitcherLayoutBuilder layoutBuilder = //
+        AnimatedSwitcher.defaultLayoutBuilder,
   }) : super(
           builder: (context, state) => AnimatedSwitcher(
             duration: duration,

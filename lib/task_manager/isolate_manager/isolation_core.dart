@@ -27,6 +27,7 @@ class StreamTaskIsolateParams<T, P> {
   final P taskParams;
 }
 
+// ignore: avoid_classes_with_only_static_members
 ///isolation core which can spawn single task and stream task
 abstract class IsolationCore {
   ///spawn an [Isolate] for singleShot async tasks
@@ -70,7 +71,7 @@ abstract class IsolationCore {
         (element) => (element as DataSnapHandler).hasEnded,
       ) as DataSnapHandler;
       return finishedTasks.castTo<T>();
-    } catch (exception) {
+    } on Object catch (exception) {
       ///if there is an exception in the isolate or in casting part this will
       ///throw it
       return DataSnapHandler<T>.error(
@@ -136,16 +137,20 @@ abstract class IsolationCore {
     );
 
     ///spawn the isolate main loop
-    unawaited(Isolate.spawn(
-      _streamTaskRunner<T, P>,
-      isolateParams,
-      errorsAreFatal: false,
-      debugName: '$debugName-Spawn',
-    ),);
+    unawaited(
+      Isolate.spawn(
+        _streamTaskRunner<T, P>,
+        isolateParams,
+        errorsAreFatal: false,
+        debugName: '$debugName-Spawn',
+      ),
+    );
   }
 
   ///main loop of the isolate for single tasks
-  static Future<void> _taskRunner<T, P>(SingleTaskIsolateParams<T, P> params) async {
+  static Future<void> _taskRunner<T, P>(
+    SingleTaskIsolateParams<T, P> params,
+  ) async {
     late DataSnapHandler<T> result;
     try {
       result = DataSnapHandler.done(
@@ -156,7 +161,7 @@ abstract class IsolationCore {
           'taskParams': params.taskParams,
         },
       );
-    } catch (exception, st) {
+    } on Object catch (exception, st) {
       result = DataSnapHandler.error(
         exception: exception,
         sender: st,
@@ -182,6 +187,7 @@ abstract class IsolationCore {
           case SnapStatus.error:
             Isolate.exit(params.sendPort, response);
 
+          // ignore: no_default_cases
           default:
 
             ///will pass data to stream but this time it will not close the
@@ -189,7 +195,7 @@ abstract class IsolationCore {
             params.sendPort.send(response);
         }
       }
-    } catch (exception) {
+    } on Object catch (exception) {
       Isolate.exit(
         params.sendPort,
         DataSnapHandler<T>.error(

@@ -22,7 +22,7 @@ class CurlLoggerDioInterceptor extends Interceptor {
   final Logger logger;
 
   @override
-  void onError(DioError err, ErrorInterceptorHandler handler) {
+  void onError(DioException err, ErrorInterceptorHandler handler) {
     logger.severe(
       _renderCurlRepresentation(err.requestOptions),
       err,

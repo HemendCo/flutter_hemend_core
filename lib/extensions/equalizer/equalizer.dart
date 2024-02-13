@@ -6,10 +6,14 @@ mixin EqualizerMixin implements _BaseEqualizer {
   @override
   bool operator ==(Object other) {
     ///checking if both of items are implementing the _BaseEqualizer
-    if (other is! _BaseEqualizer) return false;
+    if (other is! _BaseEqualizer) {
+      return false;
+    }
 
     ///checking if both are the same type
-    if (runtimeType != other.runtimeType) return false;
+    if (runtimeType != other.runtimeType) {
+      return false;
+    }
 
     return listEquals(equalCheckItems, other.equalCheckItems);
   }

@@ -67,10 +67,6 @@ extension Debugger on Object {
     );
   }
 
-  void printToConsole() {
-    print(this);
-  }
-
   /// **DO NOT USE IN RELEASE MODE**
   ///
   /// **Use in Assertion or DevTools.runInDebugMode**
@@ -90,7 +86,6 @@ extension Debugger on Object {
   }
 
   ///Remove cache of inspector objects
-
 }
 
 void resetInspectCache() {

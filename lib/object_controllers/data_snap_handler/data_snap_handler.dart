@@ -30,7 +30,6 @@ enum SnapStatus {
 ///
 /// also its callable so u can use [instance()] instead of [singleAct]
 class DataSnapHandler<T> with EqualizerMixin {
-
   ///an instance with [data] and no exception sender is done
   const DataSnapHandler.done({
     required this.data,
@@ -64,6 +63,7 @@ class DataSnapHandler<T> with EqualizerMixin {
   })  : progress = -1,
         exception = null,
         status = SnapStatus.singleSnap;
+
   /// will cast data type to [C]
   ///
   /// the reason is that some times data snap loses its type during some
@@ -104,6 +104,7 @@ class DataSnapHandler<T> with EqualizerMixin {
           sender: sender,
         );
 
+      // ignore: no_default_cases
       default:
         return DataSnapHandler<C>.loading(
           progress: progress,

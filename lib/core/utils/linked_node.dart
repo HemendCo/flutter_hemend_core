@@ -64,10 +64,9 @@ class LinkedNode<T> {
 
   LinkedNode<T>? get previous => _previous;
 
-  // ignore: avoid_setters_without_getters
-  set _iPrevious(LinkedNode<T>? value) {
-    _previous = value;
-  }
+  // set _iPrevious(LinkedNode<T>? value) {
+  //   _previous = value;
+  // }
 
   LinkedNode<T>? _next;
 

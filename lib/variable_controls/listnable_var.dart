@@ -1,3 +1,4 @@
+import 'dart:async';
 
 ///creates a variable that invokes its listeners on change
 class ListenableVar<T> {
@@ -18,7 +19,7 @@ class ListenableVar<T> {
   ///Set value of variable
   set value(T value) {
     _value = value;
-    invokeListeners();
+    unawaited(invokeListeners());
   }
 
   ///Get value of variable
@@ -82,7 +83,7 @@ class ListenableVarLazy<T> {
   set value(T value) {
     final temp = _value;
     _value = value;
-    invokeListeners(temp, _value);
+    unawaited(invokeListeners(temp, _value));
   }
 
   ///Get value of variable
