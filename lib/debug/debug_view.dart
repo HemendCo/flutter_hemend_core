@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 enum DebugSegments {
@@ -70,7 +71,7 @@ class _DebugViewBuilderState extends State<DebugViewBuilder> {
                     return DecoratedBox(
                       decoration: BoxDecoration(color: widget.eachSegmentColor),
                       child: Slider(
-                        value: segmentValues[index],
+                        value: segmentValues[index] as double,
                         onChanged: (value) => setState(() {
                           segmentValues[index] = value;
                         }),

@@ -9,12 +9,11 @@
 /// and returns a [TDestination].
 ///
 /// 4. The constructor initializes the [TypeCaster] with the two functions.
-
 class TypeCaster<TBase, TDestination> {
-  final TBase Function(TDestination) toBaseCaster;
-  final TDestination Function(TBase) toDestinationCaster;
   const TypeCaster({
     required this.toBaseCaster,
     required this.toDestinationCaster,
   });
+  final TBase Function(TDestination) toBaseCaster;
+  final TDestination Function(TBase) toDestinationCaster;
 }

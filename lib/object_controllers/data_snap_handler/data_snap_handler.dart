@@ -43,7 +43,7 @@ class DataSnapHandler<T> with EqualizerMixin {
     if (data != null && data is! C) {
       if (mapper != null) {
         return DataSnapHandler<C>.done(
-          data: mapper(data!),
+          data: mapper(data as T),
           sender: sender,
         );
       } else {

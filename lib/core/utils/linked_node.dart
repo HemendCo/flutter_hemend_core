@@ -1,6 +1,5 @@
 // TODO Temporary
 
-@Deprecated('Unstable API')
 class LinkedNode<T> {
   LinkedNode._({
     LinkedNode<T>? previous,

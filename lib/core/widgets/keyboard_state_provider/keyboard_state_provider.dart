@@ -1,4 +1,5 @@
 import 'package:animations/animations.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -9,6 +10,7 @@ part 'keyboard_state.dart';
 part 'keyboard_cubit.dart';
 part 'keyboard_reactive_view.dart';
 
+// ignore: avoid_implementing_value_types
 class KeyboardStateProvider extends StatefulWidget implements ProxyWidget {
   const KeyboardStateProvider({super.key, required this.child});
   @override
@@ -28,5 +30,14 @@ class _KeyboardStateProviderState extends State<KeyboardStateProvider> {
       value: controller,
       child: widget.child,
     );
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<KeyboardCubit>(
+      'controller',
+      controller,
+    ));
   }
 }

@@ -1,4 +1,4 @@
-// ignore_for_file: do_not_use_environment, constant_identifier_names, lines_longer_than_80_chars
+// ignore_for_file: do_not_use_environment, constant_identifier_names, lines_longer_than_80_chars, avoid_classes_with_only_static_members, non_constant_identifier_names
 
 import '../generated_env.dart';
 

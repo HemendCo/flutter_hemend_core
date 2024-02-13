@@ -3,7 +3,10 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../bloc/animated_bloc_builder.dart';
 import '../cubit/hidden_wrapper.dart';
 
-class HiddenWrapper<T extends Widget> extends StatelessWidget implements HiddenWrapperView<T> {
+class HiddenWrapper<T extends Widget> extends StatelessWidget
+    implements
+// ignore: avoid_implementing_value_types
+        HiddenWrapperView<T> {
   const HiddenWrapper({
     super.key,
     required this.child,
@@ -48,7 +51,10 @@ extension TransitionChain on AnimatedSwitcherTransitionBuilder {
   }
 }
 
-class HiddenWrapperView<T extends Widget> extends StatelessWidget implements ProxyWidget {
+class HiddenWrapperView<T extends Widget> extends StatelessWidget
+    implements
+// ignore: avoid_implementing_value_types
+        ProxyWidget {
   @override
   final Widget child;
   final Duration duration;

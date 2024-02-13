@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 extension StringTools on String {
   String withComma({
@@ -25,15 +24,10 @@ extension StringTools on String {
     );
   }
 
-  static Future<void> _openUrl(Uri uri) => launchUrl(
-        uri,
-        mode: LaunchMode.externalApplication,
-      );
-
   Iterable<TextSpan> asClickableTextSpans(
     BuildContext context, {
     String? text,
-    FutureOr<void> Function(Uri uri) onClick = _openUrl,
+    required FutureOr<void> Function(Uri uri) onClick,
   }) sync* {
     text ??= this;
     final uriMatch = urlMatcher.firstMatch(text);
@@ -53,7 +47,11 @@ extension StringTools on String {
           decoration: TextDecoration.underline,
         ),
       );
-      yield* asClickableTextSpans(context, text: text.substring(uriMatch.end, text.length));
+      yield* asClickableTextSpans(
+        context,
+        text: text.substring(uriMatch.end, text.length),
+        onClick: onClick,
+      );
     } else {
       final phoneMatch = phoneMatcher.firstMatch(text);
       if (phoneMatch != null) {
@@ -66,10 +64,7 @@ extension StringTools on String {
           locale: const Locale('en', 'US'),
           recognizer: TapGestureRecognizer()
             ..onTap = () {
-              launchUrl(
-                Uri.parse('tel:$phone'),
-                mode: LaunchMode.externalApplication,
-              );
+              onClick(Uri.parse('tel:$phone'));
             },
           style: const TextStyle(
             color: Colors.blueAccent,
@@ -78,7 +73,11 @@ extension StringTools on String {
             decoration: TextDecoration.underline,
           ),
         );
-        yield* asClickableTextSpans(context, text: text.substring(phoneMatch.end, text.length));
+        yield* asClickableTextSpans(
+          context,
+          text: text.substring(phoneMatch.end, text.length),
+          onClick: onClick,
+        );
       } else {
         yield TextSpan(text: text);
       }

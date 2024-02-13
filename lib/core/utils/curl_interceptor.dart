@@ -1,7 +1,7 @@
 import 'dart:convert';
 
 import 'package:dio/dio.dart';
-import 'package:logging/logging.dart';
+import 'package:hemend_logger/hemend_logger.dart';
 
 class DioLoggerException implements Exception {
   DioLoggerException(this.message);
@@ -48,7 +48,7 @@ class CurlLoggerDioInterceptor extends Interceptor {
     try {
       final command = _cURLRepresentation(requestOptions);
       return command;
-    } catch (err, st) {
+    } on Object catch (err, st) {
       logger.shout(
         'Fall into an error during converting request to curl representation',
         err,
