@@ -55,13 +55,6 @@ class HiddenWrapperView<T extends Widget> extends StatelessWidget
     implements
 // ignore: avoid_implementing_value_types
         ProxyWidget {
-  @override
-  final Widget child;
-  final Duration duration;
-  final Widget Function(Widget child, Animation<double> animation) transitionBuilder;
-  final Curve switchInCurve;
-  final Curve switchOutCurve;
-  final HiddenWrapperController<T>? controller;
   const HiddenWrapperView({
     super.key,
     required this.child,
@@ -71,6 +64,13 @@ class HiddenWrapperView<T extends Widget> extends StatelessWidget
     this.switchOutCurve = Curves.linear,
     this.controller,
   });
+  @override
+  final Widget child;
+  final Duration duration;
+  final Widget Function(Widget child, Animation<double> animation) transitionBuilder;
+  final Curve switchInCurve;
+  final Curve switchOutCurve;
+  final HiddenWrapperController<T>? controller;
 
   @override
   Widget build(BuildContext context) {
@@ -93,20 +93,16 @@ class HiddenWrapperView<T extends Widget> extends StatelessWidget
     switch (direction) {
       case AxisDirection.up:
         tween = Tween(begin: const Offset(0, -1), end: Offset.zero);
-        break;
       case AxisDirection.right:
         tween = Tween(begin: const Offset(1, 0), end: Offset.zero);
-        break;
       case AxisDirection.down:
         tween = Tween(begin: const Offset(0, 1), end: Offset.zero);
-        break;
       case AxisDirection.left:
         tween = Tween(begin: const Offset(-1, 0), end: Offset.zero);
-        break;
     }
     return (
-      Widget child,
-      Animation<double> animation,
+      child,
+      animation,
     ) =>
         SlideTransition(
           position: tween.animate(animation),
@@ -119,8 +115,8 @@ class HiddenWrapperView<T extends Widget> extends StatelessWidget
     double axisAlignment = 0,
   }) {
     return (
-      Widget child,
-      Animation<double> animation,
+      child,
+      animation,
     ) =>
         SizeTransition(
           axis: axis,
@@ -136,5 +132,330 @@ class HiddenWrapperView<T extends Widget> extends StatelessWidget
       sizeFactor: animation,
       child: child,
     );
+  }
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<Duration>('duration', duration));
+  }
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(ObjectFlagProperty<Widget Function(Widget child, Animation<double> animation)>.has('transitionBuilder', transitionBuilder));
+  }
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<Curve>('switchInCurve', switchInCurve));
+  }
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<Curve>('switchOutCurve', switchOutCurve));
+  }
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<HiddenWrapperController<T>?>('controller', controller));
+  }
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(ObjectFlagProperty<Widget Function(Widget child, Animation<double> animation)>.has('transitionBuilder', transitionBuilder));
+  }
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<Curve>('switchInCurve', switchInCurve));
+  }
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<Curve>('switchOutCurve', switchOutCurve));
+  }
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<HiddenWrapperController<T>?>('controller', controller));
+  }
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(ObjectFlagProperty<Widget Function(Widget child, Animation<double> animation)>.has('transitionBuilder', transitionBuilder));
+  }
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<Curve>('switchInCurve', switchInCurve));
+  }
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<Curve>('switchOutCurve', switchOutCurve));
+  }
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<HiddenWrapperController<T>?>('controller', controller));
+  }
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(ObjectFlagProperty<Widget Function(Widget child, Animation<double> animation)>.has('transitionBuilder', transitionBuilder));
+  }
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<Curve>('switchInCurve', switchInCurve));
+  }
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<Curve>('switchOutCurve', switchOutCurve));
+  }
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<HiddenWrapperController<T>?>('controller', controller));
+  }
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(ObjectFlagProperty<Widget Function(Widget child, Animation<double> animation)>.has('transitionBuilder', transitionBuilder));
+  }
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<Curve>('switchInCurve', switchInCurve));
+  }
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<Curve>('switchOutCurve', switchOutCurve));
+  }
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<HiddenWrapperController<T>?>('controller', controller));
+  }
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(ObjectFlagProperty<Widget Function(Widget child, Animation<double> animation)>.has('transitionBuilder', transitionBuilder));
+  }
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<Curve>('switchInCurve', switchInCurve));
+  }
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<Curve>('switchOutCurve', switchOutCurve));
+  }
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<HiddenWrapperController<T>?>('controller', controller));
+  }
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(ObjectFlagProperty<Widget Function(Widget child, Animation<double> animation)>.has('transitionBuilder', transitionBuilder));
+  }
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<Curve>('switchInCurve', switchInCurve));
+  }
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<Curve>('switchOutCurve', switchOutCurve));
+  }
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<HiddenWrapperController<T>?>('controller', controller));
+  }
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(ObjectFlagProperty<Widget Function(Widget child, Animation<double> animation)>.has('transitionBuilder', transitionBuilder));
+  }
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<Curve>('switchInCurve', switchInCurve));
+  }
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<Curve>('switchOutCurve', switchOutCurve));
+  }
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<HiddenWrapperController<T>?>('controller', controller));
+  }
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(ObjectFlagProperty<Widget Function(Widget child, Animation<double> animation)>.has('transitionBuilder', transitionBuilder));
+  }
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<Curve>('switchInCurve', switchInCurve));
+  }
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<Curve>('switchOutCurve', switchOutCurve));
+  }
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<HiddenWrapperController<T>?>('controller', controller));
+  }
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(ObjectFlagProperty<Widget Function(Widget child, Animation<double> animation)>.has('transitionBuilder', transitionBuilder));
+  }
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<Curve>('switchInCurve', switchInCurve));
+  }
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<Curve>('switchOutCurve', switchOutCurve));
+  }
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<HiddenWrapperController<T>?>('controller', controller));
+  }
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(ObjectFlagProperty<Widget Function(Widget child, Animation<double> animation)>.has('transitionBuilder', transitionBuilder));
+  }
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<Curve>('switchInCurve', switchInCurve));
+  }
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<Curve>('switchOutCurve', switchOutCurve));
+  }
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<HiddenWrapperController<T>?>('controller', controller));
+  }
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(ObjectFlagProperty<Widget Function(Widget child, Animation<double> animation)>.has('transitionBuilder', transitionBuilder));
+  }
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<Curve>('switchInCurve', switchInCurve));
+  }
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<Curve>('switchOutCurve', switchOutCurve));
+  }
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<HiddenWrapperController<T>?>('controller', controller));
+  }
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(ObjectFlagProperty<Widget Function(Widget child, Animation<double> animation)>.has('transitionBuilder', transitionBuilder));
+  }
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<Curve>('switchInCurve', switchInCurve));
+  }
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<Curve>('switchOutCurve', switchOutCurve));
+  }
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<HiddenWrapperController<T>?>('controller', controller));
+  }
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(ObjectFlagProperty<Widget Function(Widget child, Animation<double> animation)>.has('transitionBuilder', transitionBuilder));
+  }
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<Curve>('switchInCurve', switchInCurve));
+  }
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<Curve>('switchOutCurve', switchOutCurve));
+  }
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<HiddenWrapperController<T>?>('controller', controller));
+  }
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(ObjectFlagProperty<Widget Function(Widget child, Animation<double> animation)>.has('transitionBuilder', transitionBuilder));
+  }
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<Curve>('switchInCurve', switchInCurve));
+  }
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<Curve>('switchOutCurve', switchOutCurve));
+  }
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<HiddenWrapperController<T>?>('controller', controller));
+  }
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(ObjectFlagProperty<Widget Function(Widget child, Animation<double> animation)>.has('transitionBuilder', transitionBuilder));
+  }
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<Curve>('switchInCurve', switchInCurve));
+  }
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<Curve>('switchOutCurve', switchOutCurve));
+  }
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<HiddenWrapperController<T>?>('controller', controller));
   }
 }

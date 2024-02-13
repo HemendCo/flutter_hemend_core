@@ -24,7 +24,7 @@ abstract class IHttpRepository {
 
   Future<Snap<T>> post<T>(
     String address, {
-    dynamic body,
+    Object? body,
     Map<String, String> headers = const {},
     void Function(int count, int total)? onReceiveProgress,
     void Function(int count, int total)? onSendProgress,
@@ -40,7 +40,7 @@ abstract class IHttpRepository {
 
   Future<Snap<T>> postUrl<T>(
     Uri url, {
-    dynamic body,
+    Object? body,
     Map<String, String> headers = const {},
     void Function(int sent, int total)? onReceiveProgress,
     void Function(int count, int total)? onSendProgress,

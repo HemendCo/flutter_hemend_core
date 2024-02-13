@@ -34,7 +34,7 @@ abstract class BuildEnvironments {
       'CONFIG_CRASHLYTIX_APP_ID': $Environments.CONFIG_CRASHLYTIX_APP_ID,
       'CONFIG_CRASHLYTIX_SERVER_ADDRESS': $Environments.CONFIG_CRASHLYTIX_SERVER_ADDRESS,
       'APP_CONFIG_NAME': $Environments.APP_CONFIG_NAME,
-      'APP_CONFIG_VERSION': $Environments.APP_CONFIG_VERSION
+      'APP_CONFIG_VERSION': $Environments.APP_CONFIG_VERSION,
     };
   }
 }

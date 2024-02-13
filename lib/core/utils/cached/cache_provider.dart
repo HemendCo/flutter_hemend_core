@@ -6,7 +6,6 @@ import 'cached_method_storage.dart';
 class _CacheInheritance extends InheritedWidget {
   // ignore: public_member_api_docs
   const _CacheInheritance({
-    super.key,
     required super.child,
     required this.storage,
   });

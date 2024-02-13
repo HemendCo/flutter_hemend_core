@@ -54,7 +54,7 @@ abstract class IsolationCore {
     );
 
     ///spawning the isolate
-    Isolate.spawn<SingleTaskIsolateParams<T, P>>(
+    await Isolate.spawn<SingleTaskIsolateParams<T, P>>(
       _taskRunner,
       isolateParams,
       errorsAreFatal: false,
@@ -141,7 +141,7 @@ abstract class IsolationCore {
       isolateParams,
       errorsAreFatal: false,
       debugName: '$debugName-Spawn',
-    ));
+    ),);
   }
 
   ///main loop of the isolate for single tasks

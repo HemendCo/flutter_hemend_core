@@ -7,9 +7,9 @@ import 'dart:async';
 typedef DebounceCallback = void Function();
 
 class _DebounceOperation {
+  _DebounceOperation(this.callback, this.timer);
   DebounceCallback callback;
   Timer timer;
-  _DebounceOperation(this.callback, this.timer);
 }
 
 /// A static class for handling method call debouncing.

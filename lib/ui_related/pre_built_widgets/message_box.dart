@@ -3,12 +3,6 @@
 import 'package:flutter/material.dart';
 
 class MessageBoxSegment extends CustomPainter {
-  final Radius radius;
-  final Size sharpPointSize;
-  final bool sharpPointAtEnd;
-  final Offset? sharpPointOffset;
-  final Path? sharpPointPath;
-  final Paint? painter;
   MessageBoxSegment(
     this.radius,
     this.sharpPointSize, {
@@ -17,6 +11,12 @@ class MessageBoxSegment extends CustomPainter {
     this.sharpPointPath,
     this.painter,
   });
+  final Radius radius;
+  final Size sharpPointSize;
+  final bool sharpPointAtEnd;
+  final Offset? sharpPointOffset;
+  final Path? sharpPointPath;
+  final Paint? painter;
   @override
   void paint(Canvas canvas, Size size) {
     var canvasPainter = Paint();

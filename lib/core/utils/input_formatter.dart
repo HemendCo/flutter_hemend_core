@@ -1,18 +1,18 @@
 import 'package:flutter/services.dart';
 
 class NumberInputFormatter extends TextInputFormatter {
-  final double minDoubleValue;
-  final double maxDoubleValue;
-  final bool Function(double value)? validator;
   NumberInputFormatter(
     this.minDoubleValue,
     this.maxDoubleValue, [
     this.validator,
   ]);
+  final double minDoubleValue;
+  final double maxDoubleValue;
+  final bool Function(double value)? validator;
 
   @override
   TextEditingValue formatEditUpdate(
-      TextEditingValue oldValue, TextEditingValue newValue) {
+      TextEditingValue oldValue, TextEditingValue newValue,) {
     final doubleValue = double.tryParse(newValue.text);
 
     if (doubleValue == null) {
@@ -51,18 +51,18 @@ class NumberInputFormatter extends TextInputFormatter {
 }
 
 class IntNumberInputFormatter extends TextInputFormatter {
-  final int? minValue;
-  final int? maxValue;
-  final bool Function(int value)? validator;
   IntNumberInputFormatter(
     this.minValue,
     this.maxValue, [
     this.validator,
   ]);
+  final int? minValue;
+  final int? maxValue;
+  final bool Function(int value)? validator;
 
   @override
   TextEditingValue formatEditUpdate(
-      TextEditingValue oldValue, TextEditingValue newValue) {
+      TextEditingValue oldValue, TextEditingValue newValue,) {
     final doubleValue = int.tryParse(newValue.text);
 
     if (doubleValue == null) {

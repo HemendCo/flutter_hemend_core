@@ -1,14 +1,14 @@
 import 'package:flutter/widgets.dart';
 
 class AnimationHook<T> extends Animation<T> {
-  final T Function() getter;
-  final AnimationStatus Function()? statusGenerator;
   AnimationHook({
     required this.getter,
     this.statusGenerator,
   });
+  final T Function() getter;
+  final AnimationStatus Function()? statusGenerator;
   static AnimationHook<T> fromAnimation<T, S>(
-      Animation<S> source, T Function(S) mapper) {
+      Animation<S> source, T Function(S) mapper,) {
     final hook = AnimationHook<T>(
       getter: () => mapper(source.value),
       statusGenerator: () => source.status,

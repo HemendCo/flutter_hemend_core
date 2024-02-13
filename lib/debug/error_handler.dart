@@ -53,8 +53,6 @@ enum ErrorType {
 /// [errorTypes] is a [Set] that contains all the [ErrorType]s that are
 /// cause of the error
 class ErrorHandler implements Exception {
-  final String message;
-  final Set<ErrorType> errorTypes;
 
   const ErrorHandler(this.message, [this.errorTypes = const {}]);
   const ErrorHandler.isNotInitializedYet({
@@ -65,6 +63,8 @@ class ErrorHandler implements Exception {
         errorTypes = const {
           ErrorType.isNotInitializedYet,
         };
+  final String message;
+  final Set<ErrorType> errorTypes;
 
   @override
   String toString() {

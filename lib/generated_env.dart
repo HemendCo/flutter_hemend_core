@@ -71,7 +71,7 @@ abstract class $Environments {
   );
   static const ENV_CONFIG_API_SUFFIX = String.fromEnvironment(
     'ENV_CONFIG_API_SUFFIX',
-    defaultValue: 'IF DEBUG_LEVEL >= 1 ? /demo : \$empStr',
+    defaultValue: r'IF DEBUG_LEVEL >= 1 ? /demo : $empStr',
   );
   static const ENV_CONFIG_RELEASE_TO = String.fromEnvironment(
     'ENV_CONFIG_RELEASE_TO',
@@ -87,7 +87,7 @@ abstract class $Environments {
   );
   static const HEMEND_CONFIG_NAME_FORMAT = String.fromEnvironment(
     'HEMEND_CONFIG_NAME_FORMAT',
-    defaultValue: '\$n%-\$v%-\$build_type%-\$YYYY%-\$MM%-\$DD%-\$HH%:\$mm%:\$ss%',
+    defaultValue: r'$n%-$v%-$build_type%-$YYYY%-$MM%-$DD%-$HH%:$mm%:$ss%',
   );
   static const HEMEND_CONFIG_CLI_VERSION = String.fromEnvironment(
     'HEMEND_CONFIG_CLI_VERSION',
@@ -95,7 +95,7 @@ abstract class $Environments {
   );
   static const CONFIG_APP_API_BASE = String.fromEnvironment(
     'CONFIG_APP_API_BASE',
-    defaultValue: 'example.comIF DEBUG_LEVEL >= 1 ? /demo : \$empStr',
+    defaultValue: r'example.comIF DEBUG_LEVEL >= 1 ? /demo : $empStr',
   );
   static const CONFIG_APP_API_VERSION = int.fromEnvironment(
     'CONFIG_APP_API_VERSION',
@@ -152,7 +152,7 @@ abstract class $Environments {
       'CONFIG_CRASHLYTIX_APP_ID': CONFIG_CRASHLYTIX_APP_ID,
       'CONFIG_CRASHLYTIX_SERVER_ADDRESS': CONFIG_CRASHLYTIX_SERVER_ADDRESS,
       'APP_CONFIG_NAME': APP_CONFIG_NAME,
-      'APP_CONFIG_VERSION': APP_CONFIG_VERSION
+      'APP_CONFIG_VERSION': APP_CONFIG_VERSION,
     };
   }
 }

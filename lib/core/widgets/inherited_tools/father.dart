@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 class Father<T> extends InheritedWidget {
@@ -14,8 +15,7 @@ class Father<T> extends InheritedWidget {
   }
 
   static T legacyOf<T>(BuildContext context) {
-    final value =
-        context.dependOnInheritedWidgetOfExactType<Father<T>>()?.legacy;
+    final value = context.dependOnInheritedWidgetOfExactType<Father<T>>()?.legacy;
     if (value == null) {
       throw Exception('cannot find any father for [$T] above this context');
     }
@@ -25,5 +25,11 @@ class Father<T> extends InheritedWidget {
   @override
   bool updateShouldNotify(Father<T> oldWidget) {
     return true;
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<T>('legacy', legacy));
   }
 }

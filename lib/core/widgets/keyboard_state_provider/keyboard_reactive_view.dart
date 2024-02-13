@@ -40,4 +40,10 @@ class KeyboardNotifiedView extends StatelessWidget {
       builder: (context, state) => builder(state) ?? const SizedBox(),
     );
   }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<KeyboardCubit?>('controller', controller));
+  }
 }

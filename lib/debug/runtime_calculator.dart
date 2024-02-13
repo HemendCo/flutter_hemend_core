@@ -7,8 +7,8 @@ typedef DurationAndValueCarrier<T> = DataPairValueCarrier<Duration, T>;
 
 /// [RuntimeCalculator] is used to calculate the runtime of a given [Function].
 class RuntimeCalculator {
-  final Stopwatch stopwatch;
   RuntimeCalculator() : stopwatch = Stopwatch();
+  final Stopwatch stopwatch;
 
   /// calculates the runtime of a given [Function] that passed with function
   ///
@@ -41,8 +41,8 @@ class RuntimeCalculator {
 }
 
 class DataPairValueCarrier<L, R> {
-  final L duration;
-  final R result;
 
   DataPairValueCarrier({required this.duration, required this.result});
+  final L duration;
+  final R result;
 }

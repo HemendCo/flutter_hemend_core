@@ -113,12 +113,12 @@ enum OverlayMode {
 }
 
 class OverlayEntryKey {
+
+  ///Overlay entry Key that contains overlay name and modes
+  const OverlayEntryKey(this.name, [this.modes = const []]);
   ///Overlay modes => [OverlayMode]
   final List<OverlayMode> modes;
 
   ///Overlay Name
   final String name;
-
-  ///Overlay entry Key that contains overlay name and modes
-  const OverlayEntryKey(this.name, [this.modes = const []]);
 }

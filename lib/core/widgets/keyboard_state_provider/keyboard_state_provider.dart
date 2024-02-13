@@ -38,6 +38,6 @@ class _KeyboardStateProviderState extends State<KeyboardStateProvider> {
     properties.add(DiagnosticsProperty<KeyboardCubit>(
       'controller',
       controller,
-    ));
+    ),);
   }
 }

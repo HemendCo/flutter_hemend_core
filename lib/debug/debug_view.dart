@@ -8,7 +8,7 @@ enum DebugSegments {
 
 class DebugViewBuilder extends StatefulWidget {
   const DebugViewBuilder({
-    Key? key,
+    super.key,
     required this.segments,
     required this.builder,
     required this.height,
@@ -16,7 +16,7 @@ class DebugViewBuilder extends StatefulWidget {
     required this.width,
     this.segmentListColor = const Color(0x00000000),
     this.eachSegmentColor = const Color(0x00000000),
-  }) : super(key: key);
+  });
   final double height;
   final double segmentsListHeight;
   final double width;
@@ -29,6 +29,24 @@ class DebugViewBuilder extends StatefulWidget {
   ) builder;
   @override
   _DebugViewBuilderState createState() => _DebugViewBuilderState();
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties
+      ..add(DoubleProperty('height', height))
+      ..add(DoubleProperty('segmentsListHeight', segmentsListHeight))
+      ..add(DoubleProperty('width', width))
+      ..add(ColorProperty('segmentListColor', segmentListColor))
+      ..add(ColorProperty('eachSegmentColor', eachSegmentColor))
+      ..add(IterableProperty<DebugSegments>('segments', segments))
+      ..add(
+        ObjectFlagProperty<
+            Widget Function(
+              BuildContext context,
+              List<Object> segmentsResults,
+            )>.has('builder', builder),
+      );
+  }
 }
 
 class _DebugViewBuilderState extends State<DebugViewBuilder> {
@@ -39,10 +57,8 @@ class _DebugViewBuilderState extends State<DebugViewBuilder> {
       switch (segment) {
         case DebugSegments.slider:
           segmentValues.add(0.0);
-          break;
         case DebugSegments.textInput:
           segmentValues.add('');
-          break;
       }
     }
     super.initState();
@@ -95,9 +111,15 @@ class _DebugViewBuilderState extends State<DebugViewBuilder> {
               },
               itemCount: widget.segments.length,
             ),
-          )
+          ),
         ],
       ),
     );
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(IterableProperty<dynamic>('segmentValues', segmentValues));
   }
 }

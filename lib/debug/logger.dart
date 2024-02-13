@@ -1,7 +1,7 @@
 // ignore_for_file: do_not_use_environment
 
 import 'dart:async';
-import 'dart:developer' as dev show log, inspect;
+import 'dart:developer' as dev show inspect, log;
 
 String get currentTimeTag => '''${DateTime.now().hour}:${DateTime.now().minute}:${DateTime.now().second}''';
 

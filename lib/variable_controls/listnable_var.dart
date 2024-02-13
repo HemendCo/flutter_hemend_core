@@ -1,4 +1,3 @@
-library hemend.variables;
 
 ///creates a variable that invokes its listeners on change
 class ListenableVar<T> {

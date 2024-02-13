@@ -30,6 +30,40 @@ enum SnapStatus {
 ///
 /// also its callable so u can use [instance()] instead of [singleAct]
 class DataSnapHandler<T> with EqualizerMixin {
+
+  ///an instance with [data] and no exception sender is done
+  const DataSnapHandler.done({
+    required this.data,
+    required this.sender,
+  })  : exception = null,
+        progress = 1,
+        status = SnapStatus.done;
+
+  ///an instance with [exception] and no data sender has an error
+  const DataSnapHandler.error({
+    required this.exception,
+    required this.sender,
+  })  : data = null,
+        progress = 0,
+        status = SnapStatus.error;
+
+  ///an instance with [progress] and maybe [data] and [sender] is still working
+  const DataSnapHandler.loading({
+    required this.progress,
+    T? value,
+    this.sender,
+  })  : data = value,
+        exception = null,
+        status = SnapStatus.progress;
+
+  ///an instance with [data] and [progress] set to -1 and [sender] is
+  ///still working
+  const DataSnapHandler.singleSnap({
+    required this.data,
+    this.sender,
+  })  : progress = -1,
+        exception = null,
+        status = SnapStatus.singleSnap;
   /// will cast data type to [C]
   ///
   /// the reason is that some times data snap loses its type during some
@@ -93,40 +127,6 @@ class DataSnapHandler<T> with EqualizerMixin {
 
   ///state of current snapshot
   final SnapStatus status;
-
-  ///an instance with [data] and no exception sender is done
-  const DataSnapHandler.done({
-    required this.data,
-    required this.sender,
-  })  : exception = null,
-        progress = 1,
-        status = SnapStatus.done;
-
-  ///an instance with [exception] and no data sender has an error
-  const DataSnapHandler.error({
-    required this.exception,
-    required this.sender,
-  })  : data = null,
-        progress = 0,
-        status = SnapStatus.error;
-
-  ///an instance with [progress] and maybe [data] and [sender] is still working
-  const DataSnapHandler.loading({
-    required this.progress,
-    T? value,
-    this.sender,
-  })  : data = value,
-        exception = null,
-        status = SnapStatus.progress;
-
-  ///an instance with [data] and [progress] set to -1 and [sender] is
-  ///still working
-  const DataSnapHandler.singleSnap({
-    required this.data,
-    this.sender,
-  })  : progress = -1,
-        exception = null,
-        status = SnapStatus.singleSnap;
 
   ///flag that checks if instance created with error
   bool get hasException => exception != null;

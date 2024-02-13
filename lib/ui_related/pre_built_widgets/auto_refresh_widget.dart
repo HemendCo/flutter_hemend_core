@@ -1,24 +1,36 @@
+// ignore_for_file: library_private_types_in_public_api
+
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 class AutoRefreshWidget extends StatefulWidget {
-  final Widget Function() builder;
-  final Duration refreshDelay;
   const AutoRefreshWidget({
-    Key? key,
+    super.key,
     required this.builder,
     this.refreshDelay = const Duration(seconds: 1),
-  }) : super(key: key);
+  });
+  final Widget Function() builder;
+  final Duration refreshDelay;
 
   @override
   _AutoRefreshWidgetState createState() => _AutoRefreshWidgetState();
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties
+      ..add(ObjectFlagProperty<Widget Function()>.has('builder', builder))
+      ..add(DiagnosticsProperty<Duration>('refreshDelay', refreshDelay));
+  }
 }
 
 class _AutoRefreshWidgetState extends State<AutoRefreshWidget> {
   late Timer timer;
   void refresh() {
-    if (mounted) setState(() {});
+    if (mounted) {
+      setState(() {});
+    }
     timer = Timer(const Duration(milliseconds: 20), refresh);
   }
 
@@ -37,5 +49,11 @@ class _AutoRefreshWidgetState extends State<AutoRefreshWidget> {
   @override
   Widget build(BuildContext context) {
     return widget.builder();
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<Timer>('timer', timer));
   }
 }

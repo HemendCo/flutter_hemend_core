@@ -1,11 +1,17 @@
 import 'package:flutter/foundation.dart';
 
-extension Caster on Object? {
-  T? to<T extends Object>([T? Function()? defaultValue]) => castTo<T>(this, defaultValue);
-  T forceTo<T extends Object>([T? Function()? defaultValue]) => castTo<T>(this, defaultValue)!;
+extension Caster<F> on F {
+  T? to<T extends Object>([T? Function()? defaultValue]) => castTo<F, T>(
+        this,
+        defaultValue,
+      );
+  T forceTo<T extends Object>([T? Function()? defaultValue]) => castTo<F, T>(
+        this,
+        defaultValue,
+      )!;
 }
 
-T? castTo<T extends Object>(dynamic input, [T? Function()? defaultValue]) {
+T? castTo<F, T extends Object>(F input, [T? Function()? defaultValue]) {
   if (input == null) {
     return defaultValue?.call();
   }
@@ -42,7 +48,7 @@ T? castTo<T extends Object>(dynamic input, [T? Function()? defaultValue]) {
     } else if (input is num) {
       try {
         return DateTime.fromMillisecondsSinceEpoch(input.toInt()) as T?;
-      } catch (e) {
+      } on Object catch (_) {
         return defaultValue?.call();
       }
     }
@@ -53,6 +59,6 @@ T? castTo<T extends Object>(dynamic input, [T? Function()? defaultValue]) {
   return defaultValue?.call();
 }
 
-T castToForced<T extends Object>(dynamic input, [T Function()? defaultValue]) {
-  return castTo<T>(input, defaultValue) ?? (defaultValue?.call())!;
+T castToForced<F, T extends Object>(F input, [T Function()? defaultValue]) {
+  return castTo<F, T>(input, defaultValue) ?? (defaultValue?.call())!;
 }

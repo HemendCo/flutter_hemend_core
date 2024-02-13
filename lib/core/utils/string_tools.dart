@@ -60,7 +60,7 @@ extension StringTools on String {
         );
         final phone = text.substring(phoneMatch.start, phoneMatch.end);
         yield TextSpan(
-          text: phone.toString(),
+          text: phone,
           locale: const Locale('en', 'US'),
           recognizer: TapGestureRecognizer()
             ..onTap = () {
