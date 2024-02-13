@@ -1,4 +1,4 @@
-import '../typedefs/internal_typedefs.dart';
+import '../typedefs/typedefs.dart';
 
 abstract class IHttpRepository {
   void updateClient({String? baseUrl, String? token});
