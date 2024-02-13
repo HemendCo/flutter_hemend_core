@@ -33,6 +33,21 @@ class NotifiedListView extends StatelessWidget {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(ObjectFlagProperty<NullableIndexedWidgetBuilder>.has('builder', builder));
+    properties
+      ..add(
+        ObjectFlagProperty<NullableIndexedWidgetBuilder>.has(
+          'builder',
+          builder,
+        ),
+      )
+      ..add(IntProperty('count', count))
+      ..add(DiagnosticsProperty<EdgeInsets>('padding', padding))
+      ..add(
+        ObjectFlagProperty<void Function()>.has(
+          'onLastItemBuilt',
+          onLastItemBuilt,
+        ),
+      )
+      ..add(DiagnosticsProperty<ScrollPhysics>('physics', physics));
   }
 }

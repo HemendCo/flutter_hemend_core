@@ -138,6 +138,20 @@ class HiddenWrapperView<T extends Widget> extends StatelessWidget
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(DiagnosticsProperty<Duration>('duration', duration));
+    properties
+      ..add(DiagnosticsProperty<Duration>('duration', duration))
+      ..add(ObjectFlagProperty<
+          Widget Function(
+            Widget child,
+            Animation<double> animation,
+          )>.has('transitionBuilder', transitionBuilder))
+      ..add(DiagnosticsProperty<Curve>('switchInCurve', switchInCurve))
+      ..add(DiagnosticsProperty<Curve>('switchOutCurve', switchOutCurve))
+      ..add(
+        DiagnosticsProperty<HiddenWrapperController<T>?>(
+          'controller',
+          controller,
+        ),
+      );
   }
 }
