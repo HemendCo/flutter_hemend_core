@@ -24,6 +24,11 @@ sealed class Option<T> {
   /// If the option is none, returns a Result.err with an UnwrapOnNull error.
   Result<T, UnwrapOnNull> ok();
 
+  /// returns [T] if Some
+  ///
+  /// otherwise returns null
+  T? get value;
+
   /// Returns the option if it's some,
   ///
   /// otherwise returns a default option.

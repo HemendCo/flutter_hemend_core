@@ -5,6 +5,7 @@ part of 'option.dart';
 final class Some<T> extends Option<T> {
   const Some(this.value);
 
+  @override
   final T value;
 
   @override

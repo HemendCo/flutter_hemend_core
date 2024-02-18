@@ -4,7 +4,8 @@ part of 'option.dart';
 
 final class None<T> extends Option<T> {
   const None();
-
+  @override
+  Null get value => null;
   @override
   Option<N> and<N extends Object>(N res) => None<N>();
 
