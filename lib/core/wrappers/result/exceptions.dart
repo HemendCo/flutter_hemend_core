@@ -30,7 +30,6 @@ $message.
 
 `$name` is not accessible on this result please use pattern matching before
 calling unsafe methods
-
 ''';
   }
 }

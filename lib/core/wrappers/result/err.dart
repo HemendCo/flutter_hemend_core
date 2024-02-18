@@ -52,7 +52,7 @@ final class ResultError<T, E extends Object> extends Result<T, E> //
       onErr(err);
 
   @override
-  T? get ok => null;
+  Null get ok => null;
 
   @override
   T unwrap() {

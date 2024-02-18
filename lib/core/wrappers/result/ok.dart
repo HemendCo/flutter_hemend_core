@@ -14,7 +14,7 @@ final class ResultOk<T, E extends Object> extends Result<T, E> with EquatableMix
   Result<N, E> andThen<N>(Adapter<T, Result<N, E>> res) => res(ok);
 
   @override
-  E? get err => null;
+  Null get err => null;
 
   @override
   T expect(String message) => ok;
