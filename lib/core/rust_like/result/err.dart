@@ -39,7 +39,10 @@ final class ResultError<T, E extends Object> extends Result<T, E> //
   Result<N, E> map<N>(Adapter<T, N> adapter) => Err(err);
 
   @override
-  Result<T, N> mapErr<N extends Object>(Adapter<E, N> adapter) => Err(adapter(err));
+  Result<T, N> mapErr<N extends Object>(
+    Adapter<E, N> adapter,
+  ) =>
+      Err(adapter(err));
 
   @override
   U mapOr<U>(Adapter<T, U> adapter, {required U defaultValue}) => defaultValue;

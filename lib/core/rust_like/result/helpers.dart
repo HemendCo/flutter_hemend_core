@@ -1,4 +1,4 @@
-part of 'result.dart';
+import 'result.dart';
 
 extension LazyResultExt<T, E extends Object> //
     on LazyResult<T, E> {

@@ -6,7 +6,6 @@ import '../../contracts/typedefs/typedefs.dart';
 part 'exceptions.dart';
 part 'ok.dart';
 part 'err.dart';
-part 'helpers.dart';
 
 /// Represents an error result.
 typedef Err<T, E extends Object> = ResultError<T, E>;
@@ -17,9 +16,14 @@ typedef Ok<T, E extends Object> = ResultOk<T, E>;
 /// Lazy results can be used when you can validate parameters of the method
 /// before the actual invocation
 ///
-/// to get real value of results you can use [verify] method
+/// to get real value of results you can use `verify` method
 typedef LazyResult<T, E extends Object> = Ok<Lazy<T>, E>;
-typedef LazyAsyncResult<T, E extends Object> = Ok<AsyncLazy<T>, E>;
+
+/// Lazy results can be used when you can validate parameters of the method
+/// before the actual invocation
+///
+/// to get real value of results you can use `verify` method
+typedef LazyAsyncResult<T, E extends Object> = Ok<Future<T> Function(), E>;
 
 /// A sealed class that encapsulates a result which can either be a success
 /// ([Ok]) or an error ([Err]).
@@ -33,7 +37,7 @@ sealed class Result<T, E extends Object> {
   bool get isErr;
 
   /// Gets the error of type [E] if present; otherwise, returns `null`.
-  Option<E> get err;
+  E? get err;
 
   /// Gets the success value of type [T] if present; otherwise, returns `null`.
   T? get ok;

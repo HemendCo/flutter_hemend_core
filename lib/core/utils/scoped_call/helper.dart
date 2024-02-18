@@ -1,23 +1,24 @@
 import 'dart:async';
 
+import '../../contracts/typedefs/typedefs.dart';
 import 'scoped_call_async.dart';
 import 'scoped_call_stream.dart';
 import 'scoped_call_sync.dart';
 
 R usingSync<T, R>(
-  T Function() generator,
-  R Function(T) request,
+  Lazy<T> generator,
+  Adapter<T, R> request,
 ) =>
     ScopedCallSync(generator: generator).call(request);
 
 Future<R> usingAsync<T, R>(
-  FutureOr<T> Function() generator,
-  FutureOr<R> Function(T) request,
+  AsyncLazy<T> generator,
+  AsyncAdapter<T, R> request,
 ) =>
     ScopedCallASync(generator: generator).call(request);
 
 Stream<R> usingStream<T, R>(
-  FutureOr<T> Function() generator,
+  AsyncLazy<T> generator,
   Stream<R> Function(T) request,
 ) =>
     ScopedCallStream(generator: generator).call(request);

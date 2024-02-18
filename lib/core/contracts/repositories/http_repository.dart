@@ -1,10 +1,11 @@
+import '../../rust_like/option/option.dart';
 import '../typedefs/typedefs.dart';
 
 abstract class IHttpRepository {
   void updateClient({String? baseUrl, String? token});
   void removeToken();
   void stopAllRequests();
-  Future<Snap<T>> get<T>(
+  Future<Snap<Option<T>>> get<T extends Object>(
     String address, {
     Map<String, String> headers = const {},
     void Function(int count, int total)? onReceiveProgress,
@@ -16,13 +17,13 @@ abstract class IHttpRepository {
     );
   }
 
-  Future<Snap<T>> getUrl<T>(
+  Future<Snap<Option<T>>> getUrl<T extends Object>(
     Uri url, {
     Map<String, String> headers = const {},
     void Function(int count, int total)? onReceiveProgress,
   });
 
-  Future<Snap<T>> post<T>(
+  Future<Snap<Option<T>>> post<T extends Object>(
     String address, {
     Object? body,
     Map<String, String> headers = const {},
@@ -38,7 +39,7 @@ abstract class IHttpRepository {
     );
   }
 
-  Future<Snap<T>> postUrl<T>(
+  Future<Snap<Option<T>>> postUrl<T extends Object>(
     Uri url, {
     Object? body,
     Map<String, String> headers = const {},
