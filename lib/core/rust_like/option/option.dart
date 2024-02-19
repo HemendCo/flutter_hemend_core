@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import '../../contracts/typedefs/typedefs.dart';
 import '../result/result.dart';
 
@@ -117,4 +119,8 @@ sealed class Option<T> {
   bool isEqualTo(
     Option<T> other,
   );
+
+  /// Calls the [callback] if the option is Some
+  /// otherwise does nothing
+  FutureOr<void> onOk(Callback<T> callback);
 }

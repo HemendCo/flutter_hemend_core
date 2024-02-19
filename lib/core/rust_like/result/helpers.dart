@@ -1,4 +1,3 @@
-import '../option/option.dart';
 import 'result.dart';
 
 extension LazyResultExt<T, E extends Object> //
@@ -16,9 +15,4 @@ extension LazyAsyncResultExt<T, E extends Object>
         onErr: (err) => Future.value(Err(err)),
         onOk: Result.handleAsync<T, E>,
       );
-}
-
-extension FoldResult<T extends Object, E extends Object> //
-    on Result<Option<T>, E> {
-  Option<T> fold() => ok.unwrapOr(None<T>());
 }

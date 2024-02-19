@@ -117,4 +117,7 @@ final class Some<T> extends Option<T> {
     Option<T> other,
   ) =>
       other is Some<T> && this.value == other.value;
+
+  @override
+  FutureOr<void> onOk(Callback<T> callback) => callback(unwrap());
 }

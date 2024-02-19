@@ -76,4 +76,9 @@ final class ResultError<T, E extends Object> extends Result<T, E> //
 
   @override
   T unwrapOrElse(Adapter<E, T> orElse) => orElse(err.value);
+
+  @override
+  FutureOr<void> onOk(Callback<T> callback) {}
+  @override
+  FutureOr<void> onErr(Callback<E> callback) => callback(unwrapErr());
 }

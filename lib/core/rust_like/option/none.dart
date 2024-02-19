@@ -67,4 +67,7 @@ final class None<T> extends Option<T> {
 
   @override
   Option<(T, N)> zip<N extends Object>(Option<N> other) => None<(T, N)>();
+
+  @override
+  FutureOr<void> onOk(Callback<T> callback) {}
 }

@@ -114,6 +114,14 @@ sealed class Result<T, E extends Object> {
   /// On an [Err] instance, returns [err].
   E expectErr(String message);
 
+  /// Calls the [callback] if the result is [Ok]
+  /// otherwise does nothing
+  FutureOr<void> onOk(Callback<T> callback);
+
+  /// Calls the [callback] if the result is [Err]
+  /// otherwise does nothing
+  FutureOr<void> onErr(Callback<E> callback);
+
   /// calls given [action] inside a try catch
   ///
   /// returns `Ok<T,_>` if completed with no exception
