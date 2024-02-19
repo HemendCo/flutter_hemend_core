@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:equatable/equatable.dart';
 import '../../contracts/typedefs/typedefs.dart';
+import '../option/option.dart';
 
 part 'exceptions.dart';
 part 'ok.dart';
@@ -37,10 +38,10 @@ sealed class Result<T, E extends Object> {
   bool get isErr;
 
   /// Gets the error of type [E] if present; otherwise, returns `null`.
-  E? get err;
+  Option<E> get err;
 
   /// Gets the success value of type [T] if present; otherwise, returns `null`.
-  T? get ok;
+  Option<T> get ok;
 
   /// Unwraps the success value,
   /// throwing [ResultNullCheckFailure] if the result is an [Err].

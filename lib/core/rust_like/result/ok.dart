@@ -3,8 +3,8 @@ part of 'result.dart';
 final class ResultOk<T, E extends Object> extends Result<T, E> //
     with
         EquatableMixin {
-  const ResultOk(this.ok);
-  const ResultOk.ok({required this.ok});
+  ResultOk(T ok) : ok = Some(ok);
+  ResultOk.ok({required T ok}) : ok = Some(ok);
 
   @override
   List<Object?> get props => [ok];
@@ -13,13 +13,13 @@ final class ResultOk<T, E extends Object> extends Result<T, E> //
   Result<N, E> and<N>(Result<N, E> res) => res;
 
   @override
-  Result<N, E> andThen<N>(Adapter<T, Result<N, E>> res) => res(ok);
+  Result<N, E> andThen<N>(Adapter<T, Result<N, E>> res) => res(ok.value);
 
   @override
-  E? get err => null;
+  None<E> get err => None<E>();
 
   @override
-  T expect(String message) => ok;
+  T expect(String message) => ok.expect(message);
 
   @override
   E expectErr(String message) {
@@ -36,30 +36,30 @@ final class ResultOk<T, E extends Object> extends Result<T, E> //
   bool get isOk => true;
 
   @override
-  final T ok;
+  final Some<T> ok;
 
   @override
-  Result<N, E> map<N>(Adapter<T, N> adapter) => Ok(adapter(ok));
+  Result<N, E> map<N>(Adapter<T, N> adapter) => Ok(adapter(ok.value));
 
   @override
-  Result<T, N> mapErr<N extends Object>(Adapter<E, N> adapter) => Ok(ok);
+  Result<T, N> mapErr<N extends Object>(Adapter<E, N> adapter) => Ok(ok.value);
 
   @override
   U mapOr<U>(
     Adapter<T, U> adapter, {
     required U defaultValue,
   }) =>
-      adapter(ok);
+      adapter(ok.value);
 
   @override
   U mapOrElse<U>({
     required Adapter<E, U> onErr,
     required Adapter<T, U> onOk,
   }) =>
-      onOk(ok);
+      onOk(ok.value);
 
   @override
-  T unwrap() => ok;
+  T unwrap() => ok.value;
 
   @override
   E unwrapErr() {
@@ -73,8 +73,8 @@ final class ResultOk<T, E extends Object> extends Result<T, E> //
   E unwrapErrOr(E orElse) => orElse;
 
   @override
-  T unwrapOr(T orElse) => ok;
+  T unwrapOr(T orElse) => ok.value;
 
   @override
-  T unwrapOrElse(Adapter<E, T> orElse) => ok;
+  T unwrapOrElse(Adapter<E, T> orElse) => ok.value;
 }

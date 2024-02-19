@@ -18,8 +18,7 @@ extension LazyAsyncResultExt<T, E extends Object>
       );
 }
 
-extension FoldResult<T extends Object, E extends Object> on Result<Option<T>, E> {
-  Option<T> fold() => Option.wrap(
-        ok?.value,
-      );
+extension FoldResult<T extends Object, E extends Object> //
+    on Result<Option<T>, E> {
+  Option<T> fold() => ok.unwrapOr(None<T>());
 }

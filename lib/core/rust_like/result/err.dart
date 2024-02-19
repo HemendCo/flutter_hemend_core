@@ -3,20 +3,20 @@ part of 'result.dart';
 final class ResultError<T, E extends Object> extends Result<T, E> //
     with
         EquatableMixin {
-  const ResultError(this.err);
-  const ResultError.value({required this.err});
+  ResultError(E err) : err = Some(err);
+  ResultError.value({required E err}) : err = Some(err);
 
   @override
   List<Object?> get props => [err];
 
   @override
-  Result<N, E> and<N>(Result<N, E> res) => Err(err);
+  Result<N, E> and<N>(Result<N, E> res) => Err(err.value);
 
   @override
-  Result<N, E> andThen<N>(Adapter<T, Result<N, E>> res) => Err(err);
+  Result<N, E> andThen<N>(Adapter<T, Result<N, E>> res) => Err(err.value);
 
   @override
-  final E err;
+  final Some<E> err;
 
   @override
   T expect(String message) {
@@ -27,7 +27,7 @@ final class ResultError<T, E extends Object> extends Result<T, E> //
   }
 
   @override
-  E expectErr(String message) => err;
+  E expectErr(String message) => err.expect(message);
 
   @override
   bool get isErr => true;
@@ -36,13 +36,13 @@ final class ResultError<T, E extends Object> extends Result<T, E> //
   bool get isOk => false;
 
   @override
-  Result<N, E> map<N>(Adapter<T, N> adapter) => Err(err);
+  Result<N, E> map<N>(Adapter<T, N> adapter) => Err(err.value);
 
   @override
   Result<T, N> mapErr<N extends Object>(
     Adapter<E, N> adapter,
   ) =>
-      Err(adapter(err));
+      Err(adapter(err.value));
 
   @override
   U mapOr<U>(Adapter<T, U> adapter, {required U defaultValue}) => defaultValue;
@@ -52,10 +52,10 @@ final class ResultError<T, E extends Object> extends Result<T, E> //
     required Adapter<E, U> onErr,
     required Adapter<T, U> onOk,
   }) =>
-      onErr(err);
+      onErr(err.value);
 
   @override
-  Null get ok => null;
+  None<T> get ok => None<T>();
 
   @override
   T unwrap() {
@@ -66,14 +66,14 @@ final class ResultError<T, E extends Object> extends Result<T, E> //
   }
 
   @override
-  E unwrapErr() => err;
+  E unwrapErr() => err.unwrap();
 
   @override
-  E unwrapErrOr(E orElse) => err;
+  E unwrapErrOr(E orElse) => err.unwrapOr(orElse);
 
   @override
   T unwrapOr(T orElse) => orElse;
 
   @override
-  T unwrapOrElse(Adapter<E, T> orElse) => orElse(err);
+  T unwrapOrElse(Adapter<E, T> orElse) => orElse(err.value);
 }
