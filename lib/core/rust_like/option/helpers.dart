@@ -2,7 +2,7 @@ import 'option.dart';
 
 extension CheckAllOptionsExt on Iterable<Option<Object?>> {
   /// returns true if all of the items inside iterable are [Some]
-  bool allSome() => map(
+  bool areSome() => map(
         (element) => element.isSome,
       )
           .where(
@@ -11,7 +11,7 @@ extension CheckAllOptionsExt on Iterable<Option<Object?>> {
           .isEmpty;
 
   /// returns true if all of the items inside iterable are [None]
-  bool allNone() => map(
+  bool areNone() => map(
         (element) => element.isNone,
       )
           .where(
