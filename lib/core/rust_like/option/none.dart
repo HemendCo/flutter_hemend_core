@@ -2,7 +2,7 @@
 
 part of 'option.dart';
 
-final class None<T> extends Option<T> {
+final class None<T> implements Option<T> {
   const None();
   @override
   Null get value => null;

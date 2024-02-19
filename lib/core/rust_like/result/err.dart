@@ -1,8 +1,10 @@
 part of 'result.dart';
 
-final class ResultError<T, E extends Object> extends Result<T, E> //
+final class ResultError<T, E extends Object> //
     with
-        EquatableMixin {
+        EquatableMixin
+    implements
+        Result<T, E> {
   ResultError(E err) : err = Some(err);
   ResultError.value({required E err}) : err = Some(err);
 

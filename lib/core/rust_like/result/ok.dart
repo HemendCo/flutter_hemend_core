@@ -1,8 +1,10 @@
 part of 'result.dart';
 
-final class ResultOk<T, E extends Object> extends Result<T, E> //
+final class ResultOk<T, E extends Object> //
     with
-        EquatableMixin {
+        EquatableMixin
+    implements
+        Result<T, E> {
   ResultOk(T ok) : ok = Some(ok);
   ResultOk.ok({required T ok}) : ok = Some(ok);
 
