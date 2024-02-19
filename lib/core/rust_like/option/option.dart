@@ -128,10 +128,4 @@ sealed class Option<T> {
   ///
   /// otherwise returns an empty iterable
   Iterable<T> get iter;
-
-  /// Returns casted value of some if possible
-  /// * value has to extend [R]
-  ///
-  /// otherwise returns none
-  Option<R> into<R extends Object>();
 }

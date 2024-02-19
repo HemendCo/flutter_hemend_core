@@ -81,4 +81,7 @@ final class ResultError<T, E extends Object> extends Result<T, E> //
   FutureOr<void> onOk(Callback<T> callback) {}
   @override
   FutureOr<void> onErr(Callback<E> callback) => callback(unwrapErr());
+
+  @override
+  Iterable<T> get iter => const Iterable.empty();
 }

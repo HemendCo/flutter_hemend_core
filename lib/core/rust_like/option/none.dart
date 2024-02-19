@@ -76,8 +76,5 @@ final class None<T> extends Option<T> {
   FutureOr<void> onOk(Callback<T> callback) {}
 
   @override
-  Iterable<T> get iter => Iterable.empty();
-
-  @override
-  Option<R> into<R extends Object>() => None();
+  Iterable<T> get iter => const Iterable.empty();
 }

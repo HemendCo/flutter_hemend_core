@@ -125,12 +125,4 @@ final class Some<T> extends Option<T> {
   Iterable<T> get iter sync* {
     yield value;
   }
-
-  @override
-  Option<R> into<R extends Object>() {
-    if (value is R) {
-      return Some(value as R);
-    }
-    return None<R>();
-  }
 }

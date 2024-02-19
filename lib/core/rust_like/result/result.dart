@@ -122,6 +122,11 @@ sealed class Result<T, E extends Object> {
   /// otherwise does nothing
   FutureOr<void> onErr(Callback<E> callback);
 
+  /// Returns iterable containing value if result is [Ok]
+  ///
+  /// otherwise returns an empty iterable
+  Iterable<T> get iter;
+
   /// calls given [action] inside a try catch
   ///
   /// returns `Ok<T,_>` if completed with no exception

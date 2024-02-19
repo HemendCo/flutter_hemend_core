@@ -82,4 +82,9 @@ final class ResultOk<T, E extends Object> extends Result<T, E> //
   FutureOr<void> onOk(Callback<T> callback) => callback(unwrap());
   @override
   FutureOr<void> onErr(Callback<E> callback) {}
+
+  @override
+  Iterable<T> get iter sync* {
+    yield unwrap();
+  }
 }
