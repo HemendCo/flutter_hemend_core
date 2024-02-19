@@ -4,16 +4,16 @@ class CachedMethodStorage with LogableObject {
   CachedMethodStorage(this._cacheStorage);
   static final CachedMethodStorage global = CachedMethodStorage({});
   void dispose() => clearAllCaches();
-  final Map<String, Map<dynamic, dynamic>> _cacheStorage;
+  final Map<int, Map<dynamic, dynamic>> _cacheStorage;
   void _save<P, T>(String name, P params, T result) {
     final l = getChild(name);
-
-    if (_cacheStorage[name] == null) {
-      _cacheStorage[name] = {};
+    final key = name.hashCode;
+    if (_cacheStorage[key] == null) {
+      _cacheStorage[key] = {};
       l.fine('cache was empty creating new storage for this scope');
     }
-    if (_cacheStorage[name]![params] == null) {
-      _cacheStorage[name]![params] = result;
+    if (_cacheStorage[key]![params] == null) {
+      _cacheStorage[key]![params] = result;
       l.fine('saved into cache');
     }
   }
@@ -22,10 +22,10 @@ class CachedMethodStorage with LogableObject {
     String name,
     P params,
   ) =>
-      _cacheStorage[name]?[params] as T?;
+      _cacheStorage[name.hashCode]?[params] as T?;
   void clearCache(String name) {
     fine('removing cache storage for $name');
-    _cacheStorage[name]?.clear();
+    _cacheStorage[name.hashCode]?.clear();
   }
 
   void clearAllCaches() {
