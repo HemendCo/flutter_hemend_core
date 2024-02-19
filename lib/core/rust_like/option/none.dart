@@ -7,10 +7,10 @@ final class None<T> extends Option<T> {
   @override
   Null get value => null;
   @override
-  Option<N> and<N extends Object>(N res) => None<N>();
+  Option<N> and<N>(N res) => None<N>();
 
   @override
-  Option<N> andThen<N extends Object>(Lazy<N> lazyRes) => None<N>();
+  Option<N> andThen<N>(Lazy<N> lazyRes) => None<N>();
 
   @override
   T expect(String message) => throw ExpectSomeOnNone(
@@ -36,7 +36,11 @@ final class None<T> extends Option<T> {
   Option<N> map<N>(Adapter<T, N> adapter) => None<N>();
 
   @override
-  N mapOr<N>(Adapter<T, N> adapter, {required N defaultValue}) => defaultValue;
+  N mapOr<N>(
+    Adapter<T, N> adapter, {
+    required N defaultValue,
+  }) =>
+      defaultValue;
 
   @override
   N mapOrElse<N>(
@@ -70,4 +74,10 @@ final class None<T> extends Option<T> {
 
   @override
   FutureOr<void> onOk(Callback<T> callback) {}
+
+  @override
+  Iterable<T> get iter => Iterable.empty();
+
+  @override
+  Option<R> into<R extends Object>() => None();
 }

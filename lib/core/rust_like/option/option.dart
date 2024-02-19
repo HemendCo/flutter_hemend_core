@@ -99,11 +99,11 @@ sealed class Option<T> {
   });
 
   /// Returns the option if it's some, otherwise returns a default value.
-  Option<N> and<N extends Object>(N res);
+  Option<N> and<N>(N res);
 
   /// Returns the option if it's some, otherwise lazily computes and returns a
   /// default value.
-  Option<N> andThen<N extends Object>(
+  Option<N> andThen<N>(
     Lazy<N> lazyRes,
   );
 
@@ -123,4 +123,15 @@ sealed class Option<T> {
   /// Calls the [callback] if the option is Some
   /// otherwise does nothing
   FutureOr<void> onOk(Callback<T> callback);
+
+  /// Returns iterable containing value if is Some
+  ///
+  /// otherwise returns an empty iterable
+  Iterable<T> get iter;
+
+  /// Returns casted value of some if possible
+  /// * value has to extend [R]
+  ///
+  /// otherwise returns none
+  Option<R> into<R extends Object>();
 }

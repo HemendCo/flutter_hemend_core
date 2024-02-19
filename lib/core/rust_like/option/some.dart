@@ -86,12 +86,12 @@ final class Some<T> extends Option<T> {
 
   /// Returns the option if it's some, otherwise returns a default value.
   @override
-  Option<N> and<N extends Object>(N res) => Some(res);
+  Option<N> and<N>(N res) => Some(res);
 
   /// Returns the option if it's some, otherwise lazily computes and returns a
   /// default value.
   @override
-  Option<N> andThen<N extends Object>(
+  Option<N> andThen<N>(
     Lazy<N> lazyRes,
   ) =>
       Some(lazyRes());
@@ -120,4 +120,17 @@ final class Some<T> extends Option<T> {
 
   @override
   FutureOr<void> onOk(Callback<T> callback) => callback(unwrap());
+
+  @override
+  Iterable<T> get iter sync* {
+    yield value;
+  }
+
+  @override
+  Option<R> into<R extends Object>() {
+    if (value is R) {
+      return Some(value as R);
+    }
+    return None<R>();
+  }
 }
