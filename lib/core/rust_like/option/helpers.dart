@@ -36,18 +36,64 @@ extension WrapInOptionS<T> on Iterable<T?> {
   Iterable<Option<T>> get opts => map(Option.wrap);
 }
 
-extension ExportFromVisitorExt<T, R extends T> on //
-    void Function(Adapter<T, bool>) {
-  /// Iterates through visitor and returns visited node of type [R]
-  /// that passed the [test] with true result returns [Some], otherwise
-  /// continues iteration and if no result where found returns [None]
-  Option<R> export(Adapter<T, bool> test) {
+extension ExportFromVisitorExt<T> on void Function(Adapter<T, bool>) {
+  /// Exports elements from a visitor based on a selector function.
+  /// The selector function maps an element of type T to an Option<R> object.
+  /// The function will iterate through the collection and update the result
+  /// with the value from the selector.
+  ///
+  /// If the selector returns a Some<R> object, the function will return false
+  /// to stop the iteration.
+  ///
+  /// Otherwise, the function will continue iterating.
+  /// The method returns the Some<R> if fount any otherwise returns None<R>.
+  Option<R> export<R>(Adapter<T, Option<R>> selector) {
     Option<R> result = None<R>();
     this(
       (item) {
-        if (item is R && test(item)) {
-          result = Some(item);
-          return false;
+        final selected = selector(item);
+        switch (selected) {
+          case Some<R>():
+            result = selected;
+            return false;
+          default:
+            return true;
+        }
+      },
+    );
+    return result;
+  }
+
+  /// Exports all elements from a collection that are of type R.
+  /// The function will iterate through the collection and add elements that are
+  /// of type R to the result list.
+  List<R> exportAll<R>() {
+    final result = List<R>.empty(growable: true);
+    this(
+      (p0) {
+        if (p0 is R) {
+          result.add(p0);
+        }
+        return true;
+      },
+    );
+    return result;
+  }
+
+  /// Exports elements from a collection based on a selector function and a
+  /// predicate function.
+  ///
+  /// The predicate function takes an element of type R and returns a boolean
+  /// value.
+  ///
+  /// The function will iterate through the collection and add elements that
+  /// satisfy the predicate function to the result list.
+  List<R> exportWhere<R extends T>(Adapter<R, bool> test) {
+    final result = List<R>.empty(growable: true);
+    this(
+      (p0) {
+        if (p0 is R && test(p0)) {
+          result.add(p0);
         }
         return true;
       },
