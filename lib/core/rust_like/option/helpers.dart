@@ -30,6 +30,12 @@ extension SomeExporterOptionsExt<T> on Iterable<Option<T>> {
 
 extension WrapInOption<T> on T? {
   Option<T> get opt => Option.wrap(this);
+  Option<R> intoSafe<R>() {
+    if (this is R) {
+      return Some(this as R);
+    }
+    return None<R>();
+  }
 }
 
 extension WrapInOptionS<T> on Iterable<T?> {
