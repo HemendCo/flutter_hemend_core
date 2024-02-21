@@ -1,3 +1,5 @@
+import '../core/rust_like/option/option.dart';
+
 extension CheckTypes on String {
   bool isChar() {
     if (length > 1) {
@@ -10,20 +12,16 @@ extension CheckTypes on String {
   }
 }
 
-extension TypeConverter on String {
-  double toDouble() {
-    return double.parse(this);
+extension TypeConverterStringExt on String {
+  Option<double> toDouble() {
+    return Option.wrap(double.tryParse(this));
   }
 
-  int toInt() {
-    return int.parse(this);
+  Option<int> toInt() {
+    return Option.wrap(int.tryParse(this));
   }
 
-  double? tryToDouble() {
-    return double.tryParse(this);
-  }
-
-  int? tryToInt() {
-    return int.tryParse(this);
+  Option<num> toNum() {
+    return Option.wrap(num.tryParse(this));
   }
 }
