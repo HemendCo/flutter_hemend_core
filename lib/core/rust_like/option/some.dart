@@ -125,4 +125,10 @@ final class Some<T> implements Option<T> {
   Iterable<T> get iter sync* {
     yield value;
   }
+
+  @override
+  Option<N> mapTo<N>(
+    Adapter<T, N?> adapter,
+  ) =>
+      adapter(value).opt;
 }

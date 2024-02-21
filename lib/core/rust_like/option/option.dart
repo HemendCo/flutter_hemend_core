@@ -2,6 +2,7 @@ import 'dart:async';
 
 import '../../contracts/typedefs/typedefs.dart';
 import '../result/result.dart';
+import 'helpers.dart';
 
 part 'exceptions.dart';
 part 'some.dart';
@@ -97,6 +98,16 @@ sealed class Option<T> {
     Adapter<T, N> adapter, {
     required Lazy<N> defaultLazy,
   });
+
+  /// Maps the option with an adapter
+  ///
+  /// on [Some] will use the adapter to compute new result
+  ///   * on non-null value returns [Some<N>]
+  ///   * on null value returns [None]
+  /// if current is [None] returns [None]
+  Option<N> mapTo<N>(
+    Adapter<T, N?> adapter,
+  );
 
   /// Returns the option if it's some, otherwise returns a default value.
   Option<N> and<N>(N res);

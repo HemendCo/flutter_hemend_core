@@ -77,4 +77,7 @@ final class None<T> implements Option<T> {
 
   @override
   Iterable<T> get iter => const Iterable.empty();
+
+  @override
+  Option<N> mapTo<N>(Adapter<T, N?> adapter) => None<N>();
 }
