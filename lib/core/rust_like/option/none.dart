@@ -85,5 +85,10 @@ final class None<T> implements Option<T> {
   List<Object?> get props => [value];
 
   @override
-  bool get stringify => true;
+  bool get stringify => false;
+
+  @override
+  String toString() {
+    return 'None<$T>()';
+  }
 }

@@ -141,4 +141,7 @@ sealed class Option<T> with EquatableMixin {
   ///
   /// otherwise returns an empty iterable
   Iterable<T> get iter;
+
+  @override
+  bool get stringify => false;
 }
