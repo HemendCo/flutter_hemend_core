@@ -17,7 +17,7 @@ mixin L10nStringMixin {
         () => '''Current context does not carry any locale information, using fallbackLocale($fallbackLocale)''',
       );
     } else {
-      l.fine(() => 'Found App locale($locale)');
+      l.finest(() => 'Found App locale($locale)');
     }
     return ofLocale(
       locale ?? fallbackLocale,
