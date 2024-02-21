@@ -80,4 +80,10 @@ final class None<T> implements Option<T> {
 
   @override
   Option<N> mapTo<N>(Adapter<T, N?> adapter) => None<N>();
+
+  @override
+  List<Object?> get props => [value];
+
+  @override
+  bool get stringify => true;
 }

@@ -131,4 +131,10 @@ final class Some<T> implements Option<T> {
     Adapter<T, N?> adapter,
   ) =>
       adapter(value).opt;
+
+  @override
+  List<Object?> get props => [value];
+
+  @override
+  bool get stringify => true;
 }

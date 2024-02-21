@@ -1,5 +1,7 @@
 import 'dart:async';
 
+import 'package:equatable/equatable.dart';
+
 import '../../contracts/typedefs/typedefs.dart';
 import '../result/result.dart';
 import 'helpers.dart';
@@ -8,7 +10,7 @@ part 'exceptions.dart';
 part 'some.dart';
 part 'none.dart';
 
-sealed class Option<T> {
+sealed class Option<T> with EquatableMixin {
   const Option();
   factory Option.none() => None<T>();
   factory Option.some(T value) => Some(value);
