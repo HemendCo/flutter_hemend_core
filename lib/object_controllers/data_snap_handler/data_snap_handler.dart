@@ -190,7 +190,7 @@ class DataSnapHandler<T> with EqualizerMixin {
     required R Function(T? data) onDone,
     required R Function(Object? error, Object? sender) onError,
   }) {
-    if (status == SnapStatus.done) {
+    if (status == SnapStatus.done || status == SnapStatus.singleSnap) {
       return onDone(data);
     } else {
       return onError(exception, sender);
